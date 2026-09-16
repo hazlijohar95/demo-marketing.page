@@ -1,0 +1,75 @@
+import { ArrowUpRight } from "lucide-react"
+
+import { APP_URL, DEMO_URL, REPO_URL } from "../content.js"
+import ThemeToggle from "./ThemeToggle.jsx"
+import DotField from "./DotField.jsx"
+
+const COLUMNS = [
+  {
+    heading: "Product",
+    links: [
+      { href: "#console", label: "Console" },
+      { href: "#demo", label: "Demo" },
+      { href: "#platform", label: "Platform" },
+      { href: "#developers", label: "How it works" },
+      { href: "#faq", label: "FAQ" },
+    ],
+  },
+  {
+    heading: "Resources",
+    links: [
+      { href: "/blog/", label: "Blog" },
+      { href: "/docs", label: "Documentation" },
+      { href: REPO_URL, label: "GitHub", external: true },
+    ],
+  },
+  {
+    heading: "Company",
+    links: [
+      { href: APP_URL, label: "Open app", external: true },
+      { href: DEMO_URL, label: "Contact", external: true },
+    ],
+  },
+]
+
+export default function SiteFooter({ theme, onThemeChange }) {
+  return (
+    <footer data-component="footer">
+      <div data-slot="footer-grid">
+        <a data-slot="footer-mark" href="#top" aria-label="BoxCompute home">
+          <img src="/brand/boxcompute-symbol.svg" width="40" height="40" alt="" />
+        </a>
+        {COLUMNS.map((column) => (
+          <div data-slot="footer-column" key={column.heading}>
+            <h2>{column.heading}</h2>
+            <nav aria-label={column.heading}>
+              {column.links.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  {...(link.external ? { target: "_blank", rel: "noreferrer" } : {})}
+                >
+                  {link.label}{" "}
+                  {link.external ? <ArrowUpRight aria-hidden="true" /> : null}
+                </a>
+              ))}
+            </nav>
+          </div>
+        ))}
+      </div>
+      <div data-slot="footer-pattern" aria-hidden="true">
+        <DotField />
+      </div>
+      <div data-slot="footer-bottom">
+        <div>
+          <span>© {new Date().getFullYear()} BoxCompute</span>
+          <span>Built for ambitious agents.</span>
+        </div>
+        <div data-slot="footer-controls">
+          <span data-slot="status">Persistent by default</span>
+          <ThemeToggle theme={theme} onThemeChange={onThemeChange} />
+        </div>
+      </div>
+    </footer>
+  )
+}

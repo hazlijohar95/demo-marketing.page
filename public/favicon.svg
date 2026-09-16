@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="BoxCompute">
+  <rect width="256" height="256" fill="#F4EFE6"/>
+  <path fill="#232826" d="M54 28h124l50 50v32l-24 18 24 18v56q0 26-26 26H74l-46-46V54q0-26 26-26Z"/>
+  <path fill="#F4EFE6" d="M64 113h52l58-44h28v30h-18l-38 29 38 29h18v30h-28l-58-44H64v-30Z"/>
+  <path fill="#CE704C" d="M174 157h28v30h-28l-20-15 20-15Z"/>
+</svg>

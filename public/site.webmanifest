@@ -1,0 +1,20 @@
+{
+  "name": "BoxCompute",
+  "short_name": "BoxCompute",
+  "description": "A secure workspace that gives AI agents room to work.",
+  "icons": [
+    {
+      "src": "boxcompute-app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "boxcompute-app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#232826",
+  "background_color": "#F4EFE6",
+  "display": "standalone"
+}
