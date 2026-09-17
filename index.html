@@ -10,10 +10,12 @@
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#161616" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#161616" />
     <meta
       name="description"
-      content="Give every AI agent a secure, persistent cloud workspace to build, test, and explore without putting your systems at risk."
+      content="Isolated cloud Sandboxes grouped by persistent workspaces for AI agents to build, test, and explore."
     />
     <meta
       name="keywords"
@@ -25,7 +27,7 @@
     <meta property="og:title" content="A workspace for every agent — BoxCompute" />
     <meta
       property="og:description"
-      content="A safe place for every AI agent to build, test, and explore while your business stays in control."
+      content="Isolated Sandboxes for AI agents to build, test, and explore. Workspaces persist."
     />
     <meta property="og:image" content="/boxcompute-social-card.png" />
     <meta property="og:image:width" content="1600" />
@@ -35,7 +37,7 @@
     <meta name="twitter:title" content="A workspace for every agent — BoxCompute" />
     <meta
       name="twitter:description"
-      content="Give your agents room to work without putting your systems at risk."
+      content="Isolated Sandboxes that resume. Workspaces persist."
     />
     <meta name="twitter:image" content="/boxcompute-social-card.png" />
     <meta name="twitter:image:alt" content="BoxCompute" />
@@ -47,19 +49,13 @@
         "name": "BoxCompute",
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Cloud",
-        "description": "A safe, persistent cloud workspace where AI agents can build, test, and explore."
+        "description": "Isolated cloud Sandboxes grouped by persistent workspaces for AI agents."
       }
-    </script>
-    <script>
-      try {
-        var t = localStorage.getItem("bx-theme")
-        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-bx-theme", t)
-      } catch (e) {}
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
   </head>

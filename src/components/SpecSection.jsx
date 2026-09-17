@@ -1,59 +1,118 @@
+import { useState } from "react"
+
 import SectionHeading from "./SectionHeading.jsx"
 import Reveal from "./Reveal.jsx"
+import { CHART_COLORS, MetricBar } from "./MetricBar.jsx"
 
 const SPECS = [
   {
+    rank: "01",
     term: "Isolation",
-    title: "Full virtual machines, one per task.",
-    body: "KubeVirt VMs — your agent runs code while your laptop and production stay out of the way.",
+    value: "non-VM",
+    label: "default · VM beta approval-only",
+    fill: 100,
+    color: CHART_COLORS.workspaces,
+    detail: "SDK + CLI create ordinary Sandboxes. vmSandbox:true needs approval, direct HTTP only.",
   },
   {
-    term: "Lifetime",
-    title: "Persistent across sessions.",
-    body: "Files, tools, and context are kept. Come back to a long job and continue.",
+    rank: "02",
+    term: "Timeout",
+    value: "120s",
+    label: "default · 1–900s whole seconds",
+    fill: (120 / 900) * 100,
+    color: CHART_COLORS.timeout,
+    detail: "Non-zero exit is still HTTP 200. Inspect exitCode + timedOut.",
   },
   {
-    term: "Branching",
-    title: "Snapshot any good point, fork to explore.",
-    body: "The original stays untouched while you see what else is possible. Currently in beta.",
+    rank: "03",
+    term: "Output",
+    value: "256KB",
+    label: "default · 1–1,048,576 / stream",
+    fill: 25,
+    color: CHART_COLORS.output,
+    detail: "Check stdoutTruncated / stderrTruncated before trusting output.",
   },
   {
-    term: "Control",
-    title: "Account-scoped API, bounded commands.",
-    body: "Structured argument arrays with bounded time and capped output. Auditable by default.",
+    rank: "04",
+    term: "Argv + Env",
+    value: "64 / 64",
+    label: "entries · 8,192 chars each",
+    fill: 100,
+    color: CHART_COLORS.argv,
+    detail: "Structured argv, no shell joining. cwd + files under /workspace.",
   },
   {
-    term: "Fits",
-    title: "Any model, your framework.",
-    body: "Model-independent, with Pi and Flue integration guides in the docs today.",
+    rank: "05",
+    term: "Files",
+    value: "8 MiB",
+    label: "per transfer · paged + conditional",
+    fill: 100,
+    color: CHART_COLORS.files,
+    detail: "Binary-safe reads, hash-guarded edits. No checkpoints, forks, volumes.",
   },
   {
-    term: "Deploy",
-    title: "Hosted or private.",
-    body: "Hosted BoxCompute is invite-only; private options keep code and data close to systems you trust.",
+    rank: "06",
+    term: "Retain",
+    value: "24h / 30d",
+    label: "ops output · logs nominal",
+    fill: 80,
+    color: CHART_COLORS.ops,
+    detail: "Ops expire 24h after finish. Logs readable cold ~30d, not an archive.",
   },
 ]
 
 export default function SpecSection() {
+  const [active, setActive] = useState(1)
   return (
     <section data-section="spec" id="spec" aria-labelledby="spec-title">
       <div data-slot="section-header">
         <Reveal>
           <SectionHeading id="spec" strong="The shape of a workspace." rest="Specs, plainly." />
-          <p>No benchmarks, no asterisks. What it is and what it isn’t.</p>
+          <p>What it is, plainly. Select a row for the rule behind it.</p>
+        </Reveal>
+        <Reveal delay={100}>
+          <div data-slot="spec-legend" aria-hidden="true">
+            <span>
+              <i style={{ background: CHART_COLORS.workspaces }} /> default
+            </span>
+            <span>
+              <i style={{ background: CHART_COLORS.timeout }} /> bound
+            </span>
+            <span>
+              <i style={{ background: CHART_COLORS.ops }} /> retention
+            </span>
+          </div>
         </Reveal>
       </div>
       <Reveal>
-        <dl data-component="spec-list">
-          {SPECS.map((spec) => (
-            <div key={spec.term}>
-              <dt>{spec.term}</dt>
-              <dd>
-                <strong>{spec.title}</strong> <span>{spec.body}</span>
-              </dd>
-            </div>
-          ))}
-        </dl>
+        <div data-component="spec-board">
+          <ol>
+            {SPECS.map((s, i) => (
+              <li key={s.rank}>
+                <button
+                  type="button"
+                  data-active={i === active ? "true" : undefined}
+                  onClick={() => setActive(i)}
+                  aria-pressed={i === active}
+                >
+                  <span data-slot="spec-rank">{s.rank}</span>
+                  <span data-slot="spec-term">{s.term}</span>
+                  <strong data-slot="spec-value">{s.value}</strong>
+                  <span data-slot="spec-label">{s.label}</span>
+                  <MetricBar
+                    fill={s.fill}
+                    color={s.color}
+                    active={i === active}
+                    label={`${s.term} ${s.value} ${s.label}`}
+                  />
+                </button>
+              </li>
+            ))}
+          </ol>
+          <p data-slot="spec-foot" role="status">
+            <strong>{SPECS[active].term}.</strong> {SPECS[active].detail}
+          </p>
+        </div>
       </Reveal>
     </section>
   )

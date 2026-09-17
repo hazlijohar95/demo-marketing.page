@@ -8,27 +8,27 @@ const FAQS = [
   {
     question: "What is BoxCompute?",
     answer:
-      "BoxCompute gives AI agents secure, persistent cloud workspaces. They can edit files, run code, test ideas, and return finished work without running everything on your machine.",
+      "Secure cloud Sandboxes grouped by persistent workspaces. Edit files under /workspace, run bounded commands, no load on your machine.",
   },
   {
     question: "Will it work with my agent?",
     answer:
-      "BoxCompute is model-independent and designed to fit into the tools and agent frameworks your team already uses. Explore the documentation to get started.",
+      "Yes. Model-independent via SDKs, CLI, HTTP API. CLI skill for Codex, Claude, Pi, others.",
   },
   {
     question: "Does my workspace keep its progress?",
     answer:
-      "Yes. Your workspace keeps files and progress between sessions, so your agent can continue a longer job without starting from scratch.",
+      "Yes. Workspaces persist. Sandboxes go cold when idle; files under /workspace stay until you delete the Sandbox.",
   },
   {
     question: "Can I keep sensitive work private?",
     answer:
-      "Each task runs in a separate, controlled environment. Private deployment options are also available for teams that need code and data close to the systems they already trust.",
+      "Each task gets an isolated Sandbox. Self-hosted origins via CLI --url keep data close.",
   },
   {
-    question: "What are branchable workspaces?",
+    question: "What if my connection drops mid-run?",
     answer:
-      "They let an agent save a good point and try a different approach while leaving the original workspace untouched. Workspace branching is currently in beta.",
+      "Start a durable operation with an idempotency key. Polling, 24h retained output, explicit cancel. Closing the client never cancels it. Check exitCode, timedOut, truncation.",
   },
 ]
 
@@ -41,7 +41,7 @@ export default function FaqSection() {
           <p>
             Still curious?{" "}
             <a href={DEMO_URL} target="_blank" rel="noreferrer">
-              Let’s talk →
+              Book a 15-minute call →
             </a>
           </p>
         </Reveal>

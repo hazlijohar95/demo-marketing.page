@@ -14,7 +14,7 @@ export default function ClosingSection() {
         <h2 id="closing-title">
           <strong>More doing.</strong> Less getting ready.
         </h2>
-        <p>Hosted BoxCompute is invite-only — a 15-minute call gets you a workspace.</p>
+        <p>Hosted is invite-only — a 15-minute call requests your invite.</p>
         <div data-slot="hero-actions">
           <a data-slot="header-button" data-variant="contrast" href={APP_URL}>
             <strong>Open BoxCompute</strong> <ArrowUpRight aria-hidden="true" />
@@ -26,7 +26,7 @@ export default function ClosingSection() {
             target="_blank"
             rel="noreferrer"
           >
-            <strong>Book a demo</strong>
+            <strong>Book a 15-minute call</strong>
           </a>
         </div>
       </Reveal>

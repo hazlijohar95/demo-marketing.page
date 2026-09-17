@@ -15,7 +15,7 @@ export default function DotField() {
   const colors = DOTS[theme] ?? DOTS.light
 
   return (
-    <span data-slot="dot-drift" aria-hidden="true">
+    <span key={theme} data-slot="dot-drift" data-fade aria-hidden="true">
       <DotGrid
         width="100%"
         height="100%"

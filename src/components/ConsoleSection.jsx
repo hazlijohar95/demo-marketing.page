@@ -11,7 +11,7 @@ export default function ConsoleSection() {
               <span data-slot="heading-anchor" aria-hidden="true">
                 #
               </span>
-              Here’s a glimpse of how it works.
+              A glimpse of how it works.
             </a>
           </h2>
         </Reveal>

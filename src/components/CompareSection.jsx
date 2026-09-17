@@ -1,44 +1,55 @@
+import { useState } from "react"
 import { Check, Minus } from "lucide-react"
 
 import SectionHeading from "./SectionHeading.jsx"
 import Reveal from "./Reveal.jsx"
+import { CHART_COLORS } from "./MetricBar.jsx"
 
 const COLUMNS = ["Ephemeral sandboxes", "Cloud dev machines", "DIY containers"]
 
 const ROWS = [
   {
-    label: "Keeps working between sessions",
-    us: { state: "yes", text: "Yes — files, tools, context" },
+    label: "Resumes between sessions",
+    color: CHART_COLORS.workspaces,
+    us: { state: "yes", text: "Workspaces persist, cold resume" },
     others: ["Hours, then gone", "Yes, per seat", "If you babysit it"],
   },
   {
-    label: "A machine per task, sealed off",
-    us: { state: "yes", text: "Yes — isolated VM" },
+    label: "Isolated Sandbox per task",
+    color: CHART_COLORS.timeout,
+    us: { state: "yes", text: "Isolated Sandbox" },
     others: ["Usually microVMs", "Usually containers", "You build it"],
   },
   {
-    label: "Branch to try another direction",
-    us: { state: "yes", text: "Yes — snapshot + fork · Beta" },
-    others: ["Snapshots vary", "Branches, not forks", "You build it"],
+    label: "Stays observable across reconnects",
+    color: CHART_COLORS.ops,
+    us: { state: "yes", text: "Durable ops + retained logs" },
+    others: ["Varies", "A terminal", "You build it"],
   },
   {
     label: "Works with any model or framework",
-    us: { state: "yes", text: "Yes — Pi, Flue, yours" },
+    color: CHART_COLORS.violet,
+    us: { state: "yes", text: "SDK, CLI, HTTP" },
     others: ["SDK-shaped", "Editor-shaped", "Anything, DIY"],
   },
   {
     label: "Bounded, auditable commands",
-    us: { state: "yes", text: "Yes — structured, time-boxed" },
+    color: CHART_COLORS.output,
+    us: { state: "yes", text: "Structured, time-boxed" },
     others: ["Varies", "A terminal", "You build it"],
   },
   {
-    label: "Private option, close to your systems",
-    us: { state: "yes", text: "Yes" },
+    label: "Private option",
+    color: CHART_COLORS.files,
+    us: { state: "yes", text: "Self-hosted via CLI" },
     others: ["Enterprise tiers", "Yes", "Obviously"],
   },
 ]
 
+const FOCUS = ["BoxCompute", ...COLUMNS]
+
 export default function CompareSection() {
+  const [focus, setFocus] = useState(0)
   return (
     <section data-section="compare" id="compare" aria-labelledby="compare-title">
       <div data-slot="section-header">
@@ -48,25 +59,41 @@ export default function CompareSection() {
             strong="Why not just spin up a container?"
             rest="You could. Here is what changes."
           />
-          <p>
-            Snippet-runners are built to execute and die. BoxCompute is built for work that
-            continues.
-          </p>
+          <p>Snippet-runners execute and die. BoxCompute resumes.</p>
+        </Reveal>
+        <Reveal delay={100} data-component="demo-controls">
+          <div data-component="scenario-pills" role="group" aria-label="Highlight column">
+            {FOCUS.map((c, i) => (
+              <button
+                key={c}
+                type="button"
+                data-active={i === focus}
+                onClick={() => setFocus(i)}
+                aria-pressed={i === focus}
+              >
+                {c.split(" ")[0]}
+              </button>
+            ))}
+          </div>
         </Reveal>
       </div>
       <Reveal>
         <div data-component="compare-scroll">
-          <table data-component="compare-table">
+          <table data-component="compare-table" data-focus={focus}>
             <thead>
               <tr>
                 <th scope="col">
                   <span data-slot="visually-hidden">Capability</span>
                 </th>
-                <th scope="col" data-col="us">
+                <th scope="col" data-col="us" data-dim={focus !== 0 ? "true" : undefined}>
                   BoxCompute
                 </th>
-                {COLUMNS.map((column) => (
-                  <th scope="col" key={column}>
+                {COLUMNS.map((column, i) => (
+                  <th
+                    scope="col"
+                    key={column}
+                    data-dim={focus !== 0 && focus !== i + 1 ? "true" : undefined}
+                  >
                     {column}
                   </th>
                 ))}
@@ -75,12 +102,23 @@ export default function CompareSection() {
             <tbody>
               {ROWS.map((row) => (
                 <tr key={row.label}>
-                  <th scope="row">{row.label}</th>
-                  <td data-col="us" data-state={row.us.state}>
+                  <th scope="row">
+                    <i data-slot="row-dot" style={{ background: row.color }} aria-hidden="true" />
+                    {row.label}
+                  </th>
+                  <td
+                    data-col="us"
+                    data-state={row.us.state}
+                    data-dim={focus !== 0 ? "true" : undefined}
+                  >
                     <Check aria-hidden="true" /> {row.us.text}
                   </td>
                   {row.others.map((cell, i) => (
-                    <td key={`${row.label}-${i}`} data-state={cell === "You build it" || cell === "A terminal" ? "no" : undefined}>
+                    <td
+                      key={`${row.label}-${i}`}
+                      data-state={cell === "You build it" || cell === "A terminal" ? "no" : undefined}
+                      data-dim={focus !== 0 && focus !== i + 1 ? "true" : undefined}
+                    >
                       {cell === "You build it" || cell === "A terminal" ? (
                         <>
                           <Minus aria-hidden="true" /> {cell}
@@ -96,8 +134,7 @@ export default function CompareSection() {
           </table>
         </div>
         <p data-slot="compare-note">
-          Patterns, not vendors — every team names them differently. The question is which shape
-          your agent’s work takes: a snippet, or a job that continues.
+          Patterns, not vendors. Does your agent run a snippet, or a job that continues?
         </p>
       </Reveal>
     </section>

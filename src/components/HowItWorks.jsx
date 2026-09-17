@@ -2,19 +2,20 @@ import { ArrowUpRight } from "lucide-react"
 
 import SectionHeading from "./SectionHeading.jsx"
 import Reveal from "./Reveal.jsx"
+import LifecycleFlow from "./LifecycleFlow.jsx"
 
 const STEPS = [
   {
     title: "Start with an idea",
-    body: "A feature to ship. A dataset to understand. Something worth trying.",
+    body: "A feature to ship. A dataset to understand.",
   },
   {
     title: "Your agent gets its own space",
-    body: "An isolated workspace with room to run code, install tools, and work through the task.",
+    body: "An isolated Sandbox. Bounded commands, files under /workspace.",
   },
   {
     title: "Come back to real progress",
-    body: "Review the results, keep the files, and continue whenever you’re ready.",
+    body: "Review /workspace, read retained logs, continue. Delete when done.",
   },
 ]
 
@@ -25,12 +26,11 @@ export default function HowItWorks() {
         <Reveal>
           <SectionHeading id="developers" strong="Give it a goal." rest="Let it get to work." />
           <p>
-            Bring the agent and tools you already use. BoxCompute handles the workspace behind the
-            scenes.
+            Bring your agent. BoxCompute provides the Sandbox.
           </p>
         </Reveal>
         <a data-slot="header-button" data-variant="neutral" href="/docs">
-          <strong>Read the documentation</strong> <ArrowUpRight aria-hidden="true" />
+          <strong>Read the docs</strong> <ArrowUpRight aria-hidden="true" />
         </a>
       </div>
       <Reveal>
@@ -44,6 +44,7 @@ export default function HowItWorks() {
           ))}
         </ol>
       </Reveal>
+      <LifecycleFlow />
     </section>
   )
 }

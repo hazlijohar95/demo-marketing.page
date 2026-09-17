@@ -1,24 +1,103 @@
-import { GitBranch, Layers, ShieldCheck } from "lucide-react"
+import { useState } from "react"
 
 import SectionHeading from "./SectionHeading.jsx"
 import Reveal from "./Reveal.jsx"
 
+function IsolationVisual() {
+  return (
+    <div data-component="mini-visual" aria-hidden="true">
+      <div data-slot="mv-row">
+        <span data-slot="mv-box">laptop</span>
+        <span data-slot="mv-gap" />
+        <span data-slot="mv-box" data-active="true">
+          sandbox
+        </span>
+        <span data-slot="mv-gap" />
+        <span data-slot="mv-box">prod</span>
+      </div>
+      <div data-slot="mv-cap">
+        <i style={{ background: "#9ae600" }} /> isolated · argv only
+      </div>
+    </div>
+  )
+}
+
+function PersistVisual() {
+  return (
+    <div data-component="mini-visual" aria-hidden="true">
+      <div data-slot="mv-timeline">
+        <span data-slot="mv-seg" data-state="run" style={{ "--seg": "#51a2ff" }}>
+          run
+        </span>
+        <span data-slot="mv-seg" data-state="cold">
+          cold
+        </span>
+        <span data-slot="mv-seg" data-state="run" style={{ "--seg": "#51a2ff" }}>
+          resume
+        </span>
+        <span data-slot="mv-seg" data-state="del">
+          delete
+        </span>
+      </div>
+      <div data-slot="mv-cap">
+        <i style={{ background: "#51a2ff" }} /> /workspace until delete
+      </div>
+    </div>
+  )
+}
+
+function OpsVisual() {
+  const [dropped, setDropped] = useState(false)
+  return (
+    <div data-component="mini-visual">
+      <button
+        type="button"
+        data-slot="mv-ops"
+        data-dropped={dropped ? "true" : "false"}
+        onClick={() => setDropped((v) => !v)}
+        aria-pressed={dropped}
+        aria-label="Simulate a dropped connection"
+      >
+        <span>start</span>
+        <span data-slot="mv-dots">
+          <i />
+          <i />
+          <i />
+        </span>
+        <span>{dropped ? "dropped" : "poll"}</span>
+        <span data-slot="mv-dots">
+          <i />
+          <i />
+          <i />
+        </span>
+        <span>resume</span>
+      </button>
+      <div data-slot="mv-cap">
+        <i style={{ background: "#ffb900" }} /> tap to drop · idempotent start
+      </div>
+    </div>
+  )
+}
+
 const FEATURES = [
   {
-    icon: ShieldCheck,
-    title: "A little separation. A lot of freedom.",
-    body: "Give each task an isolated workspace. Your agent can run code and try things while your laptop and production systems stay out of the way.",
+    rank: "01",
+    title: "One Sandbox per task.",
+    body: "Isolated. Your laptop and prod stay out of the way.",
+    visual: <IsolationVisual />,
   },
   {
-    icon: Layers,
-    title: "Progress that sticks around.",
-    body: "Files, tools, and context stay with the workspace. Come back to a long-running job and pick up right where your agent left off.",
+    rank: "02",
+    title: "Resume after cold.",
+    body: "Workspaces persist. Files under /workspace stay until delete.",
+    visual: <PersistVisual />,
   },
   {
-    icon: GitBranch,
-    title: "Room to take another direction.",
-    body: "Save a good point and explore a new approach in its own branch. Keep the original work while you see what else is possible.",
-    label: "Branching · Beta",
+    rank: "03",
+    title: "Survive disconnects.",
+    body: "Durable ops: polling, 24h output, explicit cancel.",
+    visual: <OpsVisual />,
+    label: "Durable operations",
   },
 ]
 
@@ -32,24 +111,19 @@ export default function PlatformSection() {
             strong="Your agent does the work."
             rest="We give it the space."
           />
-          <p>
-            No machine to prepare before the good part. Just a place for your agent to turn a
-            prompt into something real.
-          </p>
+          <p>No local setup. A Sandbox in an owned workspace, bounded commands.</p>
         </Reveal>
       </div>
       <div data-component="card-grid">
-        {FEATURES.map(({ icon: Icon, title, body, label }, index) => (
+        {FEATURES.map(({ title, body, visual, label, rank }, index) => (
           <Reveal key={title} as="article" delay={index * 100} data-component="leader-card">
             <div data-slot="card-top">
-              <span data-slot="rank">{String(index + 1).padStart(2, "0")}</span>
-              <span data-slot="leader-avatar" aria-hidden="true">
-                <Icon />
-              </span>
+              <span data-slot="rank">{rank}</span>
+              {label ? <span data-slot="beta-pill">{label}</span> : <span />}
             </div>
+            {visual}
             <h3>{title}</h3>
             <p>{body}</p>
-            {label ? <span data-slot="beta-pill">{label}</span> : null}
           </Reveal>
         ))}
       </div>

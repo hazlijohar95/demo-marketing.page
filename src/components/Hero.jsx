@@ -2,6 +2,7 @@ import { ArrowUpRight } from "lucide-react"
 
 import { APP_URL } from "../content.js"
 import DotField from "./DotField.jsx"
+import HeroStats from "./HeroStats.jsx"
 
 export default function Hero() {
   return (
@@ -16,11 +17,11 @@ export default function Hero() {
         <h1 id="hero-title" data-entrance style={{ "--enter-delay": "100ms" }}>
           A workspace
           <br />
-          For Every Agent
+          for every agent
         </h1>
         <div data-slot="hero-copy">
           <p data-entrance style={{ "--enter-delay": "200ms" }}>
-            A computer of its own: isolated, persistent, controlled.
+            Its own Sandbox: isolated, resumable, controlled.
           </p>
           <div data-slot="hero-actions" data-entrance style={{ "--enter-delay": "300ms" }}>
             <a data-slot="header-button" data-variant="contrast" href={APP_URL}>
@@ -32,6 +33,7 @@ export default function Hero() {
           </div>
         </div>
       </div>
+      <HeroStats />
     </section>
   )
 }

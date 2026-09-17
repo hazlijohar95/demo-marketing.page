@@ -11,46 +11,63 @@ const SCENARIOS = [
   {
     id: "ship",
     label: "Ship a fix",
-    head: "workspace · sandbox-7f3a · isolated VM",
+    head: "workspace · sandbox-7f3a · isolated Sandbox",
+    timeSec: 42,
+    outKB: 18,
     lines: [
-      { type: "cmd", text: 'bc run "fix the flaky checkout test"' },
-      { type: "run", text: "workspace ready · repo cloned · deps installed" },
+      { type: "cmd", text: "bxc sandbox exec sandbox-7f3a -- npm test -- --runInBand" },
+      { type: "run", text: "workspace ready · repo in /workspace · deps installed" },
       { type: "out", text: "reproduced: 1 failing test in checkout.spec" },
       { type: "run", text: "patched retry logic · re-ran the suite" },
-      { type: "win", text: "214/214 green · checkpoint saved “green-main”" },
-      { type: "win", text: "done · files, tools, and context kept" },
+      { type: "win", text: "214/214 green · results in /workspace" },
+      { type: "win", text: "done · files kept until you delete the Sandbox" },
     ],
   },
   {
     id: "understand",
     label: "Read the data",
-    head: "workspace · sandbox-9c1e · isolated VM",
+    head: "workspace · sandbox-9c1e · isolated Sandbox",
+    timeSec: 67,
+    outKB: 210,
     lines: [
-      { type: "cmd", text: 'bc run "what is driving refunds?"' },
-      { type: "run", text: "workspace ready · orders.csv mounted · 2.1M rows" },
-      { type: "out", text: "bounded run · 120s · output capped at 64KB" },
+      { type: "cmd", text: "bxc sandbox exec sandbox-9c1e -- python3 analyze_refunds.py" },
+      { type: "run", text: "workspace ready · orders.csv in /workspace · 2.1M rows" },
+      { type: "out", text: "bounded run · 120s · output capped at 256KB" },
       { type: "run", text: "grouped by reason, region, and size" },
       { type: "win", text: "68% are size exchanges · report.md + chart.png written" },
-      { type: "win", text: "done · come back next quarter, it is all still here" },
+      { type: "win", text: "done · workspace persists, pick up where you left off" },
     ],
   },
   {
-    id: "risky",
-    label: "Try the risky thing",
-    head: "workspace · fork of “green-main” · original untouched",
+    id: "observable",
+    label: "Stay observable",
+    head: "workspace · sandbox-a41f · isolated Sandbox",
+    timeSec: 12,
+    outKB: 9,
     lines: [
-      { type: "cmd", text: "bc branch green-main → try-fast-path" },
-      { type: "run", text: "forked in place · same files, same tools" },
-      { type: "out", text: "ran the migration against the copy" },
-      { type: "out", text: "3 failures · rolled back the fork" },
-      { type: "win", text: "main still green · nothing lost" },
-      { type: "win", text: "done · the safe try is the whole point" },
+      { type: "cmd", text: "bxc sandbox exec sandbox-a41f -- python3 migrate.py" },
+      { type: "run", text: "durable operation started · observable if you disconnect" },
+      { type: "out", text: "connection dropped · polled and resumed from retained output" },
+      { type: "out", text: "3 failures · exit code and truncation flags checked" },
+      { type: "win", text: "logs readable without restarting cold compute" },
+      { type: "win", text: "done · delete the Sandbox when finished" },
     ],
   },
 ]
 
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches
+}
+
+function Meter({ label, fill, color }) {
+  return (
+    <span data-slot="demo-meter">
+      <span>{label}</span>
+      <i>
+        <b style={{ width: `${fill}%`, background: color }} />
+      </i>
+    </span>
+  )
 }
 
 export default function DemoSection() {
@@ -60,6 +77,9 @@ export default function DemoSection() {
   const figureRef = useRef(null)
   const scenario = SCENARIOS[index]
   const running = started && shown < scenario.lines.length
+  const total = scenario.lines.length
+  const doneCount = Math.min(shown, total)
+  const frac = total ? doneCount / total : 0
 
   useEffect(() => {
     const el = figureRef.current
@@ -100,10 +120,10 @@ export default function DemoSection() {
         <Reveal>
           <SectionHeading
             id="demo"
-            strong="Watch a workspace work."
-            rest="Three jobs, one computer."
+            strong="Watch it work."
+            rest="Three runs, one pattern."
           />
-          <p>An illustrated run — timings shortened, caution not. It starts when you get here.</p>
+          <p>Illustrated run. Timings shortened.</p>
         </Reveal>
         <Reveal delay={100} data-component="demo-controls">
           <div
@@ -116,6 +136,7 @@ export default function DemoSection() {
                 key={item.id}
                 type="button"
                 data-active={i === index}
+                aria-pressed={i === index}
                 onClick={() => setIndex(i)}
               >
                 {item.label}
@@ -131,6 +152,23 @@ export default function DemoSection() {
             <span data-slot="demo-status" data-state={running ? "running" : "done"}>
               {running ? "Running" : "Done"}
             </span>
+          </div>
+          <div data-slot="demo-meters" aria-hidden="true">
+            <Meter
+              label={`time ${Math.round(frac * scenario.timeSec)}s / 120s`}
+              fill={frac * ((scenario.timeSec / 120) * 100)}
+              color="#51a2ff"
+            />
+            <Meter
+              label={`out ${Math.round(frac * scenario.outKB)}KB / 256KB`}
+              fill={frac * ((scenario.outKB / 256) * 100)}
+              color="#a684ff"
+            />
+            <Meter
+              label={`${String(doneCount).padStart(2, "0")}/${String(total).padStart(2, "0")} steps`}
+              fill={frac * 100}
+              color="#00bc7d"
+            />
           </div>
           <div data-slot="demo-log" role="log" aria-live="off" aria-label={`${scenario.label} transcript`}>
             {scenario.lines.slice(0, shown).map((line, i) => (
@@ -157,8 +195,7 @@ export default function DemoSection() {
           <div data-slot="demo-foot">
             <span>
               <span data-slot="demo-count">
-                {String(Math.min(shown, scenario.lines.length)).padStart(2, "0")}/
-                {String(scenario.lines.length).padStart(2, "0")}
+                {String(doneCount).padStart(2, "0")}/{String(total).padStart(2, "0")}
               </span>{" "}
               steps · illustrated, not live
             </span>

@@ -1,7 +1,6 @@
 import { ArrowUpRight } from "lucide-react"
 
 import { APP_URL, DEMO_URL, REPO_URL } from "../content.js"
-import ThemeToggle from "./ThemeToggle.jsx"
 import DotField from "./DotField.jsx"
 
 const COLUMNS = [
@@ -19,20 +18,20 @@ const COLUMNS = [
     heading: "Resources",
     links: [
       { href: "/blog/", label: "Blog" },
-      { href: "/docs", label: "Documentation" },
+      { href: "/docs", label: "Docs" },
       { href: REPO_URL, label: "GitHub", external: true },
     ],
   },
   {
     heading: "Company",
     links: [
-      { href: APP_URL, label: "Open app", external: true },
+      { href: APP_URL, label: "Open BoxCompute", external: true },
       { href: DEMO_URL, label: "Contact", external: true },
     ],
   },
 ]
 
-export default function SiteFooter({ theme, onThemeChange }) {
+export default function SiteFooter() {
   return (
     <footer data-component="footer">
       <div data-slot="footer-grid">
@@ -66,8 +65,7 @@ export default function SiteFooter({ theme, onThemeChange }) {
           <span>Built for ambitious agents.</span>
         </div>
         <div data-slot="footer-controls">
-          <span data-slot="status">Persistent by default</span>
-          <ThemeToggle theme={theme} onThemeChange={onThemeChange} />
+          <span data-slot="status">Isolated by default</span>
         </div>
       </div>
     </footer>

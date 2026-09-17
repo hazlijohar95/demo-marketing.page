@@ -31,7 +31,7 @@ const CHATS = [
     model: "DeepSeek V4 Flash",
     status: "Done",
     group: "Today",
-    task: "Analyze customer_orders.csv. Find failed orders, calculate the affected revenue, and save a report.",
+    task: "Analyze customer_orders.csv. Flag failed orders, sum affected revenue, save report.json.",
     messages: [
       { kind: "report", title: "What I found" },
       { kind: "fact", text: "248,391 orders processed" },
@@ -39,7 +39,7 @@ const CHATS = [
       { kind: "fact", text: "$1,842.40 in affected revenue" },
       {
         kind: "note",
-        text: "The report is saved as report.json, alongside a summary in order_summary.csv. Your workspace is preserved so we can continue exploring the data.",
+        text: "Saved report.json + order_summary.csv in /workspace. Workspace persists for follow-ups.",
       },
     ],
     files: {
@@ -50,11 +50,11 @@ const CHATS = [
       ],
     },
     log: [
-      "$ bc run \"analyze customer_orders.csv\"",
-      "→ sandbox-7f3a ready · isolated VM",
+      "$ bxc sandbox exec sandbox-7f3a -- python3 analyze_orders.py",
+      "→ sandbox-7f3a ready · isolated Sandbox",
       "→ 248,391 rows scanned in 41s",
       "→ 3 failures flagged · revenue reconciled",
-      "✓ report.json + order_summary.csv written",
+      "✓ report.json + order_summary.csv in /workspace",
     ],
     previews: [
       { label: "Affected revenue", value: "$1,842.40" },
@@ -68,14 +68,14 @@ const CHATS = [
     model: "DeepSeek V4 Flash",
     status: "Done",
     group: "Today",
-    task: "Look at this week's refunds. Tell me which ones need a human and draft the replies.",
+    task: "Review this week's refunds. Flag human-needed cases, draft replies.md.",
     messages: [
       { kind: "report", title: "What I found" },
       { kind: "fact", text: "46 refunds reviewed" },
       { kind: "fact", text: "5 need a human — flagged with reasons" },
       {
         kind: "note",
-        text: "Drafts are in replies.md. Nothing was sent; the 5 flagged cases are waiting in your inbox view.",
+        text: "Drafts in /workspace/replies.md. Nothing sent; 5 flagged.",
       },
     ],
     files: {
@@ -83,10 +83,10 @@ const CHATS = [
       sandbox: [{ name: "replies.md", size: "1KB" }],
     },
     log: [
-      "$ bc run \"triage this week's refunds\"",
-      "→ sandbox-3b08 ready · isolated VM",
+      "$ bxc sandbox exec sandbox-3b08 -- python3 triage_refunds.py",
+      "→ sandbox-3b08 ready · isolated Sandbox",
       "→ 46 cases read · policy checked",
-      "✓ replies.md drafted · 5 flagged for you",
+      "✓ replies.md in /workspace · 5 flagged",
     ],
     previews: [
       { label: "Reviewed", value: "46" },
@@ -193,9 +193,9 @@ export default function ConsoleDemo() {
     if (!text || working) return
     const followUp = [
       { kind: "user", text },
-      { kind: "run", text: "workspace ready · picking up where we left off" },
-      { kind: "fact", text: "Checked against the saved files — nothing re-run twice" },
-      { kind: "note", text: "Done · the new result is saved next to the rest, still in this workspace." },
+      { kind: "run", text: "Sandbox ready · resumed after cold" },
+      { kind: "fact", text: "Checked /workspace files — no duplicate runs" },
+      { kind: "note", text: "Done · saved in /workspace, same Sandbox." },
     ]
     const next = [...extra, ...followUp]
     setExtra(next)
@@ -252,6 +252,7 @@ export default function ConsoleDemo() {
                 key={id}
                 type="button"
                 data-active={activeNav === id}
+                aria-pressed={activeNav === id}
                 onClick={() => setActiveNav(id)}
               >
                 <Icon aria-hidden="true" /> {label}
@@ -264,6 +265,7 @@ export default function ConsoleDemo() {
                 key={tab}
                 type="button"
                 data-active={sideTab === tab}
+                aria-pressed={sideTab === tab}
                 onClick={() => {
                   setSideTab(tab)
                   setActiveNav(tab)
@@ -295,6 +297,7 @@ export default function ConsoleDemo() {
                     <button
                       type="button"
                       data-active={c.id === chatId}
+                      aria-pressed={c.id === chatId}
                       onClick={() => setChatId(c.id)}
                     >
                       <span data-slot="live-avatar" data-tone="mint">
@@ -309,7 +312,9 @@ export default function ConsoleDemo() {
                     </button>
                   </li>
                 ))}
-                {filtered.length === 0 ? <li data-slot="live-empty">No chats match.</li> : null}
+                {filtered.length === 0 ? (
+                  <li data-slot="live-empty">No chats match “{query}”.</li>
+                ) : null}
               </ul>
             </>
           ) : (
@@ -370,7 +375,7 @@ export default function ConsoleDemo() {
             aria-label="Conversation"
           >
             <p data-line="ask">{chat.task}</p>
-            <p data-line="lead">I analyzed the orders in an isolated workspace and saved the results.</p>
+            <p data-line="lead">I analyzed the orders in an isolated Sandbox and saved the results.</p>
             {allMessages.slice(0, shownCount).map((message, i) =>
               message.kind === "report" ? (
                 <h4 key={i}>{message.title}</h4>
@@ -434,6 +439,7 @@ export default function ConsoleDemo() {
                 key={tab}
                 type="button"
                 data-active={rightTab === tab}
+                aria-pressed={rightTab === tab}
                 onClick={() => setRightTab(tab)}
               >
                 {tab === "files" ? "Files 2" : tab === "terminal" ? "Terminal" : "Previews"}
@@ -461,7 +467,7 @@ export default function ConsoleDemo() {
                   <p>
                     <span data-slot="live-sandbox-dot" /> Sandbox{" "}
                     <span>
-                      Temporary · {chat.files.sandbox.length}
+                      Kept until delete · {chat.files.sandbox.length}
                     </span>
                   </p>
                   <ul>
@@ -473,7 +479,7 @@ export default function ConsoleDemo() {
                       </li>
                     ))}
                   </ul>
-                  <span>Temporary sandbox files.</span>
+                  <span>Sandbox files · deleted with the Sandbox.</span>
                 </div>
               </>
             )

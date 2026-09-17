@@ -14,7 +14,7 @@ const NAV_LINKS = [
 const MOBILE_LINKS = [
   ...NAV_LINKS,
   { href: "/blog/", label: "Blog" },
-  { href: "/docs", label: "Documentation", external: true },
+  { href: "/docs", label: "Docs", external: true },
 ]
 
 export default function SiteHeader() {
@@ -42,7 +42,7 @@ export default function SiteHeader() {
               <strong>Docs</strong>
             </a>
             <a data-slot="header-button" data-variant="contrast" href={APP_URL}>
-              <strong>Open app</strong> <ArrowUpRight aria-hidden="true" />
+              <strong>Open BoxCompute</strong> <ArrowUpRight aria-hidden="true" />
             </a>
             <button
               data-slot="menu-button"
@@ -51,7 +51,10 @@ export default function SiteHeader() {
               aria-expanded={open}
               onClick={() => setOpen((value) => !value)}
             >
-              {open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
+              <span data-slot="menu-icons" data-open={open ? "true" : "false"} aria-hidden="true">
+                <Menu />
+                <X />
+              </span>
             </button>
           </div>
         </div>
@@ -69,7 +72,7 @@ export default function SiteHeader() {
           </a>
         ))}
         <a data-slot="mobile-menu-item" href={APP_URL} onClick={() => setOpen(false)}>
-          <strong>Open app</strong> <ArrowUpRight aria-hidden="true" />
+          <strong>Open BoxCompute</strong> <ArrowUpRight aria-hidden="true" />
         </a>
       </nav>
     </header>

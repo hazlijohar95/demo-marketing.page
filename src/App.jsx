@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
 import { ThemeContext } from "./theme.js"
 
@@ -14,45 +14,25 @@ import FaqSection from "./components/FaqSection.jsx"
 import ClosingSection from "./components/ClosingSection.jsx"
 import SiteFooter from "./components/SiteFooter.jsx"
 
-function getInitialTheme() {
-  try {
-    const saved = localStorage.getItem("bx-theme")
-    if (saved === "light" || saved === "dark") return saved
-  } catch {}
-  return "system"
-}
-
-export default function App() {
-  const [theme, setTheme] = useState(getInitialTheme)
-  const [systemDark, setSystemDark] = useState(
-    () => window.matchMedia("(prefers-color-scheme: dark)").matches,
-  )
-
-  useEffect(() => {
-    try {
-      if (theme === "system") localStorage.removeItem("bx-theme")
-      else localStorage.setItem("bx-theme", theme)
-    } catch {}
-    const root = document.documentElement
-    if (theme === "system") root.removeAttribute("data-bx-theme")
-    else root.setAttribute("data-bx-theme", theme)
-  }, [theme])
-
+function useSystemTheme() {
+  const get = () =>
+    window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+  const [system, setSystem] = useState(get)
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)")
-    const onChange = (event) => setSystemDark(event.matches)
+    const onChange = (event) => setSystem(event.matches ? "dark" : "light")
     media.addEventListener("change", onChange)
     return () => media.removeEventListener("change", onChange)
   }, [])
+  return system
+}
 
-  const setThemePreference = useCallback((value) => setTheme(value), [])
-
-  const themeAttr = theme === "system" ? undefined : theme
-  const resolved = theme === "system" ? (systemDark ? "dark" : "light") : theme
+export default function App() {
+  const resolved = useSystemTheme()
 
   return (
     <ThemeContext.Provider value={resolved}>
-    <main data-page="box" data-theme={themeAttr}>
+    <main data-page="box">
       <a className="skip-link" href="#main">
         Skip to content
       </a>
@@ -69,7 +49,7 @@ export default function App() {
           <FaqSection />
           <ClosingSection />
         </div>
-        <SiteFooter theme={theme} onThemeChange={setThemePreference} />
+        <SiteFooter />
       </div>
     </main>
     </ThemeContext.Provider>
