@@ -1,8 +1,7 @@
 import { ArrowUpRight } from "lucide-react"
 
 import { APP_URL } from "../content.js"
-import DotField from "./DotField.jsx"
-import HeroStats from "./HeroStats.jsx"
+import SandboxField from "./SandboxField.jsx"
 
 export default function Hero() {
   return (
@@ -12,7 +11,7 @@ export default function Hero() {
       </p>
       <div data-slot="hero-canvas">
         <div data-slot="hero-pattern" aria-hidden="true">
-          <DotField />
+          <SandboxField />
         </div>
         <h1 id="hero-title" data-entrance style={{ "--enter-delay": "100ms" }}>
           A workspace
@@ -27,13 +26,12 @@ export default function Hero() {
             <a data-slot="header-button" data-variant="contrast" href={APP_URL}>
               <strong>Open BoxCompute</strong> <ArrowUpRight aria-hidden="true" />
             </a>
-            <a data-slot="header-button" data-variant="neutral" href="#demo">
+            <a data-slot="header-button" data-variant="neutral" href="#console">
               <strong>Watch it work</strong>
             </a>
           </div>
         </div>
       </div>
-      <HeroStats />
     </section>
   )
 }

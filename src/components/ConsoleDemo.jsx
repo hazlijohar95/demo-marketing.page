@@ -9,27 +9,38 @@ import {
   KeyRound,
   LayoutDashboard,
   Paperclip,
+  Play,
   Plus,
   RotateCcw,
   Search,
   Settings,
+  Square,
   X,
 } from "lucide-react"
 
 import { APP_URL } from "../content.js"
 import { prefersReducedMotion } from "../lib/reduced-motion.js"
+import { useIsomorphicLayoutEffect } from "../lib/isomorphic-layout.js"
+import { BEAT_MS, tourSchedule } from "../lib/tour-schedule.js"
 
 const DESKTOP_SHOT = "/product/console-desktop.png?v=a2a2ab4"
+
+// One id per chat, interpolated into the transcript instead of retyped —
+// the head chip, the terminal and the URL have to agree or the console
+// reads as three unrelated mockups.
+const SANDBOX = { orders: "sandbox-7f3a", triage: "sandbox-3b08" }
 
 const CHATS = [
   {
     id: "orders",
+    sandbox: SANDBOX.orders,
     title: "Explore customer orders",
     model: "DeepSeek V4 Flash",
     status: "Done",
     group: "Today",
     task: "Analyze customer_orders.csv. Flag failed orders, sum affected revenue, save report.json.",
     messages: [
+      { kind: "lead", text: "I analyzed the orders in an isolated Sandbox and saved the results." },
       { kind: "report", title: "What I found" },
       { kind: "fact", text: "248,391 orders processed" },
       { kind: "fact", text: "3 failed orders identified" },
@@ -47,8 +58,8 @@ const CHATS = [
       ],
     },
     log: [
-      "$ bxc sandbox exec sandbox-7f3a -- python3 analyze_orders.py",
-      "→ sandbox-7f3a ready · isolated Sandbox",
+      `$ bxc sandbox exec ${SANDBOX.orders} -- python3 analyze_orders.py`,
+      `→ ${SANDBOX.orders} ready · isolated Sandbox`,
       "→ 248,391 rows scanned in 41s",
       "→ 3 failures flagged · revenue reconciled",
       "✓ report.json + order_summary.csv in /workspace",
@@ -61,12 +72,14 @@ const CHATS = [
   },
   {
     id: "triage",
+    sandbox: SANDBOX.triage,
     title: "Refund triage",
     model: "DeepSeek V4 Flash",
     status: "Done",
     group: "Today",
     task: "Review this week's refunds. Flag human-needed cases, draft replies.md.",
     messages: [
+      { kind: "lead", text: "I read this week's refunds in an isolated Sandbox and drafted replies." },
       { kind: "report", title: "What I found" },
       { kind: "fact", text: "46 refunds reviewed" },
       { kind: "fact", text: "5 need a human — flagged with reasons" },
@@ -80,8 +93,8 @@ const CHATS = [
       sandbox: [{ name: "replies.md", size: "1KB" }],
     },
     log: [
-      "$ bxc sandbox exec sandbox-3b08 -- python3 triage_refunds.py",
-      "→ sandbox-3b08 ready · isolated Sandbox",
+      `$ bxc sandbox exec ${SANDBOX.triage} -- python3 triage_refunds.py`,
+      `→ ${SANDBOX.triage} ready · isolated Sandbox`,
       "→ 46 cases read · policy checked",
       "✓ replies.md in /workspace · 5 flagged",
     ],
@@ -110,10 +123,14 @@ const NAV = [
   { id: "keys", label: "API keys", Icon: KeyRound },
 ]
 
+const FOLLOW_UP = "Which regions were hit? Reuse the same Sandbox."
+const FOLLOW_UP_STEPS = 4
+const TYPE_MS = 40
+
 export default function ConsoleDemo() {
   const [chatId, setChatId] = useState(CHATS[0].id)
   const [sideTab, setSideTab] = useState("chats")
-  const [rightTab, setRightTab] = useState("files")
+  const [rightTab, setRightTab] = useState("terminal")
   const [activeNav, setActiveNav] = useState("chats")
   const [query, setQuery] = useState("")
   const [preview, setPreview] = useState(null)
@@ -121,7 +138,12 @@ export default function ConsoleDemo() {
   const [extra, setExtra] = useState([])
   const [visible, setVisible] = useState(null)
   const [working, setWorking] = useState(false)
+  const [tourStep, setTourStep] = useState(null)
   const timers = useRef([])
+  // The tour's own timers live apart from the stream's: play() clears the
+  // stream bag, and the tour starts by calling play().
+  const tourTimers = useRef([])
+  const touring = useRef(false)
   const logRef = useRef(null)
   const stickRef = useRef(true)
 
@@ -129,21 +151,29 @@ export default function ConsoleDemo() {
   const shownCount = visible ?? chat.messages.length + extra.length
   const allMessages = [...chat.messages, ...extra]
   const done = !working && shownCount >= allMessages.length
+  const fileCount = chat.files.sandbox.length + chat.files.local.length
 
   const clearTimers = () => {
     timers.current.forEach((id) => window.clearTimeout(id))
     timers.current = []
   }
 
-  useEffect(() => clearTimers, [])
   useEffect(() => {
+    return () => {
+      clearTimers()
+      tourTimers.current.forEach((id) => window.clearTimeout(id))
+    }
+  }, [])
+  // Autoplay the run on mount and on every chat switch: the island is
+  // client:visible, so mount is the scroll-in beat. A layout effect keeps
+  // the SSR markup (all messages, for no-JS and crawlers) from flashing
+  // before the script rewinds to its first line.
+  useIsomorphicLayoutEffect(() => {
     setExtra([])
-    setVisible(null)
-    setWorking(false)
     setPreview(null)
     stickRef.current = true
     if (logRef.current) logRef.current.scrollTop = 0
-    clearTimers()
+    play(chat.messages)
   }, [chatId])
 
   const onLogScroll = () => {
@@ -169,12 +199,12 @@ export default function ConsoleDemo() {
     setVisible(1)
     script.forEach((_, i) => {
       if (i === 0) return
-      timers.current.push(window.setTimeout(() => setVisible(i + 1), i * 850))
+      timers.current.push(window.setTimeout(() => setVisible(i + 1), i * BEAT_MS))
     })
     timers.current.push(
       window.setTimeout(() => {
         setWorking(false)
-      }, script.length * 850),
+      }, script.length * BEAT_MS),
     )
   }
 
@@ -185,8 +215,8 @@ export default function ConsoleDemo() {
     play(chat.messages)
   }
 
-  const send = () => {
-    const text = draft.trim()
+  const send = (value) => {
+    const text = (typeof value === "string" ? value : draft).trim()
     if (!text || working) return
     const followUp = [
       { kind: "user", text },
@@ -208,9 +238,87 @@ export default function ConsoleDemo() {
     setVisible(base + 1)
     next.forEach((_, i) => {
       if (i === 0) return
-      timers.current.push(window.setTimeout(() => setVisible(base + i + 1), i * 850))
+      timers.current.push(window.setTimeout(() => setVisible(base + i + 1), i * BEAT_MS))
     })
-    timers.current.push(window.setTimeout(() => setWorking(false), next.length * 850))
+    timers.current.push(window.setTimeout(() => setWorking(false), next.length * BEAT_MS))
+  }
+
+  // Tour steps fire from timers, so they must not read state captured at
+  // schedule time — send() would see the stale working=true from step 1
+  // and silently drop the follow-up. This ref always holds the latest.
+  const latest = useRef(null)
+  latest.current = { send, replay, chat }
+
+  const stopTour = () => {
+    if (!touring.current) return
+    touring.current = false
+    tourTimers.current.forEach((id) => window.clearTimeout(id))
+    tourTimers.current = []
+    setTourStep(null)
+  }
+
+  const typeInto = (text, then) => {
+    if (prefersReducedMotion()) {
+      setDraft(text)
+      then()
+      return
+    }
+    const chars = [...text]
+    chars.forEach((_, i) => {
+      tourTimers.current.push(
+        window.setTimeout(() => setDraft(text.slice(0, i + 1)), i * TYPE_MS),
+      )
+    })
+    tourTimers.current.push(window.setTimeout(then, chars.length * TYPE_MS + 320))
+  }
+
+  // One full round: goal in, run streams, files it wrote, the numbers,
+  // then a follow-up into the same Sandbox. Opt-in, and any click or
+  // keypress inside the app hands control back.
+  const beats = tourSchedule(chat.messages.length, FOLLOW_UP_STEPS)
+  const TOUR = [
+    {
+      label: "Give the agent a goal",
+      act: () => {
+        setPreview(null)
+        setRightTab("terminal")
+        latest.current.replay()
+      },
+    },
+    { label: "It left files behind", act: () => setRightTab("files") },
+    {
+      label: "Open what it wrote",
+      act: () => setPreview(latest.current.chat.files.sandbox[0]?.name ?? null),
+    },
+    {
+      label: "Numbers it pulled out",
+      act: () => {
+        setPreview(null)
+        setRightTab("previews")
+      },
+    },
+    {
+      label: "Follow up · same Sandbox",
+      act: () => {
+        setRightTab("terminal")
+        typeInto(FOLLOW_UP, () => latest.current.send(FOLLOW_UP))
+      },
+    },
+  ]
+
+  const startTour = () => {
+    stopTour()
+    touring.current = true
+    setDraft("")
+    TOUR.forEach((step, i) => {
+      const run = () => {
+        setTourStep(i)
+        step.act()
+      }
+      if (beats.steps[i] === 0) run()
+      else tourTimers.current.push(window.setTimeout(run, beats.steps[i]))
+    })
+    tourTimers.current.push(window.setTimeout(stopTour, beats.end))
   }
 
   const filtered = CHATS.filter((c) => c.title.toLowerCase().includes(query.toLowerCase()))
@@ -218,9 +326,38 @@ export default function ConsoleDemo() {
   return (
     <div data-component="console-live">
       <div data-slot="live-head">
-        <span>The BoxCompute console</span>
+        <span data-slot="live-url">
+          <img src="/brand/boxcompute-symbol.svg" width="14" height="14" alt="" />
+          <span>
+            app.boxcompute.ai<b>/c/{chat.id}</b>
+          </span>
+        </span>
+        {tourStep === null ? null : (
+          <span data-slot="live-tour" role="status">
+            <b>
+              {String(tourStep + 1).padStart(2, "0")}/{String(TOUR.length).padStart(2, "0")}
+            </b>
+            {TOUR[tourStep].label}
+            <em>· click to take over</em>
+          </span>
+        )}
         <span data-slot="live-head-right">
           <span data-slot="live-badge" role="status">{done ? "Done" : "Working"}</span>
+          <button
+            type="button"
+            onClick={() => (touring.current ? stopTour() : startTour())}
+            aria-label={tourStep === null ? "Play a guided tour" : "Stop the tour"}
+          >
+            {tourStep === null ? (
+              <>
+                <Play aria-hidden="true" /> Play tour
+              </>
+            ) : (
+              <>
+                <Square aria-hidden="true" /> Stop
+              </>
+            )}
+          </button>
           <button type="button" onClick={replay} aria-label="Replay this run">
             <RotateCcw aria-hidden="true" /> Replay
           </button>
@@ -230,16 +367,22 @@ export default function ConsoleDemo() {
         </span>
       </div>
 
-      <div data-component="live-grid">
+      {/* Touching the app hands control back — the head controls sit
+          outside this element so Play/Stop/Replay stay usable. */}
+      <div data-component="live-grid" onPointerDownCapture={stopTour} onKeyDownCapture={stopTour}>
         {/* sidebar */}
         <aside data-slot="live-side" aria-label="Workspace">
+          <div data-slot="live-brand">
+            <img src="/brand/boxcompute-symbol.svg" width="20" height="20" alt="" />
+            boxcompute
+          </div>
           <div data-slot="live-ws">
             <span data-slot="live-avatar" data-tone="ember">
-              DW
+              NR
             </span>
             <span>
-              Demo workspace
-              <span>1 workspace</span>
+              <b>Northwind Retail</b>
+              <span>Production · 3 members</span>
             </span>
             <ChevronDown aria-hidden="true" />
           </div>
@@ -284,10 +427,14 @@ export default function ConsoleDemo() {
                   placeholder="Search chats"
                   aria-label="Search chats"
                 />
-                <button type="button" aria-label="New chat" onClick={() => setQuery("")}>
+                <a
+                  href={APP_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="New chat in the real console"
+                >
                   <Plus aria-hidden="true" />
-                </button>
-              </div>
+                </a>              </div>
               <p data-slot="live-group">Today</p>
               <ul data-slot="live-chats">
                 {filtered.map((c) => (
@@ -302,7 +449,7 @@ export default function ConsoleDemo() {
                         BC
                       </span>
                       <span>
-                        {c.title}
+                        <b>{c.title}</b>
                         <span>
                           {c.model} · {c.status}
                         </span>
@@ -324,7 +471,7 @@ export default function ConsoleDemo() {
                       {agent.name.slice(0, 2).toUpperCase()}
                     </span>
                     <span>
-                      {agent.name}
+                      <b>{agent.name}</b>
                       <span>{agent.detail}</span>
                     </span>
                     <span data-slot="live-mini">{agent.status}</span>
@@ -340,10 +487,11 @@ export default function ConsoleDemo() {
             </button>
             <span>
               <span data-slot="live-avatar" data-tone="plain">
-                AL
+                PR
               </span>
               <span>
-                Alex<span>alex@example.com</span>
+                <b>Priya Raman</b>
+                <span>priya@northwindretail.com</span>
               </span>
             </span>
           </div>
@@ -356,12 +504,12 @@ export default function ConsoleDemo() {
               BC
             </span>
             <span>
-              {chat.title}
+              <b>{chat.title}</b>
               <span>
                 BoxCompute · {chat.model} · {working ? "Working" : chat.status}
               </span>
             </span>
-            <span data-slot="live-wb">Workbench 2</span>
+            <span data-slot="live-wb">{chat.sandbox}</span>
           </div>
 
           <div
@@ -373,10 +521,13 @@ export default function ConsoleDemo() {
             aria-label="Conversation"
           >
             <p data-line="ask">{chat.task}</p>
-            <p data-line="lead">I analyzed the orders in an isolated Sandbox and saved the results.</p>
             {allMessages.slice(0, shownCount).map((message, i) =>
               message.kind === "report" ? (
                 <h4 key={i}>{message.title}</h4>
+              ) : message.kind === "lead" ? (
+                <p key={i} data-line="lead">
+                  {message.text}
+                </p>
               ) : message.kind === "fact" ? (
                 <p key={i} data-line="fact">
                   {message.text}
@@ -419,7 +570,7 @@ export default function ConsoleDemo() {
               </span>
               <button
                 type="button"
-                onClick={send}
+                onClick={() => send()}
                 disabled={!draft.trim() || working}
                 aria-label="Send message"
               >
@@ -441,7 +592,7 @@ export default function ConsoleDemo() {
                 aria-selected={rightTab === tab}
                 onClick={() => setRightTab(tab)}
               >
-                {tab === "files" ? "Files 2" : tab === "terminal" ? "Terminal" : "Previews"}
+                {tab === "files" ? `Files ${fileCount}` : tab === "terminal" ? "Terminal" : "Previews"}
               </button>
             ))}
           </div>
@@ -484,7 +635,9 @@ export default function ConsoleDemo() {
             )
           ) : rightTab === "terminal" ? (
             <div data-slot="live-term">
-              {chat.log.map((line, i) => (
+              {/* Same beat clock as the chat log, so the terminal streams
+                 alongside the answer instead of printing the whole run. */}
+              {chat.log.slice(0, shownCount).map((line, i) => (
                 <p key={i}>{line}</p>
               ))}
               {working ? (

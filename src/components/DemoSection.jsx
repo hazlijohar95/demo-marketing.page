@@ -3,6 +3,7 @@ import { RotateCcw } from "lucide-react"
 
 import SectionHeading from "./SectionHeading.jsx"
 import Reveal from "./Reveal.jsx"
+import DecryptText from "./DecryptText.jsx"
 import { onVisible } from "../lib/visible.js"
 import { prefersReducedMotion } from "../lib/reduced-motion.js"
 
@@ -173,14 +174,14 @@ export default function DemoSection() {
               <p key={`${scenario.id}-${i}`} data-line={line.type}>
                 {line.type === "cmd" ? (
                   <>
-                    <span>$</span> {line.text}
+                    <span>$</span> <DecryptText text={line.text} />
                   </>
                 ) : line.type === "run" ? (
                   <>
-                    <span>→</span> {line.text}
+                    <span>→</span> <DecryptText text={line.text} />
                   </>
                 ) : (
-                  line.text
+                  <DecryptText text={line.text} />
                 )}
               </p>
             ))}

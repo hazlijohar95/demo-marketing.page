@@ -4,13 +4,17 @@ import SectionHeading from "./SectionHeading.jsx"
 import Reveal from "./Reveal.jsx"
 import { CHART_COLORS, MetricBar } from "./MetricBar.jsx"
 
+// A bar only earns its place where the number is a share of a ceiling
+// (default vs max). Isolation, argv counts, transfer size and retention
+// windows have no such ratio — a full bar there reads as "maxed out"
+// and a partial one as "running low", both meaningless. fill: null = no bar.
 const SPECS = [
   {
     rank: "01",
     term: "Isolation",
     value: "non-VM",
     label: "default · VM beta approval-only",
-    fill: 100,
+    fill: null,
     color: CHART_COLORS.workspaces,
     detail: "SDK + CLI create ordinary Sandboxes. vmSandbox:true needs approval, direct HTTP only.",
   },
@@ -37,7 +41,7 @@ const SPECS = [
     term: "Argv + Env",
     value: "64 / 64",
     label: "entries · 8,192 chars each",
-    fill: 100,
+    fill: null,
     color: CHART_COLORS.argv,
     detail: "Structured argv, no shell joining. cwd + files under /workspace.",
   },
@@ -46,7 +50,7 @@ const SPECS = [
     term: "Files",
     value: "8 MiB",
     label: "per transfer · paged + conditional",
-    fill: 100,
+    fill: null,
     color: CHART_COLORS.files,
     detail: "Binary-safe reads, hash-guarded edits. No checkpoints, forks, volumes.",
   },
@@ -55,7 +59,7 @@ const SPECS = [
     term: "Retain",
     value: "24h / 30d",
     label: "ops output · logs nominal",
-    fill: 80,
+    fill: null,
     color: CHART_COLORS.ops,
     detail: "Ops expire 24h after finish. Logs readable cold ~30d, not an archive.",
   },
@@ -67,20 +71,12 @@ export default function SpecSection() {
     <section data-section="spec" id="spec" aria-labelledby="spec-title">
       <div data-slot="section-header">
         <Reveal>
-          <SectionHeading id="spec" strong="The shape of a workspace." rest="Specs, plainly." />
-          <p>What it is, plainly. Select a row for the rule behind it.</p>
+          <SectionHeading id="spec" strong="Bounds, not promises." rest="Public v2 API." />
+          <p>Defaults you set per call, ceilings you can&rsquo;t. Select a row for the rule behind it.</p>
         </Reveal>
         <Reveal delay={100}>
           <div data-slot="spec-legend" aria-hidden="true">
-            <span>
-              <i style={{ background: CHART_COLORS.workspaces }} /> default
-            </span>
-            <span>
-              <i style={{ background: CHART_COLORS.timeout }} /> bound
-            </span>
-            <span>
-              <i style={{ background: CHART_COLORS.ops }} /> retention
-            </span>
+            <span>bar = default share of its ceiling</span>
           </div>
         </Reveal>
       </div>
@@ -100,14 +96,16 @@ export default function SpecSection() {
                   <span data-slot="spec-term">{s.term}</span>
                   <strong data-slot="spec-value">{s.value}</strong>
                   <span data-slot="spec-label">{s.label}</span>
-                  <span aria-hidden="true">
-                    <MetricBar
-                      fill={s.fill}
-                      color={s.color}
-                      active={i === active}
-                      label={`${s.term} ${s.value} ${s.label}`}
-                    />
-                  </span>
+                  {s.fill == null ? null : (
+                    <span aria-hidden="true">
+                      <MetricBar
+                        fill={s.fill}
+                        color={s.color}
+                        active={i === active}
+                        label={`${s.term} ${s.value} ${s.label}`}
+                      />
+                    </span>
+                  )}
                 </button>
               </li>
             ))}

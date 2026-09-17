@@ -96,6 +96,53 @@ the client.
 - Dot fields drift ±6px on a 14s alternate loop (GPU-composited,
   auto-pauses in background tabs, off under reduced-motion).
 
+## Canvas UI (brand adaptation)
+
+Full CanvasUI components are deliberately **not** installed via the
+shadcn registry: they are built on the `html-in-canvas` API
+(Chrome-only, behind `chrome://flags/#canvas-draw-element` or an
+origin-trial token), so most visitors would only ever see the
+plain-HTML fallback — while paying for heavy WebGL loops over live DOM
+that fight this system's square, hairline, static-by-design language.
+
+Instead, two CanvasUI concepts are re-implemented brand-natively as
+dependency-free 2D canvas, working in every browser, plus one true
+vendored component behind strict progressive-enhancement gates:
+
+- `src/components/SandboxField.jsx` (Grid / Ripple / Magnify → hero
+  band). The CSS dot mask stays the base grid; the canvas only paints
+  *activated* cells above it. Hover inspects in accent (`#3b5cf6` light
+  / `#8190ff` dark), pointer-down spawns a sandbox ripple (mint ring
+  `#9ae600`, blue trail `#51a2ff`). Static state is identical to the
+  rest of the system. Idle loop stops when settled, pauses offscreen,
+  DPR capped at 2, hidden entirely under `prefers-reduced-motion`.
+- `src/components/DecryptText.jsx` (Decrypt Reveal → demo terminal).
+  Each staged log line descrambles left-to-right from product glyphs
+  (`[]{}<>/\|—·:+$#01`, spaces never scrambled), ~540ms so it resolves
+  inside the 750ms line cadence. Instant under reduced-motion;
+  `role="log"` stays `aria-live="off"` so scrambles never announce.
+- `src/components/canvasui/ParticleReveal.jsx` + `rect-cache.js` —
+  the genuine Canvas UI Particle Reveal (WebGL build, no dependencies),
+  ported from TSX to JSX with shaders and engine unchanged (one noted
+  divergence: GL setup runs in an isomorphic layout effect so the first
+  frame paints pre-paint on hydration). `ConsoleReveal.jsx` wraps the
+  live console: dust until the cursor approaches, crisp UI inside a
+  tight reveal (radius 260, aberration 6, bend 10 — tuned down from
+  upstream defaults for dense UI text). Gates: html-in-canvas support,
+  desktop widths (the wrapper sums the live-grid clamp + a constant
+  84px of console chrome), fine pointers, no reduced-motion. Content
+  stays live DOM — tabs, search, and composer remain clickable inside
+  the field. License: MIT + Commons Clause, David Haz 2026 — keep the
+  attribution header on the vendored files; do not redistribute them as
+  a library.
+- Closing and footer bands keep the existing `DotField` shader.
+
+To preview the particle field locally: enable
+`chrome://flags/#canvas-draw-element` and restart Chrome. For
+production Chrome visitors without the flag, register the domain for
+the [origin trial](https://developer.chrome.com/blog/html-in-canvas-origin-trial)
+and serve the token; everyone else gets the identical plain console.
+
 ## Motion (better-ui pass)
 
 - Hero entrance staggers 0/100/200/300ms, once, `ease-out`.
