@@ -333,7 +333,7 @@ export default function ConsoleDemo() {
           </span>
         </span>
         {tourStep === null ? null : (
-          <span data-slot="live-tour" role="status">
+          <span key={tourStep} data-slot="live-tour" role="status">
             <b>
               {String(tourStep + 1).padStart(2, "0")}/{String(TOUR.length).padStart(2, "0")}
             </b>

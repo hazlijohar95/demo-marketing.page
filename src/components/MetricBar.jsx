@@ -31,7 +31,7 @@ function useInView() {
   return [ref, seen]
 }
 
-export function MetricBar({ fill = 0, color, active = false, label }) {
+export function MetricBar({ fill = 0, color = "var(--bx-accent)", active = false, label }) {
   const [ref, seen] = useInView()
   const pct = Math.max(0, Math.min(100, fill))
   return (
@@ -41,9 +41,11 @@ export function MetricBar({ fill = 0, color, active = false, label }) {
       data-active={active ? "true" : undefined}
       role="img"
       aria-label={label}
-      style={{ "--metric-bar-fill": `${seen ? pct : 0}%`, "--metric-bar-color": color }}
     >
-      <b aria-hidden="true" />
+      <b
+        aria-hidden="true"
+        style={{ transform: `scaleX(${seen ? pct / 100 : 0})`, background: color }}
+      />
       <em aria-hidden="true" />
     </span>
   )

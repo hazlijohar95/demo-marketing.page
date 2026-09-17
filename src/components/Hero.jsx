@@ -13,16 +13,16 @@ export default function Hero() {
         <div data-slot="hero-pattern" aria-hidden="true">
           <SandboxField />
         </div>
-        <h1 id="hero-title" data-entrance style={{ "--enter-delay": "100ms" }}>
+        <h1 id="hero-title" data-entrance style={{ "--enter-delay": "60ms" }}>
           A workspace
           <br />
           for every agent
         </h1>
         <div data-slot="hero-copy">
-          <p data-entrance style={{ "--enter-delay": "200ms" }}>
+          <p data-entrance style={{ "--enter-delay": "120ms" }}>
             Its own Sandbox: isolated, resumable, controlled.
           </p>
-          <div data-slot="hero-actions" data-entrance style={{ "--enter-delay": "300ms" }}>
+          <div data-slot="hero-actions" data-entrance style={{ "--enter-delay": "180ms" }}>
             <a data-slot="header-button" data-variant="contrast" href={APP_URL}>
               <strong>Open BoxCompute</strong> <ArrowUpRight aria-hidden="true" />
             </a>

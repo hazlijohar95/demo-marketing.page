@@ -110,7 +110,7 @@ export default function SpecSection() {
               </li>
             ))}
           </ol>
-          <p data-slot="spec-foot" role="status">
+          <p key={active} data-slot="spec-foot" role="status">
             <strong>{SPECS[active].term}.</strong> {SPECS[active].detail}
           </p>
         </div>

@@ -79,7 +79,7 @@ export default function LifecycleFlow() {
           </li>
         ))}
       </ol>
-      <p data-slot="lifecycle-foot" role="status">
+      <p key={active} data-slot="lifecycle-foot" role="status">
         <strong style={{ color: STAGES[active].color }}>{STAGES[active].title}.</strong>{" "}
         {STAGES[active].detail}
       </p>

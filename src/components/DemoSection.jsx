@@ -62,7 +62,7 @@ function Meter({ label, fill, color }) {
     <span data-slot="demo-meter">
       <span>{label}</span>
       <i>
-        <b style={{ width: `${fill}%`, background: color }} />
+        <b style={{ transform: `scaleX(${fill / 100})`, background: color }} />
       </i>
     </span>
   )
@@ -72,6 +72,7 @@ export default function DemoSection() {
   const [index, setIndex] = useState(0)
   const [shown, setShown] = useState(0)
   const [started, setStarted] = useState(false)
+  const [runId, setRunId] = useState(0)
   const figureRef = useRef(null)
   const scenario = SCENARIOS[index]
   const running = started && shown < scenario.lines.length
@@ -102,14 +103,16 @@ export default function DemoSection() {
       })
     }, LINE_MS)
     return () => window.clearInterval(id)
-  }, [index, started])
+    // `runId` is in the deps so Replay restarts the interval: it clears itself
+    // on the last line, so resetting `shown` alone left nothing ticking.
+  }, [index, started, runId])
 
   const replay = () => {
     if (prefersReducedMotion()) {
       setShown(scenario.lines.length)
       return
     }
-    setShown(0)
+    setRunId((id) => id + 1)
   }
 
   return (
@@ -152,7 +155,7 @@ export default function DemoSection() {
               {running ? "Running" : "Done"}
             </span>
           </div>
-          <div data-slot="demo-meters" aria-hidden="true">
+          <div data-slot="demo-meters" aria-hidden="true" style={{ "--demo-beat": `${LINE_MS}ms` }}>
             <Meter
               label={`time ${Math.round(frac * scenario.timeSec)}s / 120s`}
               fill={frac * ((scenario.timeSec / 120) * 100)}

@@ -85,8 +85,37 @@ export default function SandboxField() {
         return { ...r, age, radius: age * RIPPLE_SPEED, fade: 1 - age / RIPPLE_LIFE }
       })
 
-      for (let y = 1; y < h; y += GAP) {
-        for (let x = offX + 1; x < w; x += GAP) {
+      // Only cells within reach of the pointer glow or a live ripple band
+      // can clear the `total < 0.03` guard below. Scanning the whole grid
+      // computed ~12k sqrt per frame to discard 94% of them.
+      let minX = Infinity
+      let minY = Infinity
+      let maxX = -Infinity
+      let maxY = -Infinity
+
+      // Grow the scan box to cover one circle of influence.
+      const cover = (cx, cy, reach) => {
+        minX = Math.min(minX, cx - reach)
+        maxX = Math.max(maxX, cx + reach)
+        minY = Math.min(minY, cy - reach)
+        maxY = Math.max(maxY, cy + reach)
+      }
+
+      if (pointer.inside) cover(pointer.x, pointer.y, HOVER_RADIUS)
+      for (const r of rippleStates) {
+        // The band falls off as exp(-band^2 * 2); 2.5 bands is already
+        // below the 0.03 cutoff, so there is nothing to draw beyond it.
+        cover(r.x, r.y, r.radius + RIPPLE_BAND * 2.5)
+      }
+      if (minX > maxX) return
+
+      // Snap to the same lattice the full scan used, so cells land on
+      // identical coordinates and the visual result is unchanged.
+      const yFrom = 1 + Math.max(0, Math.floor((minY - 1) / GAP)) * GAP
+      const xFrom = offX + 1 + Math.max(0, Math.floor((minX - offX - 1) / GAP)) * GAP
+
+      for (let y = yFrom; y < h && y <= maxY; y += GAP) {
+        for (let x = xFrom; x < w && x <= maxX; x += GAP) {
           const dx = x - pointer.x
           const dy = y - pointer.y
           const dist = Math.sqrt(dx * dx + dy * dy)

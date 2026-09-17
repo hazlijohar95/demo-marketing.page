@@ -5,8 +5,18 @@
    System theme only: light by default, dark via prefers-color-scheme.
 ------------------------------------------------------------------- */
 
+/* Anchor nav + skip link travel instead of teleporting. scroll-margin-top
+   (below) already parks the landing under the sticky header. */
+@media (prefers-reduced-motion: no-preference) {
+  html:has([data-page="box"]) {
+    scroll-behavior: smooth;
+  }
+}
+
 [data-page="box"] {
   color-scheme: light dark;
+  /* details-content can only transition from 0 to a keyword height. */
+  interpolate-size: allow-keywords;
   --bx-sans:
     "Inter",
     -apple-system,
@@ -40,6 +50,16 @@
      particle-reveal wrapper has to add them to the grid height. */
   --live-head-h: 44px;
   --live-foot-h: 42px;
+  /* Motion. Curves follow the decision order: entering/exiting uses
+     --bx-ease-out, on-screen movement uses --bx-ease-in-out, and plain
+     colour changes stay on the built-in `ease`. */
+  --bx-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --bx-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --bx-dur-press: 120ms;
+  --bx-dur-fast: 200ms;
+  --bx-dur-ui: 240ms;
+  --bx-dur-bar: 300ms;
+  --bx-dur-enter: 400ms;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -374,6 +394,23 @@
     0 1px 1.5px 0 #0000001a;
 }
 
+/* The primary CTA already declares a transition for these properties
+   (see the polish pass) but nothing ever changed them — hover was dead.
+   Colour and shadow only, no transform: this button is on screen in the
+   sticky header all day, so the feedback stays near-imperceptible. */
+@media (hover: hover) and (pointer: fine) {
+  [data-page="box"] [data-slot="header-button"][data-variant="neutral"]:hover,
+  [data-page="box"] [data-slot="menu-button"]:hover {
+    box-shadow:
+      0 0 0 0 #00000038,
+      0 0 0 0.5px #00000038,
+      0 1px 2px 0 #00000024;
+  }
+  [data-page="box"] [data-slot="header-button"][data-variant="contrast"]:hover {
+    background: #3a3a3a;
+  }
+}
+
 @media (max-width: 47.999rem) {
   [data-page="box"] [data-slot="header-actions"] [data-slot="header-button"][data-variant="neutral"] {
     display: none;
@@ -422,9 +459,9 @@
   width: 14px;
   height: 14px;
   transition:
-    opacity 180ms cubic-bezier(0.2, 0, 0, 1),
-    transform 180ms cubic-bezier(0.2, 0, 0, 1),
-    filter 180ms cubic-bezier(0.2, 0, 0, 1);
+    opacity 180ms var(--bx-ease-out),
+    transform 180ms var(--bx-ease-out),
+    filter 180ms var(--bx-ease-out);
 }
 
 [data-page="box"] [data-slot="menu-icons"][data-open="false"] svg:last-child,
@@ -815,13 +852,24 @@
     0 2px 4px 0 #0000000a;
 }
 
-[data-page="box"] [data-component="leader-card"]:hover {
-  border-color: var(--bx-line-strong);
-  box-shadow:
-    0 0 0 0.5px #00000024,
-    0 6px 16px #0000000d,
-    0 2px 6px #0000000f;
-  transform: translateY(-1px);
+/* Hover lift is gated: a tap on a touch device fires :hover and leaves
+   the card stuck in the lifted state, and one of these cards holds an
+   interactive button. */
+@media (hover: hover) and (pointer: fine) {
+  [data-page="box"] [data-component="leader-card"]:hover {
+    border-color: var(--bx-line-strong);
+    box-shadow:
+      0 0 0 0.5px #00000024,
+      0 6px 16px #0000000d,
+      0 2px 6px #0000000f;
+    transform: translateY(-1px);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
+  [data-page="box"] [data-component="leader-card"]:hover {
+    transform: none;
+  }
 }
 
 [data-page="box"] [data-component="leader-card"] {
@@ -832,7 +880,7 @@
     background-color 480ms ease;
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) and (hover: hover) and (pointer: fine) {
   [data-page="box"] [data-component="leader-card"]:hover {
     background: #242424;
   }
@@ -973,11 +1021,27 @@
   height: 15px;
   flex: 0 0 auto;
   color: var(--bx-faint);
-  transition: transform 120ms ease;
+  transition: transform var(--bx-dur-ui) var(--bx-ease-in-out);
 }
 
 [data-page="box"] [data-component="faq-list"] details[open] summary svg {
   transform: rotate(45deg);
+}
+
+/* The group is exclusive (name="faq"), so opening one row snapped its
+   sibling shut in the same frame. Both ends now travel. Browsers without
+   interpolate-size / ::details-content keep today's instant behaviour. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-component="faq-list"] details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size var(--bx-dur-ui) var(--bx-ease-out),
+      content-visibility var(--bx-dur-ui) allow-discrete;
+  }
+  [data-page="box"] [data-component="faq-list"] details[open]::details-content {
+    block-size: auto;
+  }
 }
 
 [data-page="box"] [data-component="faq-list"] details > p {
@@ -1510,8 +1574,8 @@
   font-size: 13px;
   text-align: start;
   transition-property: background-color, color;
-  transition-duration: 120ms;
-  transition-timing-function: ease-out;
+  transition-duration: var(--bx-dur-press);
+  transition-timing-function: ease;
 }
 
 [data-page="box"] [data-slot="live-nav"] button:hover {
@@ -1625,8 +1689,8 @@
   text-align: start;
   border: 1px solid transparent;
   transition-property: background-color, border-color;
-  transition-duration: 120ms;
-  transition-timing-function: ease-out;
+  transition-duration: var(--bx-dur-press);
+  transition-timing-function: ease;
 }
 
 [data-page="box"] [data-slot="live-chats"] button:hover {
@@ -1813,7 +1877,7 @@
 @media (prefers-reduced-motion: no-preference) {
   [data-page="box"] [data-slot="live-log"] > p,
   [data-page="box"] [data-slot="live-log"] > h4 {
-    animation: bx-live-in 500ms ease-out both;
+    animation: bx-live-in var(--bx-dur-fast) var(--bx-ease-out) both;
   }
 }
 
@@ -1829,8 +1893,8 @@
   border-radius: 16px;
   background: var(--live-composer);
   transition-property: border-color;
-  transition-duration: 120ms;
-  transition-timing-function: ease-out;
+  transition-duration: var(--bx-dur-press);
+  transition-timing-function: ease;
 }
 
 [data-page="box"] [data-slot="live-composer"]:focus-within {
@@ -1932,8 +1996,8 @@
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
   transition-property: color;
-  transition-duration: 120ms;
-  transition-timing-function: ease-out;
+  transition-duration: var(--bx-dur-press);
+  transition-timing-function: ease;
 }
 
 [data-page="box"] [data-slot="live-inspector-tabs"] button:hover {
@@ -2003,8 +2067,8 @@
   font-size: 12px;
   text-align: start;
   transition-property: background-color, color;
-  transition-duration: 120ms;
-  transition-timing-function: ease-out;
+  transition-duration: var(--bx-dur-press);
+  transition-timing-function: ease;
 }
 
 [data-page="box"] [data-slot="live-filegroup"] li button:hover {
@@ -2195,25 +2259,67 @@
 @media (prefers-reduced-motion: no-preference) {
   [data-page="box"] [data-entrance] {
     opacity: 0;
-    animation: bx-rise 600ms ease-out forwards;
+    animation: bx-rise var(--bx-dur-enter) var(--bx-ease-out) forwards;
     animation-delay: var(--enter-delay, 0ms);
   }
+  /* Travel uses `translate`, not `transform`: these elements also carry hover
+     lifts (leader-card), and a `transform` here would overwrite them. */
   [data-page="box"] [data-reveal] {
     opacity: 0;
-    transition: opacity 600ms ease-out;
+    translate: 0 8px;
+    transition:
+      opacity var(--bx-dur-enter) var(--bx-ease-out),
+      translate var(--bx-dur-enter) var(--bx-ease-out);
     transition-delay: var(--reveal-delay, 0ms);
   }
   [data-page="box"] [data-reveal].is-visible {
     opacity: 1;
+    translate: none;
   }
 }
 
 @keyframes bx-rise {
   from {
     opacity: 0;
+    translate: 0 8px;
   }
   to {
     opacity: 1;
+    translate: none;
+  }
+}
+
+/* Selection readouts and inspector panels: the chrome around them
+   already animates on click, the payload used to hard-swap. 2–6px of
+   travel, not 8 — these sit right next to what was just clicked.
+   JSX keys the readouts on the active index so the animation re-fires;
+   the inspector panels remount by themselves when the tab changes. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-slot="spec-foot"],
+  [data-page="box"] [data-slot="lifecycle-foot"],
+  [data-page="box"] [data-slot="live-tour"],
+  [data-page="box"] [data-slot="live-term"],
+  [data-page="box"] [data-slot="live-previews"],
+  [data-page="box"] [data-slot="live-filegroup"] {
+    animation: bx-detail-in 160ms ease-out both;
+  }
+  /* Opening a file goes deeper, so it enters from the direction of travel. */
+  [data-page="box"] [data-slot="live-preview"] {
+    animation: bx-panel-in 160ms ease-out both;
+  }
+}
+
+@keyframes bx-detail-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+}
+
+@keyframes bx-panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(6px);
   }
 }
 
@@ -2321,8 +2427,17 @@
   background: var(--bx-success);
 }
 
+/* Running is amber and blinking; done is the solid green the rest of the
+   page uses for success. The previous rule set --bx-success for both, so
+   the dot never distinguished the two states. */
 [data-page="box"] [data-slot="demo-status"][data-state="running"]::before {
-  background: var(--bx-success);
+  background: #d69a00;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-slot="demo-status"][data-state="running"]::before {
+    animation: bx-caret 1s steps(1, end) infinite;
+  }
 }
 
 [data-page="box"] [data-slot="demo-log"] {
@@ -2386,6 +2501,21 @@
   height: 14px;
   vertical-align: -2px;
   background: var(--bx-success);
+}
+
+/* The caret only renders while a run is streaming, so it has to read as
+   busy. steps(1) — a hard on/off blink, not the eased fade the softer
+   ops dots use. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-slot="demo-caret"] {
+    animation: bx-caret 1s steps(1, end) infinite;
+  }
+}
+
+@keyframes bx-caret {
+  50% {
+    opacity: 0;
+  }
 }
 
 [data-page="box"] [data-slot="demo-foot"] {
@@ -2615,12 +2745,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  [data-page="box"] [data-component="faq-list"] summary svg {
-    transition: none;
-  }
-}
-
 /* opencode/data-style visuals -------------------------------------- */
 [data-page="box"] [data-component="metric-bar"] {
   position: relative;
@@ -2632,10 +2756,9 @@
 }
 [data-page="box"] [data-component="metric-bar"] > b {
   position: absolute;
-  inset: 0 auto 0 0;
-  width: var(--metric-bar-fill, 0%);
-  background: var(--metric-bar-color, var(--bx-accent));
-  transition: width 900ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  inset: 0;
+  transform-origin: left center;
+  transition: transform var(--bx-dur-bar) var(--bx-ease-out);
 }
 [data-page="box"] [data-component="metric-bar"] > em {
   position: absolute;
@@ -2647,7 +2770,9 @@
   border-color: var(--bx-line-strong);
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-page="box"] [data-component="metric-bar"] > b {
+  [data-page="box"] [data-component="metric-bar"] > b,
+  [data-page="box"] [data-slot="demo-meter"] b,
+  [data-page="box"] [data-slot="lc-bar"] b {
     transition: none;
   }
 }
@@ -2894,10 +3019,15 @@
   border: 1px solid #ffffff1a;
   overflow: hidden;
 }
+/* linear, because this is a progress readout. The duration comes from the
+   JS beat clock so the fill is continuous instead of easing to a stop
+   between steps; --bx-dur-bar is the fallback. */
 [data-page="box"] [data-slot="demo-meter"] b {
   display: block;
+  width: 100%;
   height: 100%;
-  transition: width 600ms ease-out;
+  transform-origin: left center;
+  transition: transform var(--demo-beat, var(--bx-dur-bar)) linear;
 }
 @media (max-width: 40rem) {
   [data-page="box"] [data-slot="demo-meters"] {
@@ -2964,14 +3094,16 @@
 }
 [data-page="box"] [data-slot="lc-bar"] b {
   display: block;
+  width: 100%;
   height: 100%;
-  width: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
   background: var(--stage-color, var(--bx-accent));
-  transition: width 500ms ease-out;
+  transition: transform var(--bx-dur-bar) var(--bx-ease-out);
 }
 [data-page="box"] [data-slot="lifecycle-track"] button[data-active="true"] [data-slot="lc-bar"] b,
 [data-page="box"] [data-slot="lifecycle-track"] button[data-active="done"] [data-slot="lc-bar"] b {
-  width: 100%;
+  transform: scaleX(1);
 }
 [data-page="box"] [data-slot="lifecycle-foot"] {
   padding: 12px 16px;
