@@ -32,7 +32,7 @@ const STAGES = [
     n: "04",
     title: "Cold",
     state: "idle stops compute",
-    color: "#707070",
+    color: "var(--bx-faint)",
     detail: "Files under /workspace stay. Don't delete just because idle.",
   },
   {
@@ -56,15 +56,16 @@ const STAGES = [
 export default function LifecycleFlow() {
   const [active, setActive] = useState(2)
   return (
-    <Reveal data-component="lifecycle" aria-label="Sandbox lifecycle">
-      <ol data-slot="lifecycle-track">
+    <Reveal data-component="lifecycle" role="group" aria-label="Sandbox lifecycle">
+      <ol data-slot="lifecycle-track" role="radiogroup" aria-label="Lifecycle stages">
         {STAGES.map((s, i) => (
           <li key={s.id}>
             <button
               type="button"
+              role="radio"
               data-active={i === active ? "true" : i < active ? "done" : undefined}
               onClick={() => setActive(i)}
-              aria-pressed={i === active}
+              aria-checked={i === active}
               style={{ "--stage-color": s.color }}
             >
               <span data-slot="lc-n">{s.n}</span>

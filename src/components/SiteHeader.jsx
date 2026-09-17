@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { ArrowUpRight, Menu, X } from "lucide-react"
 
 import { APP_URL } from "../content.js"
@@ -19,6 +19,21 @@ const MOBILE_LINKS = [
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false)
+  const menuButtonRef = useRef(null)
+  const firstLinkRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    firstLinkRef.current?.focus()
+    const onKey = (event) => {
+      if (event.key === "Escape") setOpen(false)
+    }
+    document.addEventListener("keydown", onKey)
+    return () => {
+      document.removeEventListener("keydown", onKey)
+      menuButtonRef.current?.focus()
+    }
+  }, [open])
 
   return (
     <header data-component="top" data-menu-open={open ? "true" : "false"}>
@@ -46,6 +61,7 @@ export default function SiteHeader() {
             </a>
             <button
               data-slot="menu-button"
+              ref={menuButtonRef}
               type="button"
               aria-label={open ? "Close navigation" : "Open navigation"}
               aria-expanded={open}
@@ -60,9 +76,10 @@ export default function SiteHeader() {
         </div>
       </div>
       <nav data-slot="mobile-menu" aria-label="Mobile navigation" hidden={!open}>
-        {MOBILE_LINKS.map((link) => (
+        {MOBILE_LINKS.map((link, i) => (
           <a
             key={link.href}
+            ref={i === 0 ? firstLinkRef : undefined}
             data-slot="mobile-menu-item"
             href={link.href}
             onClick={() => setOpen(false)}

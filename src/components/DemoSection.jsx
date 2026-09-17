@@ -4,6 +4,7 @@ import { RotateCcw } from "lucide-react"
 import SectionHeading from "./SectionHeading.jsx"
 import Reveal from "./Reveal.jsx"
 import { onVisible } from "../lib/visible.js"
+import { prefersReducedMotion } from "../lib/reduced-motion.js"
 
 const LINE_MS = 750
 
@@ -54,10 +55,6 @@ const SCENARIOS = [
     ],
   },
 ]
-
-function prefersReducedMotion() {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches
-}
 
 function Meter({ label, fill, color }) {
   return (
@@ -128,15 +125,16 @@ export default function DemoSection() {
         <Reveal delay={100} data-component="demo-controls">
           <div
             data-component="scenario-pills"
-            role="group"
+            role="radiogroup"
             aria-label="Demo scenario"
           >
             {SCENARIOS.map((item, i) => (
               <button
                 key={item.id}
                 type="button"
+                role="radio"
                 data-active={i === index}
-                aria-pressed={i === index}
+                aria-checked={i === index}
                 onClick={() => setIndex(i)}
               >
                 {item.label}
@@ -149,7 +147,7 @@ export default function DemoSection() {
         <div data-component="demo-figure" ref={figureRef}>
           <div data-slot="demo-head">
             <span>{scenario.head}</span>
-            <span data-slot="demo-status" data-state={running ? "running" : "done"}>
+            <span data-slot="demo-status" role="status" data-state={running ? "running" : "done"}>
               {running ? "Running" : "Done"}
             </span>
           </div>

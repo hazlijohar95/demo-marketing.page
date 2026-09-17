@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 
 import { onVisible } from "../lib/visible.js"
+import { prefersReducedMotion } from "../lib/reduced-motion.js"
 
 export const CHART_COLORS = {
   timeout: "#51a2ff",
@@ -21,7 +22,7 @@ function useInView() {
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (prefersReducedMotion()) {
       setSeen(true)
       return
     }

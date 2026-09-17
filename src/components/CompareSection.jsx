@@ -62,14 +62,15 @@ export default function CompareSection() {
           <p>Snippet-runners execute and die. BoxCompute resumes.</p>
         </Reveal>
         <Reveal delay={100} data-component="demo-controls">
-          <div data-component="scenario-pills" role="group" aria-label="Highlight column">
+          <div data-component="scenario-pills" role="radiogroup" aria-label="Highlight column">
             {FOCUS.map((c, i) => (
               <button
                 key={c}
                 type="button"
+                role="radio"
                 data-active={i === focus}
                 onClick={() => setFocus(i)}
-                aria-pressed={i === focus}
+                aria-checked={i === focus}
               >
                 {c.split(" ")[0]}
               </button>

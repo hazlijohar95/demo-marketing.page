@@ -14,10 +14,9 @@ npm run preview
 ## The system
 
 - `src/styles.css` — the entire design system, scoped under `[data-page="box"]`
-- `index.html` — IBM Plex Mono (400/500/600/700) + theme preload (no FOUC)
-- `src/App.jsx` — theme state (`system` / `light` / `dark`, persisted)
+- `index.html` — Inter (400/500/600) + IBM Plex Mono (400/500/600/700)
+- `src/App.jsx` — system theme only (follows `prefers-color-scheme` via `useSystemTheme`)
 - `src/components/SectionHeading.jsx` — shared section titles with `#` anchors
-- `src/components/ThemeToggle.jsx` — system/light/dark tray (footer)
 
 ## Rules (from opencode.ai/data)
 
@@ -39,7 +38,7 @@ npm run preview
 - **Header** is sticky, 72px, 13px mono; inline section nav ≥768px,
   full overlay menu below; neutral button hidden on small screens.
 - **Footer** is 11px throughout: mark tile + link columns, pattern band,
-  bottom row with status square (`Persistent by default`) + theme tray.
+  bottom row with status square (`Isolated by default`).
 - **Numbers are tabular** (`font-variant-numeric: tabular-nums`) on ranks,
   steps, counts. Focus is always a 2px `--bx-accent` outline.
 - **Theme** flips a small token set (`--bx-bg/layer/line/text/muted/faint/
@@ -65,9 +64,8 @@ npm run preview
   (honest pattern comparison table), `SpecSection` (plain spec rows),
   `HowItWorks` (hairline step rows), `FaqSection` (accordion rows),
   `ClosingSection`, `SiteFooter`, plus `SectionHeading`, `Reveal`,
-  `ThemeToggle`, `DotField` primitives
-- `src/theme.js` — `ThemeContext` + resolved light/dark (follows the
-  footer toggle and the OS setting)
+  `DotField` primitives
+- `src/theme.js` — `ThemeContext` + resolved light/dark (follows the OS setting)
 - `public/` — brand mark, console screenshots, favicons, social card
 
 ## Pattern fields

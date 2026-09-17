@@ -41,30 +41,32 @@ const STATS = [
 export default function HeroStats() {
   const [active, setActive] = useState(0)
   return (
-    <Reveal data-component="hero-stats" aria-label="API bounds at a glance">
+    <Reveal data-component="hero-stats" role="group" aria-label="API bounds at a glance">
       <div data-slot="hero-stats-head">
         <span>Bounds, not promises</span>
         <span>public v2 API</span>
       </div>
-      <ol>
+      <ol role="radiogroup" aria-label="API bounds">
         {STATS.map((s, i) => (
           <li key={s.rank}>
             <button
               type="button"
+              role="radio"
               data-active={i === active ? "true" : undefined}
               onClick={() => setActive(i)}
-              aria-pressed={i === active}
-              aria-label={`${s.value} ${s.label}`}
+              aria-checked={i === active}
             >
               <span data-slot="hs-rank">{s.rank}</span>
               <strong data-slot="hs-value">{s.value}</strong>
               <span data-slot="hs-label">{s.label}</span>
-              <MetricBar
-                fill={s.fill}
-                color={s.color}
-                active={i === active}
-                label={`${s.value} ${s.label}`}
-              />
+              <span aria-hidden="true">
+                <MetricBar
+                  fill={s.fill}
+                  color={s.color}
+                  active={i === active}
+                  label={`${s.value} ${s.label}`}
+                />
+              </span>
             </button>
           </li>
         ))}

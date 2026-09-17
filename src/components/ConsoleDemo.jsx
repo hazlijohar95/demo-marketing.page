@@ -17,12 +17,9 @@ import {
 } from "lucide-react"
 
 import { APP_URL } from "../content.js"
+import { prefersReducedMotion } from "../lib/reduced-motion.js"
 
 const DESKTOP_SHOT = "/product/console-desktop.png?v=a2a2ab4"
-
-function prefersReducedMotion() {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches
-}
 
 const CHATS = [
   {
@@ -223,7 +220,7 @@ export default function ConsoleDemo() {
       <div data-slot="live-head">
         <span>The BoxCompute console</span>
         <span data-slot="live-head-right">
-          <span data-slot="live-badge">{done ? "Done" : "Working"}</span>
+          <span data-slot="live-badge" role="status">{done ? "Done" : "Working"}</span>
           <button type="button" onClick={replay} aria-label="Replay this run">
             <RotateCcw aria-hidden="true" /> Replay
           </button>
@@ -252,20 +249,21 @@ export default function ConsoleDemo() {
                 key={id}
                 type="button"
                 data-active={activeNav === id}
-                aria-pressed={activeNav === id}
+                aria-current={activeNav === id ? "true" : undefined}
                 onClick={() => setActiveNav(id)}
               >
                 <Icon aria-hidden="true" /> {label}
               </button>
             ))}
           </nav>
-          <div data-slot="live-tabs" role="group" aria-label="Sidebar view">
+          <div data-slot="live-tabs" role="tablist" aria-label="Sidebar view">
             {["chats", "agents"].map((tab) => (
               <button
                 key={tab}
                 type="button"
+                role="tab"
                 data-active={sideTab === tab}
-                aria-pressed={sideTab === tab}
+                aria-selected={sideTab === tab}
                 onClick={() => {
                   setSideTab(tab)
                   setActiveNav(tab)
@@ -297,7 +295,7 @@ export default function ConsoleDemo() {
                     <button
                       type="button"
                       data-active={c.id === chatId}
-                      aria-pressed={c.id === chatId}
+                      aria-current={c.id === chatId ? "true" : undefined}
                       onClick={() => setChatId(c.id)}
                     >
                       <span data-slot="live-avatar" data-tone="mint">
@@ -433,13 +431,14 @@ export default function ConsoleDemo() {
 
         {/* inspector */}
         <aside data-slot="live-inspector" aria-label="Workbench">
-          <div data-slot="live-inspector-tabs" role="group" aria-label="Workbench view">
+          <div data-slot="live-inspector-tabs" role="tablist" aria-label="Workbench view">
             {["files", "terminal", "previews"].map((tab) => (
               <button
                 key={tab}
                 type="button"
+                role="tab"
                 data-active={rightTab === tab}
-                aria-pressed={rightTab === tab}
+                aria-selected={rightTab === tab}
                 onClick={() => setRightTab(tab)}
               >
                 {tab === "files" ? "Files 2" : tab === "terminal" ? "Terminal" : "Previews"}

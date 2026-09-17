@@ -86,25 +86,28 @@ export default function SpecSection() {
       </div>
       <Reveal>
         <div data-component="spec-board">
-          <ol>
+          <ol role="radiogroup" aria-label="Workspace specs">
             {SPECS.map((s, i) => (
               <li key={s.rank}>
                 <button
                   type="button"
+                  role="radio"
                   data-active={i === active ? "true" : undefined}
                   onClick={() => setActive(i)}
-                  aria-pressed={i === active}
+                  aria-checked={i === active}
                 >
                   <span data-slot="spec-rank">{s.rank}</span>
                   <span data-slot="spec-term">{s.term}</span>
                   <strong data-slot="spec-value">{s.value}</strong>
                   <span data-slot="spec-label">{s.label}</span>
-                  <MetricBar
-                    fill={s.fill}
-                    color={s.color}
-                    active={i === active}
-                    label={`${s.term} ${s.value} ${s.label}`}
-                  />
+                  <span aria-hidden="true">
+                    <MetricBar
+                      fill={s.fill}
+                      color={s.color}
+                      active={i === active}
+                      label={`${s.term} ${s.value} ${s.label}`}
+                    />
+                  </span>
                 </button>
               </li>
             ))}
