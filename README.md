@@ -11,11 +11,15 @@ npm run build
 npm run preview
 ```
 
-## The system
+## The system (Astro 7)
 
+- Astro `7.3.3` + `@astrojs/react` `6.0.6` (Vite 8 / Rolldown underneath).
+- `src/layouts/Layout.astro` — document shell: SEO/OG/Twitter meta,
+  JSON-LD, fonts (Inter + IBM Plex Mono), favicons. Imports `src/styles.css`.
+- `src/pages/index.astro` — page composition. React sections are islands:
+  `SiteHeader` + `Hero` use `client:load` (above the fold), everything
+  else uses `client:visible`.
 - `src/styles.css` — the entire design system, scoped under `[data-page="box"]`
-- `index.html` — Inter (400/500/600) + IBM Plex Mono (400/500/600/700)
-- `src/App.jsx` — system theme only (follows `prefers-color-scheme` via `useSystemTheme`)
 - `src/components/SectionHeading.jsx` — shared section titles with `#` anchors
 
 ## Rules (from opencode.ai/data)
@@ -65,8 +69,19 @@ npm run preview
   `HowItWorks` (hairline step rows), `FaqSection` (accordion rows),
   `ClosingSection`, `SiteFooter`, plus `SectionHeading`, `Reveal`,
   `DotField` primitives
-- `src/theme.js` — `ThemeContext` + resolved light/dark (follows the OS setting)
+- `src/theme.js` — `ThemeContext` (legacy provider compat) + SSR-safe
+  `useSystemTheme()` (follows the OS setting; `"light"` on the server).
+  `DotField` uses the hook directly so it works as a standalone island.
 - `public/` — brand mark, console screenshots, favicons, social card
+
+## Why islands this way
+
+All 18 React components are kept 1:1 — no visual rewrites. Each
+top-level section is its own island so Astro code-splits JS per section
+and SSRs the HTML (11 islands, 9 sections). `Reveal`/`MetricBar` stay
+inside their parent islands (they need `IntersectionObserver`, so their
+parents must hydrate). `FaqSection` uses native `<details>` but stays an
+island so its `Reveal` wrappers can add `.is-visible`.
 
 ## Pattern fields
 
@@ -74,9 +89,10 @@ The hero, closing, and footer dot bands render Paper Shaders
 (`@paper-design/shaders-react` 0.0.80, pinned, Apache-2.0) `DotGrid` —
 same 2px squares on a 6px grid as the system language, with delicate
 size/opacity variation, static (no motion by design). Colors follow the
-resolved theme through `ThemeContext` (`#fff`/`#eee` light,
+resolved theme via `useSystemTheme()` (`#fff`/`#eee` light,
 `#161616`/`#303030` dark). The CSS dot mask stays underneath as the
-no-WebGL fallback.
+no-WebGL fallback. SSR renders an empty band; the shader hydrates on
+the client.
 - Dot fields drift ±6px on a 14s alternate loop (GPU-composited,
   auto-pauses in background tabs, off under reduced-motion).
 

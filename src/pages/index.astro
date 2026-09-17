@@ -1,0 +1,41 @@
+---
+import Layout from "../layouts/Layout.astro"
+
+// React islands — ported 1:1 from src/App.jsx.
+// Above-the-fold islands hydrate immediately; everything else hydrates
+// on visibility to keep initial JS small while preserving exact behavior.
+import SiteHeader from "../components/SiteHeader.jsx"
+import Hero from "../components/Hero.jsx"
+import ConsoleSection from "../components/ConsoleSection.jsx"
+import DemoSection from "../components/DemoSection.jsx"
+import PlatformSection from "../components/PlatformSection.jsx"
+import CompareSection from "../components/CompareSection.jsx"
+import SpecSection from "../components/SpecSection.jsx"
+import HowItWorks from "../components/HowItWorks.jsx"
+import FaqSection from "../components/FaqSection.jsx"
+import ClosingSection from "../components/ClosingSection.jsx"
+import SiteFooter from "../components/SiteFooter.jsx"
+---
+
+<Layout>
+  <main data-page="box" id="top">
+    <a class="skip-link" href="#main">
+      Skip to content
+    </a>
+    <SiteHeader client:load />
+    <div data-component="container">
+      <div id="main">
+        <Hero client:load />
+        <ConsoleSection client:visible />
+        <DemoSection client:visible />
+        <PlatformSection client:visible />
+        <CompareSection client:visible />
+        <SpecSection client:visible />
+        <HowItWorks client:visible />
+        <FaqSection client:visible />
+        <ClosingSection client:visible />
+      </div>
+      <SiteFooter client:visible />
+    </div>
+  </main>
+</Layout>

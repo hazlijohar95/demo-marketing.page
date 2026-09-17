@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { DotGrid } from "@paper-design/shaders-react"
 
-import { useResolvedTheme } from "../theme.js"
+import { useSystemTheme } from "../theme.js"
 import { onVisible } from "../lib/visible.js"
 import { prefersReducedMotion } from "../lib/reduced-motion.js"
 
@@ -16,7 +16,7 @@ const DOTS = {
 // Lazy-mounted via onVisible so the three WebGL contexts only spin up
 // when their band scrolls into view.
 export default function DotField() {
-  const theme = useResolvedTheme()
+  const theme = useSystemTheme()
   const ref = useRef(null)
   const [show, setShow] = useState(false)
 

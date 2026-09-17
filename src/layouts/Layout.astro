@@ -1,3 +1,15 @@
+---
+import "../styles.css"
+
+interface Props {
+  title?: string
+}
+
+const {
+  title = "A workspace for every agent — BoxCompute",
+} = Astro.props
+---
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -41,7 +53,7 @@
     />
     <meta name="twitter:image" content="/boxcompute-social-card.png" />
     <meta name="twitter:image:alt" content="BoxCompute" />
-    <title>A workspace for every agent — BoxCompute</title>
+    <title>{title}</title>
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -60,8 +72,7 @@
     />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <slot />
     <noscript>JavaScript enables the mobile navigation menu. You can also use the links in the footer.</noscript>
   </body>
 </html>
