@@ -1,6 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro"
 
+// Static: the landing page reads no EmDash content, so it stays prerendered
+// even though the blog routes render on the Worker.
+export const prerender = true
+
 // React islands — ported 1:1 from src/App.jsx.
 // Above-the-fold islands hydrate immediately; everything else hydrates
 // on visibility to keep initial JS small while preserving exact behavior.

@@ -8,7 +8,7 @@ const FAQS = [
   {
     question: "What is BoxCompute?",
     answer:
-      "Secure cloud Sandboxes grouped by persistent workspaces. Edit files under /workspace, run bounded commands, no load on your machine.",
+      "Secure cloud Sandboxes grouped by persistent workspaces. Each Sandbox is a full Linux VM by default: root in the guest, files under /workspace, bounded commands, no load on your machine.",
   },
   {
     question: "Will it work with my agent?",
@@ -18,7 +18,12 @@ const FAQS = [
   {
     question: "Does my workspace keep its progress?",
     answer:
-      "Yes. Workspaces persist. Sandboxes go cold when idle; files under /workspace stay until you delete the Sandbox.",
+      "Yes. Workspaces persist and can hold many Sandboxes. A VM Sandbox has no automatic expiry: its files stay, and it keeps billing, until you delete it. Download what you need first — delete removes its filesystem.",
+  },
+  {
+    question: "Can my agent reach the internet?",
+    answer:
+      "By default yes: outbound public IPv4 and DNS, so apt-get and package installs work. Create it with blockNetwork:true for a VM with no network interface. The choice is fixed at creation.",
   },
   {
     question: "Can I keep sensitive work private?",

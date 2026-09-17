@@ -9,15 +9,15 @@ const COLUMNS = ["Ephemeral sandboxes", "Cloud dev machines", "DIY containers"]
 
 const ROWS = [
   {
-    label: "Resumes between sessions",
+    label: "Persists between sessions",
     color: CHART_COLORS.workspaces,
-    us: { state: "yes", text: "Workspaces persist, cold resume" },
+    us: { state: "yes", text: "Workspaces persist, no auto-expiry" },
     others: ["Hours, then gone", "Yes, per seat", "If you babysit it"],
   },
   {
     label: "Isolated Sandbox per task",
     color: CHART_COLORS.timeout,
-    us: { state: "yes", text: "Isolated Sandbox" },
+    us: { state: "yes", text: "Full Linux VM by default" },
     others: ["Usually microVMs", "Usually containers", "You build it"],
   },
   {
@@ -59,7 +59,7 @@ export default function CompareSection() {
             strong="Why not just spin up a container?"
             rest="You could. Here is what changes."
           />
-          <p>Snippet-runners execute and die. BoxCompute resumes.</p>
+          <p>Snippet-runners execute and die. BoxCompute gives the job a machine.</p>
         </Reveal>
         <Reveal delay={100} data-component="demo-controls">
           <div data-component="scenario-pills" role="radiogroup" aria-label="Highlight column">

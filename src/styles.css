@@ -3264,3 +3264,175 @@
     padding: 22px 0;
   }
 }
+
+/* blog ------------------------------------------------------------ */
+/* Same hairline section shell as the landing sections; the list is a
+   steps-style row stack and the article body is one prose block. */
+[data-page="box"] [data-component="post-list"] {
+  border-top: 1px solid var(--bx-line);
+}
+
+[data-page="box"] [data-component="post-list"] > li {
+  border-bottom: 1px solid var(--bx-line);
+}
+
+[data-page="box"] [data-component="post-list"] a {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 24px;
+  padding: 24px 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+[data-page="box"] [data-slot="post-date"] {
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-page="box"] [data-component="post-list"] h2 {
+  font-family: var(--bx-sans);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  transition: color var(--bx-dur-fast) ease;
+}
+
+[data-page="box"] [data-component="post-list"] a:hover h2 {
+  color: var(--bx-accent-text);
+}
+
+[data-page="box"] [data-component="post-list"] p {
+  margin-top: 8px;
+  max-width: 62ch;
+  color: var(--bx-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+[data-page="box"] [data-slot="post-back"],
+[data-page="box"] [data-slot="post-preview"] {
+  font-family: var(--bx-mono);
+  font-size: 13px;
+}
+
+[data-page="box"] [data-slot="post-preview"] {
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  border: 1px solid var(--bx-line-strong);
+  color: var(--bx-text);
+}
+
+[data-page="box"] [data-slot="post-header"] {
+  max-width: 68ch;
+  margin: 24px 0 40px;
+}
+
+[data-page="box"] [data-slot="post-header"] h1 {
+  font-family: var(--bx-sans);
+  font-size: 40px;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+[data-page="box"] [data-slot="post-header"] > p {
+  margin-top: 16px;
+  color: var(--bx-muted);
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+[data-page="box"] [data-slot="post-header"] [data-slot="post-date"] {
+  margin-top: 20px;
+}
+
+[data-page="box"] [data-component="prose"] {
+  max-width: 68ch;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+[data-page="box"] [data-component="prose"] > * + * {
+  margin-top: 1.2em;
+}
+
+[data-page="box"] [data-component="prose"] h2,
+[data-page="box"] [data-component="prose"] h3 {
+  margin-top: 2em;
+  font-family: var(--bx-sans);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+[data-page="box"] [data-component="prose"] h2 {
+  font-size: 24px;
+}
+
+[data-page="box"] [data-component="prose"] h3 {
+  font-size: 18px;
+}
+
+[data-page="box"] [data-component="prose"] a {
+  color: var(--bx-accent-text);
+  text-underline-offset: 3px;
+}
+
+[data-page="box"] [data-component="prose"] ul,
+[data-page="box"] [data-component="prose"] ol {
+  padding-left: 1.4em;
+}
+
+[data-page="box"] [data-component="prose"] li + li {
+  margin-top: 0.4em;
+}
+
+[data-page="box"] [data-component="prose"] blockquote {
+  padding-left: 20px;
+  border-left: 1px solid var(--bx-line-strong);
+  color: var(--bx-muted);
+}
+
+[data-page="box"] [data-component="prose"] pre,
+[data-page="box"] [data-component="prose"] code {
+  font-family: var(--bx-mono);
+  font-size: 13px;
+}
+
+[data-page="box"] [data-component="prose"] pre {
+  padding: 16px;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-layer);
+  overflow-x: auto;
+}
+
+[data-page="box"] [data-component="prose"] img {
+  max-width: 100%;
+  height: auto;
+}
+
+[data-page="box"] [data-component="prose"] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+[data-page="box"] [data-component="prose"] th,
+[data-page="box"] [data-component="prose"] td {
+  padding: 10px 12px;
+  border: 1px solid var(--bx-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+@media (max-width: 48rem) {
+  [data-page="box"] [data-component="post-list"] a {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  [data-page="box"] [data-slot="post-header"] h1 {
+    font-size: 30px;
+  }
+}

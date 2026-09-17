@@ -12,11 +12,12 @@ const SPECS = [
   {
     rank: "01",
     term: "Isolation",
-    value: "non-VM",
-    label: "default · VM beta approval-only",
+    value: "full VM",
+    label: "default · 0.5 CPU · 1 GiB · 10 GiB",
     fill: null,
     color: CHART_COLORS.workspaces,
-    detail: "SDK + CLI create ordinary Sandboxes. vmSandbox:true needs approval, direct HTTP only.",
+    detail:
+      "VM Sandboxes are the default for every account: own Linux kernel, root in the guest, HOME=/workspace. Pass vmSandbox:false for a gVisor Sandbox.",
   },
   {
     rank: "02",
@@ -62,6 +63,16 @@ const SPECS = [
     fill: null,
     color: CHART_COLORS.ops,
     detail: "Ops expire 24h after finish. Logs readable cold ~30d, not an archive.",
+  },
+  {
+    rank: "07",
+    term: "Lifetime",
+    value: "until delete",
+    label: "no automatic expiry",
+    fill: null,
+    color: CHART_COLORS.violet,
+    detail:
+      "A VM Sandbox has no fixed lifetime. It keeps running, and billing, until you delete it. Its root filesystem goes with it.",
   },
 ]
 

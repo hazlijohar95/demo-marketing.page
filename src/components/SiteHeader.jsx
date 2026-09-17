@@ -3,12 +3,14 @@ import { ArrowUpRight, Menu, X } from "lucide-react"
 
 import { APP_URL } from "../content.js"
 
+// Root-relative so the nav also works from /blog/*; on the landing page these
+// still resolve to same-document fragment scrolls.
 const NAV_LINKS = [
-  { href: "#console", label: "Console" },
-  { href: "#demo", label: "Demo" },
-  { href: "#platform", label: "Platform" },
-  { href: "#developers", label: "How it works" },
-  { href: "#faq", label: "FAQ" },
+  { href: "/#console", label: "Console" },
+  { href: "/#demo", label: "Demo" },
+  { href: "/#platform", label: "Platform" },
+  { href: "/#developers", label: "How it works" },
+  { href: "/#faq", label: "FAQ" },
 ]
 
 const MOBILE_LINKS = [
@@ -39,7 +41,7 @@ export default function SiteHeader() {
     <header data-component="top" data-menu-open={open ? "true" : "false"}>
       <div data-component="container">
         <div data-slot="header-bar">
-          <a data-slot="brand" href="#top" aria-label="BoxCompute home">
+          <a data-slot="brand" href="/" aria-label="BoxCompute home">
             <img src="/brand/boxcompute-symbol.svg" width="32" height="32" alt="" />
             boxcompute
           </a>

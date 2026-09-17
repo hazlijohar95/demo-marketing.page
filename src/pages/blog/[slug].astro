@@ -1,0 +1,61 @@
+---
+import { decodeSlug, getEmDashEntry, getSeoMeta } from "emdash"
+import { PortableText } from "emdash/ui"
+
+import Layout from "../../layouts/Layout.astro"
+import SiteHeader from "../../components/SiteHeader.jsx"
+import SiteFooter from "../../components/SiteFooter.jsx"
+
+const slug = decodeSlug(Astro.params.slug)
+if (!slug) return Astro.redirect("/blog/")
+
+const { entry: post, error, isPreview, cacheHint } = await getEmDashEntry("posts", slug)
+
+// A slug that matches nothing arrives as a LiveEntryNotFoundError in `error`,
+// not as `entry: null` — so it has to be answered with 404, not 500.
+if (error) {
+  if (error.name === "LiveEntryNotFoundError") return new Response("Not found", { status: 404 })
+  console.error("Failed to load post:", error)
+  return new Response("Unable to load post", { status: 500 })
+}
+
+if (!post) return new Response("Not found", { status: 404 })
+if (Astro.cache?.enabled) Astro.cache.set(cacheHint)
+
+const seo = getSeoMeta(post, {
+  siteTitle: "BoxCompute",
+  siteUrl: Astro.url.origin,
+  path: Astro.url.pathname.replace(/\/$/, ""),
+})
+
+const publishedAt =
+  post.data.publishedAt?.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }) ?? null
+---
+
+<Layout title={seo.title} description={seo.description}>
+  <main data-page="box" id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader client:load />
+    <div data-component="container">
+      <div id="main">
+        <section data-section="post" aria-labelledby="post-title">
+          {isPreview ? <p data-slot="post-preview">Unpublished preview.</p> : null}
+          <p data-slot="post-back"><a href="/blog/">← All posts</a></p>
+          <header data-slot="post-header">
+            <h1 id="post-title" {...post.edit.title}>{post.data.title}</h1>
+            {post.data.excerpt ? <p {...post.edit.excerpt}>{post.data.excerpt}</p> : null}
+            <p data-slot="post-date">{publishedAt ?? "Unpublished"}</p>
+          </header>
+          <div data-component="prose">
+            <PortableText value={post.data.content} />
+          </div>
+        </section>
+      </div>
+      <SiteFooter client:visible />
+    </div>
+  </main>
+</Layout>

@@ -220,7 +220,7 @@ export default function ConsoleDemo() {
     if (!text || working) return
     const followUp = [
       { kind: "user", text },
-      { kind: "run", text: "Sandbox ready · resumed after cold" },
+      { kind: "run", text: "Same Sandbox · /workspace intact" },
       { kind: "fact", text: "Checked /workspace files — no duplicate runs" },
       { kind: "note", text: "Done · saved in /workspace, same Sandbox." },
     ]

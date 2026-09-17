@@ -9,7 +9,30 @@ npm install
 npm run dev     # http://localhost:5180
 npm run build
 npm run preview
+npm run deploy  # astro build && wrangler deploy
 ```
+
+## The blog (EmDash on Cloudflare)
+
+`/blog/` is an [EmDash](https://emdashcms.com) CMS, not files in the repo.
+Posts live in D1, media in R2, and the two routes render on the Worker;
+`src/pages/index.astro` stays `prerender = true`.
+
+- `astro.config.mjs` — `output: "server"`, `@astrojs/cloudflare`,
+  `emdash({ database: d1("DB"), storage: r2("MEDIA") })`
+- `wrangler.jsonc` — `DB` (D1 `boxcompute-cms`), `MEDIA` (R2
+  `boxcompute-media`), a minute cron for scheduled publishing
+- `src/worker.ts` — Astro handler + EmDash scheduled handler
+- `src/live.config.ts` — the `_emdash` live collection
+- `src/pages/blog/index.astro` + `[slug].astro` — published posts only,
+  styled with the same `[data-page="box"]` tokens (`post-list`, `prose`)
+- `.env` holds `EMDASH_ENCRYPTION_KEY` (gitignored, `npx emdash secrets
+  generate`). Losing it makes stored plugin secrets unreadable.
+
+Write posts at `/_emdash/admin`; locally use the dev-bypass link the dev
+server prints. First `wrangler deploy` creates the named D1 + R2
+resources. No sandboxed plugins, so no `LOADER` binding.
+
 
 ## The system (Astro 7)
 

@@ -1,0 +1,68 @@
+---
+import { getEmDashCollection } from "emdash"
+
+import Layout from "../../layouts/Layout.astro"
+import SiteHeader from "../../components/SiteHeader.jsx"
+import SiteFooter from "../../components/SiteFooter.jsx"
+
+// Ordering happens in D1 so the query uses its published_at index.
+// Public collection queries default to status: "published".
+const { entries: posts, error, cacheHint } = await getEmDashCollection("posts", {
+  orderBy: { published_at: "desc" },
+})
+
+if (error) {
+  console.error("Failed to load posts:", error)
+  return new Response("Unable to load posts", { status: 500 })
+}
+
+if (Astro.cache?.enabled) Astro.cache.set(cacheHint)
+
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+---
+
+<Layout
+  title="Blog — BoxCompute"
+  description="Notes on the technology behind agent workspaces: virtualization, infrastructure, and the boundaries that make them work."
+>
+  <main data-page="box" id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader client:load />
+    <div data-component="container">
+      <div id="main">
+        <section data-section="blog" aria-labelledby="blog-title">
+          <div data-slot="section-header">
+            <div>
+              <h1 data-slot="section-title" id="blog-title">
+                <strong>From BoxCompute.</strong> Notes on the technology behind agent workspaces.
+              </h1>
+              <p>Virtualization, infrastructure, and the boundaries that make them work.</p>
+            </div>
+          </div>
+
+          {
+            posts.length === 0 ? (
+              <p data-slot="blog-empty">No posts yet.</p>
+            ) : (
+              <ol data-component="post-list">
+                {posts.map((post) => (
+                  <li>
+                    <a href={`/blog/${post.id}/`}>
+                      <span data-slot="post-date">
+                        {post.data.publishedAt ? formatDate(post.data.publishedAt) : "Draft"}
+                      </span>
+                      <h2>{post.data.title}</h2>
+                      {post.data.excerpt ? <p>{post.data.excerpt}</p> : null}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            )
+          }
+        </section>
+      </div>
+      <SiteFooter client:visible />
+    </div>
+  </main>
+</Layout>

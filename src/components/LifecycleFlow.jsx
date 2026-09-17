@@ -15,9 +15,9 @@ const STAGES = [
     id: "sandbox",
     n: "02",
     title: "Sandbox",
-    state: "cold ↔ running",
+    state: "pending → running",
     color: "#51a2ff",
-    detail: "Isolated instance. Ordinary non-VM by default via SDK/CLI.",
+    detail: "Isolated instance. A full Linux VM by default; vmSandbox:false for gVisor.",
   },
   {
     id: "execute",
@@ -28,12 +28,12 @@ const STAGES = [
     detail: "Structured argv. Non-zero exit still HTTP 200 — check flags.",
   },
   {
-    id: "cold",
+    id: "running",
     n: "04",
-    title: "Cold",
-    state: "idle stops compute",
+    title: "Running",
+    state: "no automatic expiry",
     color: "var(--bx-faint)",
-    detail: "Files under /workspace stay. Don't delete just because idle.",
+    detail: "A VM keeps running, and billing, until you delete it. gVisor Sandboxes go cold when idle.",
   },
   {
     id: "logs",
@@ -49,7 +49,7 @@ const STAGES = [
     title: "Delete",
     state: "removes instance",
     color: "#ff8904",
-    detail: "Deletes Sandbox + log access. Workspace and siblings stay.",
+    detail: "Deletes the Sandbox, its filesystem, and log access. Workspace and siblings stay.",
   },
 ]
 

@@ -3,10 +3,12 @@ import "../styles.css"
 
 interface Props {
   title?: string
+  description?: string
 }
 
 const {
   title = "A workspace for every agent — BoxCompute",
+  description = "Isolated Linux VM Sandboxes grouped by persistent workspaces for AI agents to build, test, and explore.",
 } = Astro.props
 ---
 
@@ -25,10 +27,7 @@ const {
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#161616" />
-    <meta
-      name="description"
-      content="Isolated cloud Sandboxes grouped by persistent workspaces for AI agents to build, test, and explore."
-    />
+    <meta name="description" content={description} />
     <meta
       name="keywords"
       content="AI agent workspace, AI agent sandbox, secure agent work, autonomous agents, coding agents, persistent workspace"
@@ -36,21 +35,15 @@ const {
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="BoxCompute" />
-    <meta property="og:title" content="A workspace for every agent — BoxCompute" />
-    <meta
-      property="og:description"
-      content="Isolated Sandboxes for AI agents to build, test, and explore. Workspaces persist."
-    />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
     <meta property="og:image" content="/boxcompute-social-card.png" />
     <meta property="og:image:width" content="1600" />
     <meta property="og:image:height" content="480" />
     <meta property="og:image:alt" content="BoxCompute" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="A workspace for every agent — BoxCompute" />
-    <meta
-      name="twitter:description"
-      content="Isolated Sandboxes that resume. Workspaces persist."
-    />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content="/boxcompute-social-card.png" />
     <meta name="twitter:image:alt" content="BoxCompute" />
     <title>{title}</title>
@@ -61,7 +54,7 @@ const {
         "name": "BoxCompute",
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Cloud",
-        "description": "Isolated cloud Sandboxes grouped by persistent workspaces for AI agents."
+        "description": "Isolated Linux VM Sandboxes grouped by persistent workspaces for AI agents."
       }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

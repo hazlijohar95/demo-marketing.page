@@ -7,11 +7,11 @@ const COLUMNS = [
   {
     heading: "Product",
     links: [
-      { href: "#console", label: "Console" },
-      { href: "#demo", label: "Demo" },
-      { href: "#platform", label: "Platform" },
-      { href: "#developers", label: "How it works" },
-      { href: "#faq", label: "FAQ" },
+      { href: "/#console", label: "Console" },
+      { href: "/#demo", label: "Demo" },
+      { href: "/#platform", label: "Platform" },
+      { href: "/#developers", label: "How it works" },
+      { href: "/#faq", label: "FAQ" },
     ],
   },
   {
@@ -35,7 +35,7 @@ export default function SiteFooter() {
   return (
     <footer data-component="footer">
       <div data-slot="footer-grid">
-        <a data-slot="footer-mark" href="#top" aria-label="BoxCompute home">
+        <a data-slot="footer-mark" href="/" aria-label="BoxCompute home">
           <img src="/brand/boxcompute-symbol.svg" width="40" height="40" alt="" />
         </a>
         {COLUMNS.map((column) => (

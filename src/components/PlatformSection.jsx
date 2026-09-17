@@ -16,7 +16,7 @@ function IsolationVisual() {
         <span data-slot="mv-box">prod</span>
       </div>
       <div data-slot="mv-cap">
-        <i style={{ background: "#9ae600" }} /> isolated · argv only
+        <i style={{ background: "#9ae600" }} /> own kernel · root in guest
       </div>
     </div>
   )
@@ -27,20 +27,20 @@ function PersistVisual() {
     <div data-component="mini-visual" aria-hidden="true">
       <div data-slot="mv-timeline">
         <span data-slot="mv-seg" data-state="run" style={{ "--seg": "#51a2ff" }}>
-          run
-        </span>
-        <span data-slot="mv-seg" data-state="cold">
-          cold
+          start
         </span>
         <span data-slot="mv-seg" data-state="run" style={{ "--seg": "#51a2ff" }}>
-          resume
+          work
+        </span>
+        <span data-slot="mv-seg" data-state="run" style={{ "--seg": "#51a2ff" }}>
+          continue
         </span>
         <span data-slot="mv-seg" data-state="del">
           delete
         </span>
       </div>
       <div data-slot="mv-cap">
-        <i style={{ background: "#51a2ff" }} /> /workspace until delete
+        <i style={{ background: "#51a2ff" }} /> no auto-expiry · delete when done
       </div>
     </div>
   )
@@ -83,13 +83,13 @@ const FEATURES = [
   {
     rank: "01",
     title: "One Sandbox per task.",
-    body: "Isolated. Your laptop and prod stay out of the way.",
+    body: "A full Linux VM with its own kernel. Your laptop and prod stay out of the way.",
     visual: <IsolationVisual />,
   },
   {
     rank: "02",
-    title: "Resume after cold.",
-    body: "Workspaces persist. Files under /workspace stay until delete.",
+    title: "Stays until you delete it.",
+    body: "No automatic expiry. Files under /workspace live as long as the Sandbox does.",
     visual: <PersistVisual />,
   },
   {

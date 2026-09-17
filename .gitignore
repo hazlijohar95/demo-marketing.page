@@ -3,3 +3,7 @@ dist
 .astro
 .DS_Store
 *.log
+.env
+.wrangler
+.emdash/migrations.json
+emdash-env.d.ts

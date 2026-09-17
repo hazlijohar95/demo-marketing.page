@@ -20,7 +20,7 @@ export default function Hero() {
         </h1>
         <div data-slot="hero-copy">
           <p data-entrance style={{ "--enter-delay": "120ms" }}>
-            Its own Sandbox: isolated, resumable, controlled.
+            Its own Sandbox: a full Linux VM, isolated and controlled.
           </p>
           <div data-slot="hero-actions" data-entrance style={{ "--enter-delay": "180ms" }}>
             <a data-slot="header-button" data-variant="contrast" href={APP_URL}>
