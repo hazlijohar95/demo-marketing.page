@@ -1,23 +1,59 @@
-// Guards the accessibility and layout invariants of the built landing page.
-// Regex over the prerendered HTML and CSS, deliberately: these are structural
-// facts about the output, so the check is a `node --test` away rather than a
-// browser harness.
+// Guards the accessibility, layout, and agent-discovery invariants of the
+// served landing page. Requests go to a local `wrangler dev` server (which
+// serves the built worker exactly as production does: prerendered routes as
+// static assets, SSR routes through the Astro app + edge middleware), so the
+// checks cover the real response headers as well as the markup.
 //
 //   npm run build && node --test scripts/a11y-check.mjs
 import assert from "node:assert/strict"
-import { readFileSync } from "node:fs"
-import test from "node:test"
+import { spawn } from "node:child_process"
+import { createHash } from "node:crypto"
+import test, { after, before } from "node:test"
 
-const html = readFileSync(new URL("../dist/client/index.html", import.meta.url), "utf8")
-const css = readFileSync(
-  new URL(
-    // Chunk names are a bundler detail (index.*, SiteFooter.*, …) — match any
-    // emitted stylesheet the landing page links, not a specific chunk name.
-    `../dist/client/_astro/${/href="\/_astro\/([^"]+\.css)"/.exec(html)[1]}`,
-    import.meta.url,
-  ),
-  "utf8",
-)
+const PORT = 54321
+const BASE = `http://localhost:${PORT}`
+
+let dev = null
+let html = ""
+let css = ""
+
+async function waitForOk(url, tries = 90) {
+  for (let i = 0; i < tries; i++) {
+    try {
+      const res = await fetch(url)
+      if (res.ok) return
+    } catch {
+      // Server still booting.
+    }
+    await new Promise((r) => setTimeout(r, 500))
+  }
+  throw new Error(`wrangler dev never came up at ${url}`)
+}
+
+before(async () => {
+  dev = spawn("npx", ["wrangler", "dev", "--port", String(PORT)], {
+    // Detached process group so teardown kills workerd too, not just npx —
+    // otherwise the orphan keeps the port and the next run fails to boot.
+    detached: true,
+    cwd: new URL("..", import.meta.url),
+    stdio: "ignore",
+  })
+  await waitForOk(`${BASE}/`)
+  html = await (await fetch(`${BASE}/`)).text()
+  const chunk = /href="\/_astro\/([^"]+\.css)"/.exec(html)
+  assert.ok(chunk, "no stylesheet link in served HTML")
+  css = await (await fetch(`${BASE}/_astro/${chunk[1]}`)).text()
+})
+
+after(() => {
+  if (dev?.pid) {
+    try {
+      process.kill(-dev.pid, "SIGTERM")
+    } catch {
+      // Already gone.
+    }
+  }
+})
 
 test("no ARIA that promises unimplemented keyboard behaviour", () => {
   for (const role of ["radiogroup", "radio", "tablist", "tab"]) {
@@ -147,4 +183,69 @@ test("scroll depth degrades to nothing, never to a frozen dim page", () => {
   // Sections hold full presence across every height's "covering" phase, so the
   // dim only ever lands on a section that is marginal at a viewport edge.
   assert.match(css, /@keyframes bx-section-depth\{0%\{[^}]*\}33%,72%\{opacity:1/)
+})
+
+test("homepage advertises discovery via Link headers", async () => {
+  // RFC 8288 pointers ride the HTML response (edge middleware for the SSR
+  // landing page, public/_headers for prerendered routes) so agents find the
+  // catalog without scraping markup.
+  const res = await fetch(`${BASE}/`)
+  const link = res.headers.get("link") ?? ""
+  for (const rel of ['rel="api-catalog"', 'rel="service-doc"', 'rel="service-desc"']) {
+    assert.ok(link.includes(rel), `Link header missing ${rel}: ${link}`)
+  }
+})
+
+test("agents can request markdown, browsers keep HTML", async () => {
+  const md = await fetch(`${BASE}/`, { headers: { Accept: "text/markdown" } })
+  assert.ok(
+    (md.headers.get("content-type") ?? "").includes("text/markdown"),
+    "markdown negotiation did not return text/markdown",
+  )
+  assert.ok(md.headers.get("x-markdown-tokens"), "x-markdown-tokens header missing")
+  const body = await md.text()
+  assert.ok(body.startsWith("# BoxCompute"), "markdown body is not the homepage summary")
+  const htmlRes = await fetch(`${BASE}/`)
+  assert.ok(
+    (htmlRes.headers.get("content-type") ?? "").includes("text/html"),
+    "default response is no longer HTML",
+  )
+})
+
+test("well-known discovery documents resolve with the right types", async () => {
+  const catalog = await fetch(`${BASE}/.well-known/api-catalog`)
+  assert.equal(catalog.status, 200)
+  assert.ok(
+    (catalog.headers.get("content-type") ?? "").includes("application/linkset+json"),
+    "api-catalog is not linkset+json",
+  )
+  assert.equal(catalog.headers.get("access-control-allow-origin"), "*")
+  const linkset = await catalog.json()
+  assert.ok(Array.isArray(linkset.linkset) && linkset.linkset.length > 0, "linkset is empty")
+
+  const aiCatalog = await fetch(`${BASE}/.well-known/ai-catalog.json`)
+  assert.equal(aiCatalog.status, 200)
+  assert.equal(aiCatalog.headers.get("access-control-allow-origin"), "*")
+  const manifest = await aiCatalog.json()
+  assert.ok(manifest.specVersion, "ai-catalog has no specVersion")
+  assert.ok(manifest.entries.length > 0, "ai-catalog has no entries")
+
+  const skills = await fetch(`${BASE}/.well-known/agent-skills/index.json`)
+  assert.equal(skills.status, 200)
+  const index = await skills.json()
+  assert.ok(index.$schema.includes("agentskills.io"), "skills index has no schema")
+  assert.equal(index.skills.length, 1)
+  // The published digest must match the served artifact byte-for-byte, or
+  // agents will reject the skill as tampered.
+  const artifact = await (await fetch(`${BASE}${index.skills[0].url}`)).text()
+  const digest = `sha256:${createHash("sha256").update(artifact).digest("hex")}`
+  assert.equal(index.skills[0].digest, digest, "skills index digest does not match served SKILL.md")
+
+  const auth = await fetch(`${BASE}/auth.md`)
+  assert.equal(auth.status, 200)
+  assert.match(await auth.text(), /^# .*auth\.md/m)
+
+  const robots = await fetch(`${BASE}/robots.txt`)
+  assert.equal(robots.status, 200)
+  assert.match(await robots.text(), /Content-Signal:\s*ai-train=no,\s*search=yes,\s*ai-input=no/)
 })

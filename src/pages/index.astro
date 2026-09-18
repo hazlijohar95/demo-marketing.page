@@ -1,9 +1,12 @@
 ---
 import Layout from "../layouts/Layout.astro"
 
-// Static: the landing page reads no EmDash content, so it stays prerendered
-// even though the blog routes render on the Worker.
-export const prerender = true
+// The landing page server-renders (not prerendered) so edge middleware can
+// negotiate `Accept: text/markdown` and attach RFC 8288 Link headers —
+// static assets bypass the worker entirely. Every other route stays
+// prerendered edge-cacheable HTML and gets its Link headers from
+// public/_headers instead.
+export const prerender = false
 
 // React islands — ported 1:1 from src/App.jsx.
 // Above-the-fold islands hydrate immediately; everything else hydrates
