@@ -215,6 +215,14 @@ export default function ConsoleDemo() {
     play(chat.messages)
   }
 
+  // WCAG 2.2.2: the run auto-starts on scroll-in and moves for longer than 5s,
+  // so it needs a stop. Showing the finished state is a valid stop.
+  const stop = () => {
+    clearTimers()
+    setVisible(chat.messages.length + extra.length)
+    setWorking(false)
+  }
+
   const send = (value) => {
     const text = (typeof value === "string" ? value : draft).trim()
     if (!text || working) return
@@ -332,15 +340,19 @@ export default function ConsoleDemo() {
             app.boxcompute.ai<b>/c/{chat.id}</b>
           </span>
         </span>
-        {tourStep === null ? null : (
-          <span key={tourStep} data-slot="live-tour" role="status">
-            <b>
-              {String(tourStep + 1).padStart(2, "0")}/{String(TOUR.length).padStart(2, "0")}
-            </b>
-            {TOUR[tourStep].label}
-            <em>· click to take over</em>
-          </span>
-        )}
+        {/* Always rendered so the live region is stable across tour steps; the
+            keyed inner span re-fires the entrance animation. */}
+        <span data-slot="live-tour" role="status">
+          {tourStep === null ? null : (
+            <span key={tourStep}>
+              <b>
+                {String(tourStep + 1).padStart(2, "0")}/{String(TOUR.length).padStart(2, "0")}
+              </b>
+              {TOUR[tourStep].label}
+              <em>· click to take over</em>
+            </span>
+          )}
+        </span>
         <span data-slot="live-head-right">
           <span data-slot="live-badge" role="status">{done ? "Done" : "Working"}</span>
           <button
@@ -358,8 +370,16 @@ export default function ConsoleDemo() {
               </>
             )}
           </button>
-          <button type="button" onClick={replay} aria-label="Replay this run">
-            <RotateCcw aria-hidden="true" /> Replay
+          <button type="button" onClick={working ? stop : replay} aria-label={working ? "Stop this run" : "Replay this run"}>
+            {working ? (
+              <>
+                <Square aria-hidden="true" /> Stop
+              </>
+            ) : (
+              <>
+                <RotateCcw aria-hidden="true" /> Replay
+              </>
+            )}
           </button>
           <a href={DESKTOP_SHOT} target="_blank" rel="noreferrer" aria-label="View full size">
             Full size <ArrowUpRight aria-hidden="true" />
@@ -399,14 +419,16 @@ export default function ConsoleDemo() {
               </button>
             ))}
           </nav>
-          <div data-slot="live-tabs" role="tablist" aria-label="Sidebar view">
+          {/* Sidebar views are toggle buttons: there is no tabpanel and no
+              aria-controls, so tab semantics announced a relationship that
+              pointed at nothing, and arrow-key navigation was never wired. */}
+          <div data-slot="live-tabs" role="group" aria-label="Sidebar view">
             {["chats", "agents"].map((tab) => (
               <button
                 key={tab}
                 type="button"
-                role="tab"
                 data-active={sideTab === tab}
-                aria-selected={sideTab === tab}
+                aria-pressed={sideTab === tab}
                 onClick={() => {
                   setSideTab(tab)
                   setActiveNav(tab)
@@ -518,12 +540,13 @@ export default function ConsoleDemo() {
             onScroll={onLogScroll}
             role="log"
             aria-live="off"
+            tabIndex={0}
             aria-label="Conversation"
           >
             <p data-line="ask">{chat.task}</p>
             {allMessages.slice(0, shownCount).map((message, i) =>
               message.kind === "report" ? (
-                <h4 key={i}>{message.title}</h4>
+                <h3 key={i}>{message.title}</h3>
               ) : message.kind === "lead" ? (
                 <p key={i} data-line="lead">
                   {message.text}
@@ -582,14 +605,13 @@ export default function ConsoleDemo() {
 
         {/* inspector */}
         <aside data-slot="live-inspector" aria-label="Workbench">
-          <div data-slot="live-inspector-tabs" role="tablist" aria-label="Workbench view">
+          <div data-slot="live-inspector-tabs" role="group" aria-label="Workbench view">
             {["files", "terminal", "previews"].map((tab) => (
               <button
                 key={tab}
                 type="button"
-                role="tab"
                 data-active={rightTab === tab}
-                aria-selected={rightTab === tab}
+                aria-pressed={rightTab === tab}
                 onClick={() => setRightTab(tab)}
               >
                 {tab === "files" ? `Files ${fileCount}` : tab === "terminal" ? "Terminal" : "Previews"}

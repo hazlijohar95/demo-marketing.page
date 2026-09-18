@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { RotateCcw } from "lucide-react"
+import { RotateCcw, Square } from "lucide-react"
 
 import SectionHeading from "./SectionHeading.jsx"
 import Reveal from "./Reveal.jsx"
@@ -107,6 +107,13 @@ export default function DemoSection() {
     // on the last line, so resetting `shown` alone left nothing ticking.
   }, [index, started, runId])
 
+  const stop = () => {
+    // WCAG 2.2.2: the stream auto-starts on scroll-in and runs past 5s, so it
+    // needs a stop. Jumping to the end state is a valid stop and reuses the
+    // interval's own self-clear on the next tick.
+    setShown(scenario.lines.length)
+  }
+
   const replay = () => {
     if (prefersReducedMotion()) {
       setShown(scenario.lines.length)
@@ -121,24 +128,27 @@ export default function DemoSection() {
         <Reveal>
           <SectionHeading
             id="demo"
+            eyebrow="see a run"
             strong="Watch it work."
             rest="Three runs, one pattern."
           />
           <p>Illustrated run. Timings shortened.</p>
         </Reveal>
         <Reveal delay={100} data-component="demo-controls">
+          {/* Mutually-exclusive filters, not a radiogroup: radio semantics
+              promise arrow-key selection and a roving tabindex that this does
+              not implement. Toggle buttons describe them and need no key code. */}
           <div
             data-component="scenario-pills"
-            role="radiogroup"
+            role="group"
             aria-label="Demo scenario"
           >
             {SCENARIOS.map((item, i) => (
               <button
                 key={item.id}
                 type="button"
-                role="radio"
                 data-active={i === index}
-                aria-checked={i === index}
+                aria-pressed={i === index}
                 onClick={() => setIndex(i)}
               >
                 {item.label}
@@ -172,7 +182,15 @@ export default function DemoSection() {
               color="#00bc7d"
             />
           </div>
-          <div data-slot="demo-log" role="log" aria-live="off" aria-label={`${scenario.label} transcript`}>
+          {/* No tabindex: unlike the console log this box never scrolls (a
+              308px min-height that grows to fit), so a tab stop here would
+              land on nothing. */}
+          <div
+            data-slot="demo-log"
+            role="log"
+            aria-live="off"
+            aria-label={`${scenario.label} transcript`}
+          >
             {scenario.lines.slice(0, shown).map((line, i) => (
               <p key={`${scenario.id}-${i}`} data-line={line.type}>
                 {line.type === "cmd" ? (
@@ -201,8 +219,16 @@ export default function DemoSection() {
               </span>{" "}
               steps · illustrated, not live
             </span>
-            <button type="button" onClick={replay}>
-              <RotateCcw aria-hidden="true" /> Replay
+            <button type="button" onClick={running ? stop : replay}>
+              {running ? (
+                <>
+                  <Square aria-hidden="true" /> Stop
+                </>
+              ) : (
+                <>
+                  <RotateCcw aria-hidden="true" /> Replay
+                </>
+              )}
             </button>
           </div>
         </div>

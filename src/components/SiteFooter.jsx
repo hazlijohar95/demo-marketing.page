@@ -40,7 +40,9 @@ export default function SiteFooter() {
         </a>
         {COLUMNS.map((column) => (
           <div data-slot="footer-column" key={column.heading}>
-            <h2>{column.heading}</h2>
+            {/* h3, not h2: these are nav group labels, not peers of the page's
+                section headings in the outline. */}
+            <h3>{column.heading}</h3>
             <nav aria-label={column.heading}>
               {column.links.map((link) => (
                 <a

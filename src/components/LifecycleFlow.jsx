@@ -57,15 +57,16 @@ export default function LifecycleFlow() {
   const [active, setActive] = useState(2)
   return (
     <Reveal data-component="lifecycle" role="group" aria-label="Sandbox lifecycle">
-      <ol data-slot="lifecycle-track" role="radiogroup" aria-label="Lifecycle stages">
+      {/* Toggle buttons, not radios: `radiogroup` on the <ol> put a `listitem`
+          between the group and its radios, and no arrow-key selection exists. */}
+      <ol data-slot="lifecycle-track" aria-label="Lifecycle stages">
         {STAGES.map((s, i) => (
           <li key={s.id}>
             <button
               type="button"
-              role="radio"
               data-active={i === active ? "true" : i < active ? "done" : undefined}
               onClick={() => setActive(i)}
-              aria-checked={i === active}
+              aria-pressed={i === active}
               style={{ "--stage-color": s.color }}
             >
               <span data-slot="lc-n">{s.n}</span>
@@ -79,9 +80,12 @@ export default function LifecycleFlow() {
           </li>
         ))}
       </ol>
-      <p key={active} data-slot="lifecycle-foot" role="status">
-        <strong style={{ color: STAGES[active].color }}>{STAGES[active].title}.</strong>{" "}
-        {STAGES[active].detail}
+      {/* Stable live region; the keyed inner span carries the entrance animation. */}
+      <p data-slot="lifecycle-foot" role="status">
+        <span key={active}>
+          <strong style={{ color: STAGES[active].color }}>{STAGES[active].title}.</strong>{" "}
+          {STAGES[active].detail}
+        </span>
       </p>
     </Reveal>
   )

@@ -44,8 +44,15 @@
   --bx-accent: #3b5cf6;
   --bx-accent-text: #3b5cf6;
   --bx-pattern: #dcdcdc;
+  --bx-grid-dot: #0000001f;
   --bx-success: #198b43;
-  --bx-section-pad: 80px 40px;
+  /* One inline pad for every band — sections, hero, footer — so the page keeps
+     a single leading edge instead of three. */
+  --bx-pad-inline: 40px;
+  --bx-section-pad: 80px var(--bx-pad-inline);
+  /* Sticky bar height. The mobile overlay offset and every anchor landing read
+     from this, so growing the bar for touch targets can't desync them. */
+  --bx-bar-h: 72px;
   /* Console chrome rows. Named here, not inlined, because the
      particle-reveal wrapper has to add them to the grid height. */
   --live-head-h: 44px;
@@ -83,6 +90,7 @@
     --bx-faint: #a3a3a3;
     --bx-accent-text: #8190ff;
     --bx-pattern: #303030;
+    --bx-grid-dot: #ffffff1f;
   }
 }
 
@@ -180,9 +188,29 @@
   text-decoration: none;
 }
 
-[data-page="box"] :is(a, button, summary):focus-visible {
+[data-page="box"] :is(a, button, summary, input, [tabindex]):focus-visible {
   outline: 2px solid var(--bx-accent);
   outline-offset: 2px;
+}
+
+/* Inputs sit flush inside their own bordered shell, so the ring draws inward
+   rather than clipping against it. */
+[data-page="box"] input:focus-visible {
+  outline-offset: -2px;
+}
+
+/* Forced colors flattens the accent ring and every background/colour tint that
+   carries selection, so both get a system-colour equivalent. */
+@media (forced-colors: active) {
+  [data-page="box"] :is(a, button, summary, input, [tabindex]):focus-visible {
+    outline: 2px solid CanvasText;
+  }
+  [data-page="box"] [data-active="true"],
+  [data-page="box"] [aria-pressed="true"],
+  [data-page="box"] [aria-current="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
 }
 
 [data-page="box"] [data-slot="visually-hidden"] {
@@ -197,10 +225,12 @@
   border: 0;
 }
 
+/* Fixed, not absolute: an absolutely-positioned skip link scrolls away with the
+   document, so it is off-screen whenever it takes focus below the top. */
 [data-page="box"] .skip-link {
-  position: absolute;
+  position: fixed;
   top: -48px;
-  left: 16px;
+  inset-inline-start: 16px;
   z-index: 20;
   padding: 8px 12px;
   background: var(--bx-text);
@@ -213,8 +243,11 @@
   top: 12px;
 }
 
-[data-page="box"] section[id] {
-  scroll-margin-top: 88px;
+/* Anchor and skip-link landings clear the sticky bar. #main is the skip target
+   and is focusable, so it needs the same offset the sections get. */
+[data-page="box"] section[id],
+[data-page="box"] #main {
+  scroll-margin-top: calc(var(--bx-bar-h) + 16px);
 }
 
 /* dot pattern shared by every divider band */
@@ -241,6 +274,56 @@
   margin: 0 auto;
 }
 
+/* Page grid: one coordinate system behind every section instead of a stack of
+   separately-boxed bands. A 22px dot field full-bleed, plus five column rules
+   inside the container that section edges align to. Percentage stops hold the
+   column count fixed while the container stays fluid, so this needs no extra
+   DOM and no resize maths. */
+[data-page="box"] {
+  background-image: radial-gradient(circle at 1px 1px, var(--bx-grid-dot) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+[data-page="box"] > [data-component="container"] {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--bx-line) 0 1px,
+    transparent 1px 20%
+  );
+}
+
+/* Grid knock-out. The grid is a backdrop for empty space, so anything that
+   carries text or rows sits on an opaque plate and the ruling stops at its
+   edge. Same device the hero already uses for its title and copy. Listed in
+   one place rather than per-component so the rule stays reviewable: cards,
+   boards and the console already own an opaque background, and the gaps
+   between them are genuine blank space where the grid should read through.
+   `:not([data-component])` keeps this on the heading/copy block — the
+   segmented controls are also direct div children of the header. */
+[data-page="box"] :is(
+    [data-slot="section-header"] > div:not([data-component]),
+    [data-component="steps"],
+    [data-component="faq-list"],
+    [data-section="closing"] > div:not([data-component])
+  ) {
+  background: var(--bx-bg);
+}
+
+/* The plate has to clear the text it protects, or the ruling resumes tight
+   against the last glyph. */
+[data-page="box"] [data-slot="section-header"] > div:not([data-component]),
+[data-page="box"] [data-section="closing"] > div:not([data-component]) {
+  padding-inline-end: 16px;
+  padding-bottom: 12px;
+}
+
+/* A trailing-aligned block (the spec legend) needs the plate on its leading
+   side instead, or its 16px end-pad pushes it 16px off the trailing edge the
+   sibling sections' segmented controls sit on. */
+[data-page="box"] [data-slot="section-header"] > div:not([data-component]):not(:first-child) {
+  padding-inline: 16px 0;
+}
+
 /* header ------------------------------------------------------------ */
 [data-page="box"] [data-component="top"] {
   position: sticky;
@@ -248,7 +331,24 @@
   z-index: 10;
   box-sizing: border-box;
   width: 100%;
+  /* Physical insets for a physical concern: the notch is on the same screen
+     side whatever the reading direction. */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
   background: var(--bx-bg);
+  /* Hairline only once the page has moved: at rest the bar should merge with
+     the hero, not sit in a box of its own. */
+  box-shadow: inset 0 -1px transparent;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-component="top"] {
+    transition: box-shadow var(--bx-dur-ui) ease;
+  }
+}
+
+[data-page="box"] [data-component="top"][data-scrolled="true"] {
+  box-shadow: inset 0 -1px var(--bx-line);
 }
 
 [data-page="box"] [data-component="top"] * {
@@ -259,8 +359,9 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  min-height: 72px;
-  padding: 20px 20px 20px 24px;
+  min-height: var(--bx-bar-h);
+  padding-block: 20px;
+  padding-inline: 24px 20px;
   overflow: hidden;
 }
 
@@ -321,6 +422,23 @@
   color: var(--bx-text);
 }
 
+/* Current section. A rule under the label rather than a filled pill: the bar
+   already carries two filled buttons, and a third fill would compete with the
+   primary action. */
+[data-page="box"] [data-component="section-nav"] a[data-current] {
+  position: relative;
+  color: var(--bx-text);
+}
+
+[data-page="box"] [data-component="section-nav"] a[data-current]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 15px;
+  bottom: 2px;
+  height: 1px;
+  background: var(--bx-accent);
+}
+
 [data-page="box"] [data-slot="header-actions"] {
   flex: 1 1 auto;
   display: flex;
@@ -360,8 +478,7 @@
 [data-page="box"] [data-slot="menu-button"]::before {
   position: absolute;
   top: 0;
-  right: 0;
-  left: 0;
+  inset-inline: 0;
   height: 16px;
   pointer-events: none;
   content: "";
@@ -485,13 +602,20 @@
 
 [data-page="box"] [data-slot="mobile-menu"] {
   position: fixed;
-  top: 72px;
-  right: 0;
+  top: var(--bx-bar-h);
+  inset-inline: 0;
   bottom: 0;
-  left: 0;
   z-index: 9;
   display: none;
   overflow: auto;
+  /* Without these the last item sits under the home indicator and the first
+     one clips against a landscape notch. */
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  /* Keeps a scroll gesture inside the overlay instead of chaining to the
+     page behind it. */
+  overscroll-behavior: contain;
   background: var(--bx-bg);
   border-top: 1px solid var(--bx-line);
 }
@@ -595,13 +719,15 @@
 
 @media (max-width: 75rem) {
   [data-page="box"] {
-    --bx-section-pad: 64px 32px;
+    --bx-pad-inline: 32px;
+    --bx-section-pad: 64px var(--bx-pad-inline);
   }
 }
 
 @media (max-width: 47.999rem) {
   [data-page="box"] {
-    --bx-section-pad: 48px 24px;
+    --bx-pad-inline: 24px;
+    --bx-section-pad: 48px var(--bx-pad-inline);
   }
 }
 
@@ -623,16 +749,38 @@
 [data-page="box"] [data-slot="section-header"] > div {
   display: grid;
   gap: 18px;
-  max-width: 460px;
+  /* Wide heading, narrow sub-copy. At the display size the old 460px cap
+     wrapped two-clause titles into four ragged lines. */
+  max-width: 46rem;
+}
+
+/* Section eyebrow. The `#` anchor already existed but only appeared on hover,
+   so sections had no visible label and every band opened at the same pitch.
+   Promoting it to a permanent mono line gives each section an identity and
+   sets up the size jump into the title below it. */
+[data-page="box"] [data-slot="section-eyebrow"] {
+  margin: 0;
+  color: var(--bx-accent-text);
+  font-family: var(--bx-mono);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+[data-page="box"] [data-slot="section-eyebrow"] span {
+  opacity: 0.55;
 }
 
 [data-page="box"] [data-slot="section-title"] {
   max-width: 1200px;
   color: var(--bx-muted);
-  font-size: 28px;
+  /* Warp's display step: the heading has to out-rank the eyebrow and the
+     body copy by more than 28px managed against 16px body. */
+  font-size: clamp(28px, 3.4vw, 40px);
   font-weight: 400;
-  line-height: 1.5;
-  letter-spacing: 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 [data-page="box"] [data-slot="section-title"] strong {
@@ -640,7 +788,11 @@
   font-weight: 500;
 }
 
-[data-page="box"] [data-slot="section-header"] p {
+/* `p:not([data-slot])` so this stays the sub-copy rule only: a bare `p` here
+   also matches the eyebrow and, being more specific and later, silently
+   overrode it. */
+[data-page="box"] [data-slot="section-header"] p:not([data-slot]) {
+  max-width: 460px;
   color: var(--bx-muted);
   font-size: 16px;
   line-height: 1.5;
@@ -671,7 +823,7 @@
     flex-direction: column;
   }
   [data-page="box"] [data-slot="section-title"] {
-    font-size: 16px;
+    font-size: 24px;
   }
 }
 
@@ -685,7 +837,7 @@
   gap: 24px;
   min-height: 0;
   overflow: hidden;
-  padding: 48px 24px;
+  padding: 48px var(--bx-pad-inline);
 }
 
 [data-page="box"] [data-slot="hero-meta"] {
@@ -738,6 +890,12 @@
   letter-spacing: 0;
 }
 
+/* Keeps the hard two-line break the old <br> gave us, without the <br> —
+   a break contributes no whitespace to the computed accessible name. */
+[data-page="box"] [data-section="hero"] h1 > span {
+  display: block;
+}
+
 [data-page="box"] [data-slot="hero-pattern"] {
   order: 2;
   flex: 0 0 auto;
@@ -769,11 +927,19 @@
 @media (min-width: 48rem) {
   [data-page="box"] [data-section="hero"] {
     gap: 16px;
-    padding: 64px 32px 32px;
+    padding: 64px var(--bx-pad-inline) 32px;
   }
+  /* Grid, not two absolutely-positioned corners. Absolute children contribute
+     no height, so the 232px floor was also a ceiling: on a coarse pointer the
+     44px CTA row already overlapped the title, and a translated three-line
+     title clipped outright. 8px + space-between reproduces today's English
+     geometry exactly (140 + 8 + 84 = 232) and grows past it when it must. */
   [data-page="box"] [data-slot="hero-canvas"] {
     position: relative;
-    display: block;
+    display: grid;
+    justify-items: start;
+    align-content: space-between;
+    gap: 8px;
     min-height: 232px;
     overflow: hidden;
   }
@@ -786,9 +952,6 @@
     transform: translate(-50%, -50%);
   }
   [data-page="box"] [data-section="hero"] h1 {
-    position: absolute;
-    top: 0;
-    inset-inline-start: 0;
     z-index: 1;
     width: min(100%, max-content);
     max-width: 100%;
@@ -800,9 +963,7 @@
     text-wrap: balance;
   }
   [data-page="box"] [data-slot="hero-copy"] {
-    position: absolute;
-    inset-inline-end: 0;
-    bottom: 0;
+    justify-self: end;
     z-index: 1;
     width: min(563px, 100%);
     padding: 0;
@@ -813,12 +974,6 @@
   }
   [data-page="box"] [data-slot="hero-copy"] [data-slot="hero-actions"] {
     justify-content: flex-end;
-  }
-}
-
-@media (min-width: 75rem) {
-  [data-page="box"] [data-section="hero"] {
-    padding: 64px 40px 32px;
   }
 }
 
@@ -899,23 +1054,6 @@
   font-weight: 500;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-}
-
-[data-page="box"] [data-slot="leader-avatar"] {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--bx-line);
-  border-radius: 4px;
-  background: var(--bx-layer);
-  color: var(--bx-text);
-}
-
-[data-page="box"] [data-slot="leader-avatar"] svg {
-  width: 16px;
-  height: 16px;
 }
 
 [data-page="box"] [data-component="leader-card"] h3 {
@@ -1070,12 +1208,13 @@
 }
 
 [data-page="box"] [data-section="closing"] h2 {
-  max-width: 1200px;
+  max-width: 46rem;
   color: var(--bx-muted);
-  font-size: 28px;
+  font-size: clamp(28px, 3.4vw, 40px);
   font-weight: 400;
-  line-height: 1.5;
-  letter-spacing: 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 [data-page="box"] [data-section="closing"] h2 strong {
@@ -1096,7 +1235,7 @@
 
 @media (max-width: 47.999rem) {
   [data-page="box"] [data-section="closing"] h2 {
-    font-size: 16px;
+    font-size: 24px;
   }
 }
 
@@ -1107,7 +1246,9 @@
   gap: 56px;
   box-sizing: border-box;
   min-height: 0;
-  padding: 64px clamp(32px, 4vw, 48px) 24px;
+  /* Same inline pad as every other band; the old clamp() ran ~8px wider at
+     each width, putting the footer on a leading edge of its own. */
+  padding: 64px var(--bx-pad-inline) 24px;
   font-size: 11px;
 }
 
@@ -1143,7 +1284,7 @@
   min-width: 0;
 }
 
-[data-page="box"] [data-slot="footer-column"] h2 {
+[data-page="box"] [data-slot="footer-column"] h3 {
   font-size: 11px;
   font-weight: 500;
   line-height: 1;
@@ -1171,31 +1312,6 @@
   width: 11px;
   height: 11px;
   vertical-align: -1px;
-}
-
-[data-page="box"] [data-slot="subscribe-button"] {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: fit-content;
-  height: 28px;
-  margin: 0;
-  padding: 0 12px;
-  border: 1px solid var(--bx-line);
-  border-radius: 0;
-  appearance: none;
-  background: var(--bx-bg);
-  color: var(--bx-text);
-  font: inherit;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1;
-  cursor: pointer;
-}
-
-[data-page="box"] [data-slot="subscribe-button"]:hover {
-  border-color: var(--bx-line-strong);
-  background: var(--bx-layer);
 }
 
 [data-page="box"] [data-slot="footer-pattern"] {
@@ -1431,6 +1547,15 @@
   text-transform: none;
 }
 
+/* The tour readout's flex row moved to the keyed inner span so the outer
+   element can stay mounted as a stable live region. */
+[data-page="box"] [data-slot="live-tour"] > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 [data-page="box"] [data-slot="live-tour"] b {
   flex: 0 0 auto;
   color: var(--live-muted);
@@ -1639,7 +1764,6 @@
   flex: 1 1 auto;
   background: transparent;
   border: 0;
-  outline: none;
   color: var(--live-text);
   font: inherit;
   font-size: 12px;
@@ -1821,11 +1945,11 @@
 }
 
 [data-page="box"] [data-slot="live-log"] > p,
-[data-page="box"] [data-slot="live-log"] > h4 {
+[data-page="box"] [data-slot="live-log"] > h3 {
   overflow-wrap: anywhere;
 }
 
-[data-page="box"] [data-slot="live-log"] h4 {
+[data-page="box"] [data-slot="live-log"] h3 {
   font-size: 13px;
   font-weight: 600;
 }
@@ -1876,7 +2000,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   [data-page="box"] [data-slot="live-log"] > p,
-  [data-page="box"] [data-slot="live-log"] > h4 {
+  [data-page="box"] [data-slot="live-log"] > h3 {
     animation: bx-live-in var(--bx-dur-fast) var(--bx-ease-out) both;
   }
 }
@@ -1906,7 +2030,6 @@
   box-sizing: border-box;
   background: transparent;
   border: 0;
-  outline: none;
   padding: 14px 16px 6px;
   color: var(--live-text);
   font: inherit;
@@ -2236,7 +2359,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   [data-page="box"] [data-slot="live-log"] > p,
-  [data-page="box"] [data-slot="live-log"] > h4 {
+  [data-page="box"] [data-slot="live-log"] > h3 {
     animation: none;
   }
 }
@@ -2303,12 +2426,12 @@
 /* Selection readouts and inspector panels: the chrome around them
    already animates on click, the payload used to hard-swap. 2–6px of
    travel, not 8 — these sit right next to what was just clicked.
-   JSX keys the readouts on the active index so the animation re-fires;
-   the inspector panels remount by themselves when the tab changes. */
+   The live region stays mounted for the announcement; a keyed inner span
+   re-fires the animation. The inspector panels remount by themselves. */
 @media (prefers-reduced-motion: no-preference) {
-  [data-page="box"] [data-slot="spec-foot"],
-  [data-page="box"] [data-slot="lifecycle-foot"],
-  [data-page="box"] [data-slot="live-tour"],
+  [data-page="box"] [data-slot="spec-foot"] > span,
+  [data-page="box"] [data-slot="lifecycle-foot"] > span,
+  [data-page="box"] [data-slot="live-tour"] > span,
   [data-page="box"] [data-slot="live-term"],
   [data-page="box"] [data-slot="live-previews"],
   [data-page="box"] [data-slot="live-filegroup"] {
@@ -2586,7 +2709,8 @@
   display: block;
   width: calc(100% + 12px);
   height: calc(100% + 12px);
-  margin: -6px 0 0 -6px;
+  margin-block-start: -6px;
+  margin-inline-start: -6px;
 }
 
 [data-page="box"] [data-slot="dot-drift"] > * {
@@ -2614,6 +2738,9 @@
 [data-page="box"] [data-component="compare-scroll"] {
   overflow-x: auto;
   border: 1px solid var(--bx-line);
+  /* Opaque: a dense comparison grid sitting on the page dot grid reads as two
+     competing rasters. Sparse row lists below stay transparent on purpose. */
+  background-color: var(--bx-bg);
   scrollbar-width: thin;
   /* Direction-neutral scroll shadows: edge cues appear only while
      content hides past that edge. Pure CSS via background-attachment. */
@@ -2712,50 +2839,6 @@
   line-height: 1.5;
 }
 
-/* spec sheet ------------------------------------------------------ */
-[data-page="box"] [data-component="spec-list"] {
-  border-top: 1px solid var(--bx-line);
-}
-
-[data-page="box"] [data-component="spec-list"] > div {
-  display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
-  gap: 24px;
-  align-items: baseline;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--bx-line);
-}
-
-[data-page="box"] [data-component="spec-list"] dt {
-  color: var(--bx-faint);
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.5;
-  text-transform: uppercase;
-  letter-spacing: 0;
-}
-
-[data-page="box"] [data-component="spec-list"] dd {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-[data-page="box"] [data-component="spec-list"] dd strong {
-  font-weight: 600;
-}
-
-[data-page="box"] [data-component="spec-list"] dd span {
-  color: var(--bx-muted);
-}
-
-@media (max-width: 47.999rem) {
-  [data-page="box"] [data-component="spec-list"] > div {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-}
-
 /* opencode/data-style visuals -------------------------------------- */
 [data-page="box"] [data-component="metric-bar"] {
   position: relative;
@@ -2779,6 +2862,15 @@
 }
 [data-page="box"] [data-component="metric-bar"][data-active="true"] {
   border-color: var(--bx-line-strong);
+}
+/* transform-origin has no logical keyword, so the three progress fills need
+   one explicit mirror: a bar has to grow from the reading edge. `[dir=rtl]`
+   rather than `:dir(rtl)` — the build downlevels `:dir()` into a `:lang()`
+   list, which would miss an explicit dir attribute. */
+[dir="rtl"] [data-component="metric-bar"] > b,
+[dir="rtl"] [data-slot="demo-meter"] b,
+[dir="rtl"] [data-slot="lc-bar"] b {
+  transform-origin: right center;
 }
 @media (prefers-reduced-motion: reduce) {
   [data-page="box"] [data-component="metric-bar"] > b,
@@ -2816,7 +2908,10 @@
 [data-page="box"] [data-component="spec-board"] li:nth-child(3n + 3) {
   border-inline-start: 1px solid var(--bx-line);
 }
-[data-page="box"] [data-component="spec-board"] li:nth-child(n + 4) {
+/* Only the final row drops its bottom rule — spec-foot's border-top supplies
+   that line. `nth-child(n + 4)` assumed two full rows of three; with seven
+   specs it also stripped row 2's divider, leaving row 3 unseparated. */
+[data-page="box"] [data-component="spec-board"] li:last-child {
   border-bottom: 0;
 }
 [data-page="box"] [data-component="spec-board"] li button {
@@ -2877,12 +2972,6 @@
   }
   [data-page="box"] [data-component="spec-board"] li:nth-child(2n) {
     border-inline-start: 1px solid var(--bx-line);
-  }
-  [data-page="box"] [data-component="spec-board"] li:nth-child(n + 4) {
-    border-bottom: 1px solid var(--bx-line);
-  }
-  [data-page="box"] [data-component="spec-board"] li:last-child {
-    border-bottom: 0;
   }
 }
 @media (max-width: 36rem) {
@@ -2955,9 +3044,6 @@
   border-color: var(--seg, #51a2ff);
   background: color-mix(in srgb, var(--seg, #51a2ff) 16%, var(--bx-bg));
   color: var(--bx-text);
-}
-[data-page="box"] [data-slot="mv-seg"][data-state="cold"] {
-  border-style: dashed;
 }
 [data-page="box"] [data-slot="mv-ops"] {
   display: flex;
@@ -3140,11 +3226,15 @@
   [data-page="box"] [data-slot="lifecycle-track"] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  [data-page="box"] [data-slot="lifecycle-track"] li:nth-child(4) {
-    border-inline-start: 1px solid var(--bx-line);
-  }
-  [data-page="box"] [data-slot="lifecycle-track"] li:nth-child(3n + 1) {
+  /* Two columns: the leading column is 1, 3, 5. `3n + 1` selected 1 and 4, so
+     it stripped the divider off a second-column cell and left stray leading
+     rules on 3 and 5. Row starts move to n + 3 for the same reason — item 3
+     begins row 2 here, not item 4. */
+  [data-page="box"] [data-slot="lifecycle-track"] li:nth-child(2n + 1) {
     border-inline-start: 0;
+  }
+  [data-page="box"] [data-slot="lifecycle-track"] li:nth-child(n + 3) {
+    border-top: 1px solid var(--bx-line);
   }
 }
 
@@ -3249,6 +3339,12 @@
 
 /* touch targets: 44px minimum on coarse pointers / small screens -------- */
 @media (pointer: coarse), (max-width: 47.999rem) {
+  /* 44px controls + 40px block padding grow the bar to 84px. The mobile
+     overlay was pinned at a hardcoded 72px, so the header painted over the
+     top 12px of it — hiding its divider and the top of the first item. */
+  [data-page="box"] {
+    --bx-bar-h: 84px;
+  }
   [data-page="box"] [data-slot="header-button"] {
     min-height: 44px;
   }
@@ -3259,7 +3355,6 @@
   [data-page="box"] [data-component="scenario-pills"] button {
     padding: 12px 14px;
   }
-  [data-page="box"] [data-slot="subscribe-button"],
   [data-page="box"] [data-slot="demo-foot"] button {
     min-height: 44px;
   }
@@ -3551,7 +3646,7 @@
 
 [data-page="box"] [data-component="prose"] ul,
 [data-page="box"] [data-component="prose"] ol {
-  padding-left: 1.4em;
+  padding-inline-start: 1.4em;
 }
 
 [data-page="box"] [data-component="prose"] ul {
@@ -3567,8 +3662,8 @@
 }
 
 [data-page="box"] [data-component="prose"] blockquote {
-  padding-left: 20px;
-  border-left: 1px solid var(--bx-line-strong);
+  padding-inline-start: 20px;
+  border-inline-start: 1px solid var(--bx-line-strong);
   color: var(--bx-muted);
 }
 
@@ -3638,7 +3733,7 @@
 [data-page="box"] [data-component="prose"] td {
   padding: 10px 12px;
   border: 1px solid var(--bx-line);
-  text-align: left;
+  text-align: start;
   vertical-align: top;
 }
 

@@ -5,7 +5,8 @@
     "dev": "astro dev --port 5180",
     "build": "astro build",
     "preview": "astro preview --port 5180",
-    "deploy": "astro build && wrangler deploy"
+    "deploy": "astro build && wrangler deploy",
+    "test": "node --test src/lib/*.test.mjs scripts/a11y-check.mjs"
   },
   "private": true,
   "type": "module",

@@ -24,7 +24,7 @@ export default function HowItWorks() {
     <section data-section="how" id="developers" aria-labelledby="developers-title">
       <div data-slot="section-header">
         <Reveal>
-          <SectionHeading id="developers" strong="Give it a goal." rest="Let it get to work." />
+          <SectionHeading id="developers" eyebrow="the loop" strong="Give it a goal." rest="Let it get to work." />
           <p>
             Bring your agent. BoxCompute provides the Sandbox.
           </p>

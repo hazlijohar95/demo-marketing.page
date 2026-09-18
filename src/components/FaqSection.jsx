@@ -42,7 +42,7 @@ export default function FaqSection() {
     <section data-section="faq" id="faq" aria-labelledby="faq-title">
       <div data-slot="section-header">
         <Reveal>
-          <SectionHeading id="faq" strong="Good questions." rest="" />
+          <SectionHeading id="faq" eyebrow="answers" strong="Good questions." rest="" />
           <p>
             Still curious?{" "}
             <a href={DEMO_URL} target="_blank" rel="noreferrer">

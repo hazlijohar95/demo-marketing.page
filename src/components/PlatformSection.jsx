@@ -108,6 +108,7 @@ export default function PlatformSection() {
         <Reveal>
           <SectionHeading
             id="platform"
+            eyebrow="the model"
             strong="Your agent does the work."
             rest="We give it the space."
           />

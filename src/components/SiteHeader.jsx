@@ -18,24 +18,63 @@ const MOBILE_LINKS = [...NAV_LINKS, { href: "/docs", label: "Docs", external: tr
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false)
+  const [active, setActive] = useState("")
+  const [scrolled, setScrolled] = useState(false)
   const menuButtonRef = useRef(null)
   const firstLinkRef = useRef(null)
+
+  // Which section the reader is in. Drives the nav's current-item mark, so the
+  // sticky bar answers "where am I" instead of only "where can I go".
+  useEffect(() => {
+    const ids = NAV_LINKS.map((link) => link.href.split("#")[1]).filter(Boolean)
+    const sections = ids
+      .map((id) => document.getElementById(id))
+      .filter(Boolean)
+    // No early return on an empty list: /blog/* has no sections but still needs
+    // the scrolled hairline.
+    const read = () => {
+      setScrolled(window.scrollY > 8)
+      // Nearest section whose top has passed just under the sticky bar.
+      let current = ""
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top <= 140) current = section.id
+      }
+      setActive(current)
+    }
+    read()
+    window.addEventListener("scroll", read, { passive: true })
+    window.addEventListener("resize", read)
+    return () => {
+      window.removeEventListener("scroll", read)
+      window.removeEventListener("resize", read)
+    }
+  }, [])
 
   useEffect(() => {
     if (!open) return
     firstLinkRef.current?.focus()
+    // The menu is a fixed overlay covering everything below the bar, so the
+    // content behind it must leave the tab order. The header bar itself stays
+    // interactive: it holds the close button.
+    const behind = document.querySelector('[data-page] > [data-component="container"]')
+    if (behind) behind.inert = true
     const onKey = (event) => {
       if (event.key === "Escape") setOpen(false)
     }
     document.addEventListener("keydown", onKey)
     return () => {
+      if (behind) behind.inert = false
       document.removeEventListener("keydown", onKey)
       menuButtonRef.current?.focus()
     }
   }, [open])
 
   return (
-    <header data-component="top" data-menu-open={open ? "true" : "false"}>
+    <header
+      data-component="top"
+      data-menu-open={open ? "true" : "false"}
+      data-scrolled={scrolled ? "true" : "false"}
+    >
       <div data-component="container">
         <div data-slot="header-bar">
           <a data-slot="brand" href="/" aria-label="BoxCompute home">
@@ -44,11 +83,21 @@ export default function SiteHeader() {
           </a>
           <nav data-component="section-nav" aria-label="Sections">
             <ul>
-              {NAV_LINKS.map((link) => (
-                <li key={link.href}>
-                  <a href={link.href}>{link.label}</a>
-                </li>
-              ))}
+              {NAV_LINKS.map((link) => {
+                const id = link.href.split("#")[1]
+                const current = Boolean(id) && id === active
+                return (
+                  <li key={link.href}>
+                    <a
+                      href={link.href}
+                      data-current={current ? "true" : undefined}
+                      aria-current={current ? "true" : undefined}
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                )
+              })}
             </ul>
           </nav>
           <div data-slot="header-actions">

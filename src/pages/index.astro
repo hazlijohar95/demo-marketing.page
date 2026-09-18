@@ -22,13 +22,15 @@ import SiteFooter from "../components/SiteFooter.jsx"
 ---
 
 <Layout>
-  <main data-page="box" id="top">
+  <!-- `data-page` is the CSS scope, not a landmark: header / main / footer are
+       siblings under it so the page exposes a banner, a main and a contentinfo. -->
+  <div data-page="box" id="top">
     <a class="skip-link" href="#main">
       Skip to content
     </a>
     <SiteHeader client:load />
     <div data-component="container">
-      <div id="main">
+      <main id="main" tabindex="-1">
         <Hero client:load />
         <ConsoleSection client:visible />
         <DemoSection client:visible />
@@ -38,8 +40,8 @@ import SiteFooter from "../components/SiteFooter.jsx"
         <HowItWorks client:visible />
         <FaqSection client:visible />
         <ClosingSection client:visible />
-      </div>
+      </main>
       <SiteFooter client:visible />
     </div>
-  </main>
+  </div>
 </Layout>

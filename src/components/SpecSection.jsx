@@ -82,7 +82,7 @@ export default function SpecSection() {
     <section data-section="spec" id="spec" aria-labelledby="spec-title">
       <div data-slot="section-header">
         <Reveal>
-          <SectionHeading id="spec" strong="Bounds, not promises." rest="Public v2 API." />
+          <SectionHeading id="spec" eyebrow="the limits" strong="Bounds, not promises." rest="Public v2 API." />
           <p>Defaults you set per call, ceilings you can&rsquo;t. Select a row for the rule behind it.</p>
         </Reveal>
         <Reveal delay={100}>
@@ -93,15 +93,17 @@ export default function SpecSection() {
       </div>
       <Reveal>
         <div data-component="spec-board">
-          <ol role="radiogroup" aria-label="Workspace specs">
+          {/* A real list of toggle buttons: `radiogroup` on the <ol> put a
+              `listitem` between the group and its radios, which breaks the
+              required structure, and nothing implemented arrow-key selection. */}
+          <ol aria-label="Workspace specs">
             {SPECS.map((s, i) => (
               <li key={s.rank}>
                 <button
                   type="button"
-                  role="radio"
                   data-active={i === active ? "true" : undefined}
                   onClick={() => setActive(i)}
-                  aria-checked={i === active}
+                  aria-pressed={i === active}
                 >
                   <span data-slot="spec-rank">{s.rank}</span>
                   <span data-slot="spec-term">{s.term}</span>
@@ -121,8 +123,15 @@ export default function SpecSection() {
               </li>
             ))}
           </ol>
-          <p key={active} data-slot="spec-foot" role="status">
-            <strong>{SPECS[active].term}.</strong> {SPECS[active].detail}
+          {/* One stable live region, no `key`: re-keying destroyed and recreated
+              the node on every selection, which announces inconsistently. */}
+          {/* One stable live region, no `key`: re-keying destroyed and recreated
+              the node on every selection, which announces inconsistently. The
+              keyed inner span still re-fires the entrance animation. */}
+          <p data-slot="spec-foot" role="status">
+            <span key={active}>
+              <strong>{SPECS[active].term}.</strong> {SPECS[active].detail}
+            </span>
           </p>
         </div>
       </Reveal>

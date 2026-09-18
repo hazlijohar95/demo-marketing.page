@@ -52,11 +52,11 @@ const hasContent = Array.isArray(post.data.content)
 ---
 
 <Layout title={seo.title} description={seo.description}>
-  <main data-page="box" id="top">
+  <div data-page="box" id="top">
     <a class="skip-link" href="#main">Skip to content</a>
     <SiteHeader client:load />
     <div data-component="container">
-      <div id="main">
+      <main id="main" tabindex="-1">
         <section data-section="post" aria-labelledby="post-title">
           {
             isPreview ? (
@@ -105,8 +105,8 @@ const hasContent = Array.isArray(post.data.content)
             }
           </div>
         </section>
-      </div>
+      </main>
       <SiteFooter client:visible />
     </div>
-  </main>
+  </div>
 </Layout>

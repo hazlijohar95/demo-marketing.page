@@ -32,11 +32,11 @@ const formatDate = (date: Date) =>
   title="Blog — BoxCompute"
   description="Notes on the technology behind agent workspaces: virtualization, infrastructure, and the boundaries that make them work."
 >
-  <main data-page="box" id="top">
+  <div data-page="box" id="top">
     <a class="skip-link" href="#main">Skip to content</a>
     <SiteHeader client:load />
     <div data-component="container">
-      <div id="main">
+      <main id="main" tabindex="-1">
         <section data-section="blog" aria-labelledby="blog-title">
           <Reveal client:load as="header" data-slot="blog-intro">
             <p data-slot="eyebrow">Engineering notes</p>
@@ -104,8 +104,8 @@ const formatDate = (date: Date) =>
             )
           }
         </section>
-      </div>
+      </main>
       <SiteFooter client:visible />
     </div>
-  </main>
+  </div>
 </Layout>

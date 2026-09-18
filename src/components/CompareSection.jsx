@@ -56,21 +56,23 @@ export default function CompareSection() {
         <Reveal>
           <SectionHeading
             id="compare"
+            eyebrow="the alternative"
             strong="Why not just spin up a container?"
             rest="You could. Here is what changes."
           />
           <p>Snippet-runners execute and die. BoxCompute gives the job a machine.</p>
         </Reveal>
         <Reveal delay={100} data-component="demo-controls">
-          <div data-component="scenario-pills" role="radiogroup" aria-label="Highlight column">
+          {/* Toggle buttons, not radios: nothing here implements arrow-key
+              selection or a roving tabindex. */}
+          <div data-component="scenario-pills" role="group" aria-label="Highlight column">
             {FOCUS.map((c, i) => (
               <button
                 key={c}
                 type="button"
-                role="radio"
                 data-active={i === focus}
                 onClick={() => setFocus(i)}
-                aria-checked={i === focus}
+                aria-pressed={i === focus}
               >
                 {c.split(" ")[0]}
               </button>
@@ -79,7 +81,8 @@ export default function CompareSection() {
         </Reveal>
       </div>
       <Reveal>
-        <div data-component="compare-scroll">
+        {/* tabindex=0 so the table's horizontal overflow is keyboard-reachable. */}
+        <div data-component="compare-scroll" tabIndex={0} role="region" aria-label="Comparison table">
           <table data-component="compare-table" data-focus={focus}>
             <thead>
               <tr>
