@@ -1,0 +1,63 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "BoxCompute",
+    "identifier": "did:web:boxcompute.ai"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:boxcompute.ai:api:public-v2",
+      "displayName": "BoxCompute Public v2 API",
+      "type": "application/vnd.oai.openapi+json",
+      "url": "https://api.boxcompute.ai/api/v2/openapi.json",
+      "representativeQueries": [
+        "create a BoxCompute Sandbox over HTTP",
+        "execute a command in a BoxCompute Sandbox",
+        "list my BoxCompute workspaces and Sandboxes"
+      ]
+    },
+    {
+      "identifier": "urn:air:boxcompute.ai:docs:http-api",
+      "displayName": "BoxCompute HTTP API documentation",
+      "type": "text/html",
+      "url": "https://boxcompute.ai/docs/http-api/",
+      "representativeQueries": [
+        "how do I authenticate with the BoxCompute API",
+        "BoxCompute API limits and error handling",
+        "BoxCompute API scopes for keys"
+      ]
+    },
+    {
+      "identifier": "urn:air:boxcompute.ai:skill:boxcompute-sandbox",
+      "displayName": "boxcompute-sandbox agent skill",
+      "type": "text/markdown",
+      "url": "/skills/boxcompute-sandbox/SKILL.md",
+      "representativeQueries": [
+        "connect my coding agent to a BoxCompute Sandbox",
+        "install the BoxCompute skill for Claude Code",
+        "run my test suite in an isolated Sandbox"
+      ]
+    },
+    {
+      "identifier": "urn:air:boxcompute.ai:auth:agent-guide",
+      "displayName": "BoxCompute agent authentication guide",
+      "type": "text/markdown",
+      "url": "/auth.md",
+      "representativeQueries": [
+        "how does an AI agent get a BoxCompute API key",
+        "BoxCompute Bearer token format and scopes",
+        "revoke a BoxCompute API key"
+      ]
+    },
+    {
+      "identifier": "urn:air:boxcompute.ai:discovery:api-catalog",
+      "displayName": "BoxCompute API catalog",
+      "type": "application/linkset+json",
+      "url": "/.well-known/api-catalog",
+      "representativeQueries": [
+        "discover the BoxCompute API catalog",
+        "BoxCompute OpenAPI spec location"
+      ]
+    }
+  ]
+}

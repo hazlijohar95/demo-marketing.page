@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Capability manifest for agent discovery (ARD ai-catalog).
+Agentmap: https://boxcompute.ai/.well-known/ai-catalog.json
+
+# AI content usage preferences (Content Signals draft).
+Content-Signal: ai-train=no, search=yes, ai-input=no

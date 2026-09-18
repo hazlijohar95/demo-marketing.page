@@ -1,6 +1,8 @@
 ---
 import "../styles.css"
 
+import WebMcpTools from "../components/WebMcpTools.jsx"
+
 interface Props {
   title?: string
   description?: string
@@ -29,6 +31,7 @@ const {
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#161616" />
     <meta name="description" content={description} />
     <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="ai-catalog" href="/.well-known/ai-catalog.json" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="BoxCompute" />
     <meta property="og:url" content="https://boxcompute.ai/" />
@@ -71,6 +74,7 @@ const {
   </head>
   <body>
     <slot />
+    <WebMcpTools client:load />
     <noscript>JavaScript enables the mobile navigation menu. You can also use the links in the footer.</noscript>
   </body>
 </html>
