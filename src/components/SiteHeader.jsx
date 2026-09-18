@@ -11,13 +11,10 @@ const NAV_LINKS = [
   { href: "/#platform", label: "Platform" },
   { href: "/#developers", label: "How it works" },
   { href: "/#faq", label: "FAQ" },
+  { href: "/blog/", label: "Blog" },
 ]
 
-const MOBILE_LINKS = [
-  ...NAV_LINKS,
-  { href: "/blog/", label: "Blog" },
-  { href: "/docs", label: "Docs", external: true },
-]
+const MOBILE_LINKS = [...NAV_LINKS, { href: "/docs", label: "Docs", external: true }]
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false)
