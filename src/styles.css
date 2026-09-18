@@ -2276,6 +2276,17 @@
     opacity: 1;
     translate: none;
   }
+  /* The reveal is opt-out polish, not a gate on the content: with scripting
+     off nothing ever adds .is-visible, which would leave every revealed
+     element — the whole blog — permanently invisible. */
+  @media (scripting: none) {
+    [data-page="box"] [data-reveal],
+    [data-page="box"] [data-entrance] {
+      opacity: 1;
+      translate: none;
+      animation: none;
+    }
+  }
 }
 
 @keyframes bx-rise {
@@ -3263,59 +3274,188 @@
   [data-page="box"] [data-component="faq-list"] summary {
     padding: 22px 0;
   }
+  [data-page="box"] [data-slot="post-back"] a {
+    min-height: 44px;
+  }
 }
 
 /* blog ------------------------------------------------------------ */
-/* Same hairline section shell as the landing sections; the list is a
-   steps-style row stack and the article body is one prose block. */
+/* Card stack in the section shell: mono eyebrow, display h1 on the hero
+   scale, then hairline rows. Tags borrow the beta-pill box so the blog
+   inherits the square-corner vocabulary instead of inventing rounded ones. */
+[data-page="box"] [data-slot="blog-intro"] {
+  /* Same right edge as the cards below — 720 vs 760 reads as a misalignment
+     rather than a distinction. */
+  max-width: 760px;
+  margin-bottom: 56px;
+}
+
+[data-page="box"] [data-slot="eyebrow"] {
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+[data-page="box"] [data-slot="blog-intro"] h1 {
+  margin-top: 20px;
+  color: var(--bx-text);
+  font-size: clamp(28px, 7vw, 40px);
+  font-weight: 500;
+  /* 1.05 is a one-line display value; these headings wrap to 2–3 lines at
+     the small end of the clamp, where it reads as cramped. */
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+[data-page="box"] [data-slot="blog-intro"] > p:last-child {
+  margin-top: 20px;
+  /* The lede and the card excerpts are the same role (muted summary prose),
+     so they get the same measure instead of 580px vs 62ch. */
+  max-width: 62ch;
+  color: var(--bx-muted);
+  font-size: 16px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
 [data-page="box"] [data-component="post-list"] {
   border-top: 1px solid var(--bx-line);
 }
 
-[data-page="box"] [data-component="post-list"] > li {
+[data-page="box"] [data-slot="post-card"] {
+  max-width: 760px;
+  padding: 32px 0;
   border-bottom: 1px solid var(--bx-line);
 }
 
-[data-page="box"] [data-component="post-list"] a {
-  display: grid;
-  grid-template-columns: 180px minmax(0, 1fr);
-  gap: 24px;
-  padding: 24px 0;
+[data-page="box"] [data-slot="post-tags"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* beta-pill is built for the one-word "Beta" badge and sets `nowrap`, which
+   makes the overflow-wrap below it inert. CMS tags are real phrases, so they
+   need to wrap, and 10px is too small for a phrase. */
+[data-page="box"] [data-slot="post-tags"] [data-slot="beta-pill"] {
+  white-space: normal;
+  font-size: 11px;
+}
+
+[data-page="box"] [data-slot="post-card"] h2 {
+  margin: 16px 0 12px;
+  font-family: var(--bx-sans);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+/* CMS titles can carry an unbreakable token (a URL, a flag, an image name).
+   Without this the card scrolls the page sideways at 320px. `min-width: 0`
+   lets the span shrink inside the inline-flex link. */
+[data-page="box"] [data-slot="post-card"] h2 span,
+[data-page="box"] [data-slot="post-header"] h1,
+[data-page="box"] [data-slot="post-description"],
+[data-page="box"] [data-slot="beta-pill"] {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+[data-page="box"] [data-slot="post-card"] h2 a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
   color: inherit;
   text-decoration: none;
-}
-
-[data-page="box"] [data-slot="post-date"] {
-  color: var(--bx-faint);
-  font-family: var(--bx-mono);
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-}
-
-[data-page="box"] [data-component="post-list"] h2 {
-  font-family: var(--bx-sans);
-  font-size: 20px;
-  font-weight: 500;
-  letter-spacing: -0.02em;
   transition: color var(--bx-dur-fast) ease;
 }
 
-[data-page="box"] [data-component="post-list"] a:hover h2 {
+[data-page="box"] [data-slot="post-card"] h2 a:hover {
   color: var(--bx-accent-text);
 }
 
-[data-page="box"] [data-component="post-list"] p {
-  margin-top: 8px;
+[data-page="box"] [data-slot="post-card"] h2 svg,
+[data-page="box"] [data-slot="post-back"] svg {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+}
+
+[data-page="box"] [data-slot="post-description"] {
   max-width: 62ch;
   color: var(--bx-muted);
-  font-size: 15px;
+  /* This is body copy, not a caption — 15px put the list's only prose below
+     the 16px floor the post body already holds. */
+  font-size: 16px;
   line-height: 1.6;
+  text-wrap: pretty;
+}
+
+[data-page="box"] [data-slot="post-meta"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-page="box"] [data-slot="blog-empty"],
+[data-page="box"] [data-slot="post-empty"] {
+  padding: 32px 0;
+  border-top: 1px solid var(--bx-line);
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 13px;
+}
+
+/* Both empty states point somewhere; the site reset strips link underlines,
+   which would leave the only next action looking like plain text. */
+[data-page="box"] [data-slot="blog-empty"] a,
+[data-page="box"] [data-slot="post-empty"] a {
+  color: var(--bx-accent-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Arrows travel on hover; `translate` keeps clear of the reveal's own
+   translate on the card. Motion-safe only. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-slot="post-card"] h2 svg,
+  [data-page="box"] [data-slot="post-back"] svg {
+    transition: translate var(--bx-dur-fast) var(--bx-ease-out);
+  }
+  [data-page="box"] [data-slot="post-card"] h2 a:hover svg {
+    translate: 2px -2px;
+  }
+  [data-page="box"] [data-slot="post-back"] a:hover svg {
+    translate: -3px 0;
+  }
 }
 
 [data-page="box"] [data-slot="post-back"],
 [data-page="box"] [data-slot="post-preview"] {
   font-family: var(--bx-mono);
   font-size: 13px;
+}
+
+[data-page="box"] [data-slot="post-back"] a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--bx-faint);
+  text-decoration: none;
+  transition: color var(--bx-dur-fast) ease;
+}
+
+[data-page="box"] [data-slot="post-back"] a:hover {
+  color: var(--bx-text);
 }
 
 [data-page="box"] [data-slot="post-preview"] {
@@ -3331,11 +3471,13 @@
 }
 
 [data-page="box"] [data-slot="post-header"] h1 {
+  margin-top: 16px;
   font-family: var(--bx-sans);
-  font-size: 40px;
+  font-size: clamp(28px, 7vw, 40px);
   font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 [data-page="box"] [data-slot="post-header"] > p {
@@ -3343,16 +3485,24 @@
   color: var(--bx-muted);
   font-size: 18px;
   line-height: 1.6;
+  text-wrap: pretty;
 }
 
-[data-page="box"] [data-slot="post-header"] [data-slot="post-date"] {
-  margin-top: 20px;
+[data-page="box"] [data-slot="post-header"] [data-slot="post-meta"] {
+  font-size: 12px;
+}
+
+[data-page="box"] [data-slot="post-header"] [data-slot="post-tags"] {
+  margin-bottom: 16px;
 }
 
 [data-page="box"] [data-component="prose"] {
   max-width: 68ch;
   font-size: 16px;
   line-height: 1.7;
+  /* CMS prose carries long URLs and identifiers the base reset never sees;
+     without this they push the 24px-padded mobile column sideways. */
+  overflow-wrap: break-word;
 }
 
 [data-page="box"] [data-component="prose"] > * + * {
@@ -3365,24 +3515,51 @@
   font-family: var(--bx-sans);
   font-weight: 500;
   letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 [data-page="box"] [data-component="prose"] h2 {
-  font-size: 24px;
+  font-size: 26px;
 }
 
+/* 18px against 16px body is a step you cannot see; 20px keeps the scale
+   readable at 16 → 20 → 26 without colliding with the 18px lede. */
 [data-page="box"] [data-component="prose"] h3 {
-  font-size: 18px;
+  font-size: 20px;
 }
 
+/* Every other `strong` in the system is 500 or 600; only prose fell through
+   to the browser's 700, and these posts bold whole sentences. */
+[data-page="box"] [data-component="prose"] strong {
+  color: var(--bx-text);
+  font-weight: 600;
+}
+
+[data-page="box"] [data-component="prose"] p,
+[data-page="box"] [data-component="prose"] li {
+  text-wrap: pretty;
+}
+
+/* The site reset strips underlines and list markers for the landing page's
+   nav-style links and lists. Body prose needs both back: colour alone is not
+   enough to mark a link, and unmarked <li> reads as stray paragraphs. */
 [data-page="box"] [data-component="prose"] a {
   color: var(--bx-accent-text);
+  text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 [data-page="box"] [data-component="prose"] ul,
 [data-page="box"] [data-component="prose"] ol {
   padding-left: 1.4em;
+}
+
+[data-page="box"] [data-component="prose"] ul {
+  list-style: disc;
+}
+
+[data-page="box"] [data-component="prose"] ol {
+  list-style: decimal;
 }
 
 [data-page="box"] [data-component="prose"] li + li {
@@ -3401,11 +3578,49 @@
   font-size: 13px;
 }
 
+/* Inline code sat at a flat 13px — mono x-height makes that read smaller
+   than the 16px body around it, and nothing marked it as code. `em` keeps it
+   proportional wherever it lands (body, heading, list). */
+[data-page="box"] [data-component="prose"] :not(pre) > code {
+  padding: 0.1em 0.32em;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-layer);
+  font-size: 0.875em;
+}
+
 [data-page="box"] [data-component="prose"] pre {
   padding: 16px;
   border: 1px solid var(--bx-line);
   background: var(--bx-layer);
   overflow-x: auto;
+}
+
+/* emdash ships its code block with scoped styles (#1e1e1e, 8px radius, Fira
+   Code) that outspecify the rules above and land in a later stylesheet, so a
+   published post renders off-system. `pre[class]` / `.emdash-code[class]`
+   match the language class emdash already emits and only add the one step of
+   specificity needed to win. */
+[data-page="box"] [data-component="prose"] .emdash-code pre[class] {
+  border: 1px solid var(--bx-line);
+  border-radius: 0;
+  background: var(--bx-layer);
+  padding: 16px;
+}
+
+[data-page="box"] [data-component="prose"] .emdash-code pre[class] code,
+[data-page="box"] [data-component="prose"] .emdash-code[class] .emdash-code-filename {
+  color: var(--bx-text);
+  font-family: var(--bx-mono);
+  font-size: 13px;
+}
+
+[data-page="box"] [data-component="prose"] .emdash-code[class] .emdash-code-filename {
+  border: 1px solid var(--bx-line);
+  border-bottom: 0;
+  border-radius: 0;
+  background: var(--bx-layer-2);
+  color: var(--bx-faint);
+  padding: 8px 16px;
 }
 
 [data-page="box"] [data-component="prose"] img {
@@ -3428,11 +3643,27 @@
 }
 
 @media (max-width: 48rem) {
-  [data-page="box"] [data-component="post-list"] a {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
+  [data-page="box"] [data-slot="blog-intro"] {
+    margin-bottom: 36px;
   }
-  [data-page="box"] [data-slot="post-header"] h1 {
-    font-size: 30px;
+  [data-page="box"] [data-slot="post-card"] {
+    padding-block: 28px;
+  }
+  /* ponytail: display:block turns the table into its own scroller instead of
+     adding a wrapper element PortableText does not emit. Narrow screens only,
+     so wide-screen tables keep table layout and full width. */
+  [data-page="box"] [data-component="prose"] table {
+    display: block;
+    overflow-x: auto;
+  }
+  /* Code lines are the one thing that cannot reflow, so let the block use the
+     section's 24px side pad too — the scroll area gains 48px on a phone. */
+  [data-page="box"] [data-component="prose"] pre,
+  [data-page="box"] [data-component="prose"] .emdash-code {
+    margin-inline: -24px;
+  }
+  [data-page="box"] [data-component="prose"] pre,
+  [data-page="box"] [data-component="prose"] .emdash-code pre[class] {
+    border-inline: 0;
   }
 }

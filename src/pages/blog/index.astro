@@ -1,7 +1,9 @@
 ---
 import { getEmDashCollection } from "emdash"
 
+import ArrowUpRight from "../../components/ArrowUpRight.astro"
 import Layout from "../../layouts/Layout.astro"
+import Reveal from "../../components/Reveal.jsx"
 import SiteHeader from "../../components/SiteHeader.jsx"
 import SiteFooter from "../../components/SiteFooter.jsx"
 
@@ -13,13 +15,17 @@ const { entries: posts, error, cacheHint } = await getEmDashCollection("posts", 
 
 if (error) {
   console.error("Failed to load posts:", error)
-  return new Response("Unable to load posts", { status: 500 })
+  return new Response("We couldn't load the blog just now. Refresh to try again.", { status: 500 })
 }
 
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint)
 
+// A bad `published_at` in D1 arrives as an Invalid Date, which would render
+// the literal string "Invalid Date" in the byline.
 const formatDate = (date: Date) =>
-  date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+  Number.isNaN(date.getTime())
+    ? null
+    : date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
 ---
 
 <Layout
@@ -32,32 +38,69 @@ const formatDate = (date: Date) =>
     <div data-component="container">
       <div id="main">
         <section data-section="blog" aria-labelledby="blog-title">
-          <div data-slot="section-header">
-            <div>
-              <h1 data-slot="section-title" id="blog-title">
-                <strong>From BoxCompute.</strong> Notes on the technology behind agent workspaces.
-              </h1>
-              <p>Virtualization, infrastructure, and the boundaries that make them work.</p>
-            </div>
-          </div>
+          <Reveal client:load as="header" data-slot="blog-intro">
+            <p data-slot="eyebrow">Engineering notes</p>
+            <h1 id="blog-title">The BoxCompute blog</h1>
+            <p>
+              How we build agent workspaces: virtualization, infrastructure, and the boundaries that
+              make them work.
+            </p>
+          </Reveal>
 
           {
             posts.length === 0 ? (
-              <p data-slot="blog-empty">No posts yet.</p>
+              <p data-slot="blog-empty">
+                No posts published yet. In the meantime, the <a href="/docs">docs</a> cover how
+                sandboxes and workspaces work.
+              </p>
             ) : (
-              <ol data-component="post-list">
-                {posts.map((post) => (
-                  <li>
-                    <a href={`/blog/${post.id}/`}>
-                      <span data-slot="post-date">
-                        {post.data.publishedAt ? formatDate(post.data.publishedAt) : "Draft"}
-                      </span>
-                      <h2>{post.data.title}</h2>
-                      {post.data.excerpt ? <p>{post.data.excerpt}</p> : null}
-                    </a>
-                  </li>
-                ))}
-              </ol>
+              <div data-component="post-list">
+                {posts.map((post, index) => {
+                  const tags = post.data.terms?.tag ?? []
+                  const author = post.data.byline?.displayName ?? null
+                  // This list is published-only, so a missing date is bad data,
+                  // never a draft — labelling it "Draft" would be a lie. Drop
+                  // the line instead, and only print the separator when it has
+                  // something on both sides.
+                  const date = post.data.publishedAt ? formatDate(post.data.publishedAt) : null
+                  return (
+                    // The stagger is capped: uncapped, `index * 100` leaves the
+                    // 30th post of an archive invisible for three seconds.
+                    // client:visible so a long archive doesn't hydrate one
+                    // island per card on load.
+                    <Reveal
+                      client:visible
+                      as="article"
+                      delay={Math.min(index, 5) * 60}
+                      data-slot="post-card"
+                    >
+                      {tags.length > 0 ? (
+                        <ul data-slot="post-tags" aria-label="Topics">
+                          {tags.map((tag) => (
+                            <li data-slot="beta-pill">{tag.label}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      <h2>
+                        <a href={`/blog/${post.id}/`}>
+                          <span>{post.data.title}</span>
+                          <ArrowUpRight />
+                        </a>
+                      </h2>
+                      {post.data.excerpt ? (
+                        <p data-slot="post-description">{post.data.excerpt}</p>
+                      ) : null}
+                      {author || date ? (
+                        <p data-slot="post-meta">
+                          {author ? <span>By {author}</span> : null}
+                          {author && date ? <span aria-hidden="true">·</span> : null}
+                          {date ? <span>{date}</span> : null}
+                        </p>
+                      ) : null}
+                    </Reveal>
+                  )
+                })}
+              </div>
             )
           }
         </section>

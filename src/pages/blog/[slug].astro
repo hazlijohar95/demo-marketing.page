@@ -2,7 +2,9 @@
 import { decodeSlug, getEmDashEntry, getSeoMeta } from "emdash"
 import { PortableText } from "emdash/ui"
 
+import ArrowLeft from "../../components/ArrowLeft.astro"
 import Layout from "../../layouts/Layout.astro"
+import Reveal from "../../components/Reveal.jsx"
 import SiteHeader from "../../components/SiteHeader.jsx"
 import SiteFooter from "../../components/SiteFooter.jsx"
 
@@ -14,12 +16,14 @@ const { entry: post, error, isPreview, cacheHint } = await getEmDashEntry("posts
 // A slug that matches nothing arrives as a LiveEntryNotFoundError in `error`,
 // not as `entry: null` — so it has to be answered with 404, not 500.
 if (error) {
-  if (error.name === "LiveEntryNotFoundError") return new Response("Not found", { status: 404 })
+  if (error.name === "LiveEntryNotFoundError") {
+    return new Response("That post doesn't exist. Browse every post at /blog/", { status: 404 })
+  }
   console.error("Failed to load post:", error)
-  return new Response("Unable to load post", { status: 500 })
+  return new Response("We couldn't load this post just now. Refresh to try again.", { status: 500 })
 }
 
-if (!post) return new Response("Not found", { status: 404 })
+if (!post) return new Response("That post doesn't exist. Browse every post at /blog/", { status: 404 })
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint)
 
 const seo = getSeoMeta(post, {
@@ -28,12 +32,23 @@ const seo = getSeoMeta(post, {
   path: Astro.url.pathname.replace(/\/$/, ""),
 })
 
+// A bad `published_at` would otherwise render as the string "Invalid Date".
 const publishedAt =
-  post.data.publishedAt?.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }) ?? null
+  post.data.publishedAt && !Number.isNaN(post.data.publishedAt.getTime())
+    ? post.data.publishedAt.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : null
+
+const author = post.data.byline?.displayName ?? null
+const tags = post.data.terms?.tag ?? []
+// PortableText renders nothing for empty content, which would leave a header
+// floating over a blank page with no explanation.
+const hasContent = Array.isArray(post.data.content)
+  ? post.data.content.length > 0
+  : Boolean(post.data.content)
 ---
 
 <Layout title={seo.title} description={seo.description}>
@@ -43,15 +58,51 @@ const publishedAt =
     <div data-component="container">
       <div id="main">
         <section data-section="post" aria-labelledby="post-title">
-          {isPreview ? <p data-slot="post-preview">Unpublished preview.</p> : null}
-          <p data-slot="post-back"><a href="/blog/">← All posts</a></p>
-          <header data-slot="post-header">
+          {
+            isPreview ? (
+              <p data-slot="post-preview">Preview — this post isn't published yet.</p>
+            ) : null
+          }
+          <p data-slot="post-back">
+            <a href="/blog/"><ArrowLeft />All posts</a>
+          </p>
+          <Reveal client:load as="header" data-slot="post-header">
+            {
+              tags.length > 0 ? (
+                <ul data-slot="post-tags" aria-label="Topics">
+                  {tags.map((tag) => (
+                    <li data-slot="beta-pill">{tag.label}</li>
+                  ))}
+                </ul>
+              ) : null
+            }
             <h1 id="post-title" {...post.edit.title}>{post.data.title}</h1>
             {post.data.excerpt ? <p {...post.edit.excerpt}>{post.data.excerpt}</p> : null}
-            <p data-slot="post-date">{publishedAt ?? "Unpublished"}</p>
-          </header>
+            {
+              author || publishedAt || isPreview ? (
+                <p data-slot="post-meta">
+                  {author ? <span>By {author}</span> : null}
+                  {author && (publishedAt || isPreview) ? <span aria-hidden="true">·</span> : null}
+                  {/* "Not published yet" is only true in preview; on a live post a
+                      missing date is bad data, so print nothing rather than
+                      telling readers a published post is unpublished. */}
+                  {publishedAt ? <span>{publishedAt}</span> : null}
+                  {!publishedAt && isPreview ? <span>Not published yet</span> : null}
+                </p>
+              ) : null
+            }
+          </Reveal>
           <div data-component="prose">
-            <PortableText value={post.data.content} />
+            {
+              hasContent ? (
+                <PortableText value={post.data.content} />
+              ) : (
+                <p data-slot="post-empty">
+                  This post doesn't have any content yet. Try{" "}
+                  <a href="/blog/">the other posts</a> in the meantime.
+                </p>
+              )
+            }
           </div>
         </section>
       </div>
