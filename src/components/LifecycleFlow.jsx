@@ -54,7 +54,7 @@ const STAGES = [
 ]
 
 export default function LifecycleFlow() {
-  const [active, setActive] = useState(2)
+  const [active, setActive] = useState(0)
   return (
     <Reveal data-component="lifecycle" role="group" aria-label="Sandbox lifecycle">
       {/* Toggle buttons, not radios: `radiogroup` on the <ol> put a `listitem`
@@ -80,11 +80,12 @@ export default function LifecycleFlow() {
           </li>
         ))}
       </ol>
-      {/* Stable live region; the keyed inner span carries the entrance animation. */}
+      {/* Stable live region; the keyed inner span carries the entrance animation.
+          The title stays --bx-text for 4.5:1: stage hex is chart ink for the
+          bar only, not body copy. */}
       <p data-slot="lifecycle-foot" role="status">
         <span key={active}>
-          <strong style={{ color: STAGES[active].color }}>{STAGES[active].title}.</strong>{" "}
-          {STAGES[active].detail}
+          <strong>{STAGES[active].title}.</strong> {STAGES[active].detail}
         </span>
       </p>
     </Reveal>

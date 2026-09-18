@@ -182,13 +182,17 @@ export default function DemoSection() {
               color="#00bc7d"
             />
           </div>
-          {/* No tabindex: unlike the console log this box never scrolls (a
-              308px min-height that grows to fit), so a tab stop here would
-              land on nothing. */}
+          <p data-slot="visually-hidden">
+            Bounded run: capped at 120 seconds and 256KB of output. {scenario.label},{" "}
+            {doneCount} of {total} steps shown.
+          </p>
+          {/* Transcript region, not a live log: the run is illustrated and
+              streams on scroll-in, so role=log would promise announcements
+              aria-live=off then silences. Meters stay aria-hidden (they tick
+              every beat); the foot count carries the progress for AT. */}
           <div
             data-slot="demo-log"
-            role="log"
-            aria-live="off"
+            role="region"
             aria-label={`${scenario.label} transcript`}
           >
             {scenario.lines.slice(0, shown).map((line, i) => (

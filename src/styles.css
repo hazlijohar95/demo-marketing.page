@@ -50,6 +50,14 @@
   --bx-pattern: #dcdcdc;
   --bx-grid-dot: #0000001f;
   --bx-success: #198b43;
+  /* Illustration inks that are not theme tokens yet: console ember is fixed
+     across themes (ask bubble + active chat + inspector underline share it),
+     warn amber marks running states. Named here so the six raw hexes below
+     read as a system instead of one-offs. */
+  --live-ember: #ce704c;
+  --live-ember-wash: #ce704c1f;
+  --live-ember-line: #ce704c66;
+  --bx-warn: #d69a00;
   /* One inline pad for every band — sections, hero, footer — so the page keeps
      a single leading edge instead of three. */
   --bx-pad-inline: 40px;
@@ -249,6 +257,12 @@
 
 [data-page="box"] .skip-link:focus-visible {
   top: 12px;
+}
+
+/* Two skip links stack: content first, console bypass second. Without the
+   offset the second paints directly over the first on focus. */
+[data-page="box"] .skip-link + .skip-link:focus-visible {
+  top: 48px;
 }
 
 /* Anchor and skip-link landings clear the sticky bar. #main is the skip target
@@ -536,9 +550,35 @@
   }
 }
 
+/* The Docs button stays visible on small screens: it is the invite-only
+   escape hatch, and the mobile menu already costs an extra tap. Tighten
+   padding instead of hiding so brand + Docs + Open + menu fit 360px. */
 @media (max-width: 47.999rem) {
   [data-page="box"] [data-slot="header-actions"] [data-slot="header-button"][data-variant="neutral"] {
-    display: none;
+    padding: 0 8px;
+  }
+  [data-page="box"] [data-slot="header-bar"] {
+    gap: 8px;
+    padding-inline: 16px 12px;
+  }
+  [data-page="box"] [data-slot="brand"] {
+    font-size: 20px;
+    gap: 8px;
+  }
+}
+
+/* 320px: brand + two CTAs + 44px menu exceed the viewport with
+   overflow:hidden clipping mid-glyph. Shrink the mark and shorten gaps. */
+@media (max-width: 22.5rem) {
+  [data-page="box"] [data-slot="brand"] {
+    font-size: 18px;
+  }
+  [data-page="box"] [data-slot="brand"] img {
+    width: 28px;
+    height: 28px;
+  }
+  [data-page="box"] [data-slot="header-button"] {
+    padding: 0 8px;
   }
 }
 
@@ -894,7 +934,7 @@
   color: var(--bx-text);
   font-size: 40px;
   font-weight: 500;
-  line-height: 1;
+  line-height: 1.05;
   letter-spacing: 0;
 }
 
@@ -1194,8 +1234,8 @@
   max-width: 640px;
   padding-bottom: 24px;
   color: var(--bx-muted);
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1533,6 +1573,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 24px;
+  padding: 4px 6px;
   color: var(--live-muted);
   font-size: 11px;
   font-weight: 400;
@@ -1676,7 +1718,7 @@
 }
 
 [data-page="box"] [data-slot="live-avatar"][data-tone="ember"] {
-  background: #ce704c;
+  background: var(--live-ember);
   color: #161616;
 }
 
@@ -1830,8 +1872,8 @@
 }
 
 [data-page="box"] [data-slot="live-chats"] button[data-active="true"] {
-  background: #ce704c1f;
-  border-color: #ce704c66;
+  background: var(--live-ember-wash);
+  border-color: var(--live-ember-line);
 }
 
 [data-page="box"] [data-slot="live-chats"] button > span:nth-child(2) {
@@ -1966,7 +2008,7 @@
   width: fit-content;
   max-width: 100%;
   padding: 10px 14px;
-  background: #ce704c;
+  background: var(--live-ember);
   color: #161616;
   font-weight: 500;
 }
@@ -2137,7 +2179,7 @@
 
 [data-page="box"] [data-slot="live-inspector-tabs"] button[data-active="true"] {
   color: var(--live-text);
-  border-bottom-color: #ce704c;
+  border-bottom-color: var(--live-ember);
 }
 
 [data-page="box"] [data-slot="live-filegroup"] {
@@ -2178,7 +2220,7 @@
 [data-page="box"] [data-slot="live-sandbox-dot"] {
   width: 14px;
   height: 14px;
-  border: 1px solid #d69a00;
+  border: 1px solid var(--bx-warn);
   border-radius: 50%;
   flex: 0 0 auto;
 }
@@ -2558,7 +2600,7 @@
 
 [data-page="box"] [data-component="scenario-pills"] button {
   margin: 0;
-  padding: 7px 10px;
+  padding: 10px 14px;
   border: 0;
   border-radius: 0;
   appearance: none;
@@ -2646,7 +2688,7 @@
    page uses for success. The previous rule set --bx-success for both, so
    the dot never distinguished the two states. */
 [data-page="box"] [data-slot="demo-status"][data-state="running"]::before {
-  background: #d69a00;
+  background: var(--bx-warn);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -2995,6 +3037,27 @@
 [data-page="box"] [data-component="spec-board"] li:last-child {
   border-bottom: 0;
 }
+
+/* Seven specs in three columns orphan the last card at 1/3 width with 2/3
+   blank board. Span it full-width as a closing rule: horizontal layout so
+   it reads as a footnote, not a broken row. */
+[data-page="box"] [data-component="spec-board"] li:last-child {
+  grid-column: 1 / -1;
+}
+[data-page="box"] [data-component="spec-board"] li:last-child button {
+  grid-template-columns: auto auto 1fr;
+  align-items: baseline;
+  column-gap: 12px;
+}
+[data-page="box"] [data-component="spec-board"] li:last-child [data-slot="spec-label"] {
+  min-height: 0;
+  grid-column: 3;
+}
+@media (max-width: 60rem) {
+  [data-page="box"] [data-component="spec-board"] li:last-child {
+    grid-column: 1 / -1;
+  }
+}
 [data-page="box"] [data-component="spec-board"] li button {
   display: grid;
   gap: 6px;
@@ -3328,11 +3391,19 @@
   vertical-align: 0;
 }
 [data-page="box"] [data-component="compare-table"] [data-dim="true"] {
-  opacity: 0.38;
+  color: var(--bx-faint);
+}
+
+/* Dimmed cells keep 4.5:1: the "us" column is --bx-text on --bx-layer,
+   so its dimmed state uses --bx-muted instead of opacity, which dropped it
+   to ~1.8:1. */
+[data-page="box"] [data-component="compare-table"] td[data-col="us"][data-dim="true"],
+[data-page="box"] [data-component="compare-table"] th[data-col="us"][data-dim="true"] {
+  color: var(--bx-muted);
 }
 [data-page="box"] [data-component="compare-table"] th,
 [data-page="box"] [data-component="compare-table"] td {
-  transition: opacity 200ms ease-out, background-color 200ms ease-out;
+  transition: color 200ms ease-out, background-color 200ms ease-out;
 }
 [data-page="box"] [data-component="compare-table"] tbody tr:hover th,
 [data-page="box"] [data-component="compare-table"] tbody tr:hover td {
@@ -3434,7 +3505,7 @@
     height: 44px;
   }
   [data-page="box"] [data-component="scenario-pills"] button {
-    padding: 12px 14px;
+    padding: 15px 16px;
   }
   [data-page="box"] [data-slot="demo-foot"] button {
     min-height: 44px;

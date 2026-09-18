@@ -16,17 +16,13 @@ export default function ClosingSection() {
         </h2>
         <p>Hosted is invite-only — a 15-minute call requests your invite.</p>
         <div data-slot="hero-actions">
-          <a data-slot="header-button" data-variant="contrast" href={APP_URL}>
-            <strong>Open BoxCompute</strong> <ArrowUpRight aria-hidden="true" />
-          </a>
-          <a
-            data-slot="header-button"
-            data-variant="neutral"
-            href={DEMO_URL}
-            target="_blank"
-            rel="noreferrer"
-          >
+          {/* Invite-first: the app login is a dead end without an invite,
+              so Book is primary and Open is secondary here. */}
+          <a data-slot="header-button" data-variant="contrast" href={DEMO_URL} target="_blank" rel="noreferrer">
             <strong>Book a 15-minute call</strong>
+          </a>
+          <a data-slot="header-button" data-variant="neutral" href={APP_URL}>
+            <strong>Open BoxCompute</strong> <ArrowUpRight aria-hidden="true" />
           </a>
         </div>
       </Reveal>

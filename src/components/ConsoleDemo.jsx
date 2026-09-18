@@ -349,7 +349,7 @@ export default function ConsoleDemo() {
                 {String(tourStep + 1).padStart(2, "0")}/{String(TOUR.length).padStart(2, "0")}
               </b>
               {TOUR[tourStep].label}
-              <em>· click to take over</em>
+              <em aria-hidden="true">· click to take over</em>
             </span>
           )}
         </span>

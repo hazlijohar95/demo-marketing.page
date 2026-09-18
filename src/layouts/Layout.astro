@@ -28,23 +28,20 @@ const {
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#161616" />
     <meta name="description" content={description} />
-    <meta
-      name="keywords"
-      content="AI agent workspace, AI agent sandbox, secure agent work, autonomous agents, coding agents, persistent workspace"
-    />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="BoxCompute" />
+    <meta property="og:url" content="https://boxcompute.ai/" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="/boxcompute-social-card.png" />
+    <meta property="og:image" content="https://boxcompute.ai/boxcompute-social-card.png" />
     <meta property="og:image:width" content="1600" />
     <meta property="og:image:height" content="480" />
     <meta property="og:image:alt" content="BoxCompute" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content="/boxcompute-social-card.png" />
+    <meta name="twitter:image" content="https://boxcompute.ai/boxcompute-social-card.png" />
     <meta name="twitter:image:alt" content="BoxCompute" />
     <title>{title}</title>
     <script type="application/ld+json">
@@ -52,15 +49,23 @@ const {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "BoxCompute",
+        "url": "https://boxcompute.ai/",
         "applicationCategory": "DeveloperApplication",
-        "operatingSystem": "Cloud",
+        "operatingSystem": "Linux",
         "description": "Isolated Linux VM Sandboxes grouped by persistent workspaces for AI agents."
       }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    {/* Preload the render-blocking font CSS so first paint doesn't wait on
+        discovery from the stylesheet late in <head>. */}
     <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
   </head>

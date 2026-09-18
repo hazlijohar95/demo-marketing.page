@@ -9,7 +9,7 @@ const NAV_LINKS = [
   { href: "/#console", label: "Console" },
   { href: "/#demo", label: "Demo" },
   { href: "/#platform", label: "Platform" },
-  { href: "/#developers", label: "How it works" },
+  { href: "/#how-it-works", label: "How it works" },
   { href: "/#faq", label: "FAQ" },
   { href: "/blog/", label: "Blog" },
 ]

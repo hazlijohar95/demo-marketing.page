@@ -10,7 +10,7 @@ const COLUMNS = [
       { href: "/#console", label: "Console" },
       { href: "/#demo", label: "Demo" },
       { href: "/#platform", label: "Platform" },
-      { href: "/#developers", label: "How it works" },
+      { href: "/#how-it-works", label: "How it works" },
       { href: "/#faq", label: "FAQ" },
     ],
   },
@@ -26,7 +26,7 @@ const COLUMNS = [
     heading: "Company",
     links: [
       { href: APP_URL, label: "Open BoxCompute", external: true },
-      { href: DEMO_URL, label: "Contact", external: true },
+      { href: DEMO_URL, label: "Book a 15-minute call", external: true },
     ],
   },
 ]

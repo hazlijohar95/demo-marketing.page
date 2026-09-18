@@ -21,10 +21,12 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section data-section="how" id="developers" aria-labelledby="developers-title">
+    <section data-section="how" id="how-it-works" aria-labelledby="how-it-works-title">
+      {/* Back-compat anchor: external deep links may still use #developers. */}
+      <span id="developers" aria-hidden="true" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }} />
       <div data-slot="section-header">
         <Reveal>
-          <SectionHeading id="developers" eyebrow="the loop" strong="Give it a goal." rest="Let it get to work." />
+          <SectionHeading id="how-it-works" eyebrow="the loop" strong="Give it a goal." rest="Let it get to work." />
           <p>
             Bring your agent. BoxCompute provides the Sandbox.
           </p>

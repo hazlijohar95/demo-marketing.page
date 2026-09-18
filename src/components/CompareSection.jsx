@@ -46,7 +46,12 @@ const ROWS = [
   },
 ]
 
-const FOCUS = ["BoxCompute", ...COLUMNS]
+const FOCUS = [
+  { short: "BoxCompute", full: "BoxCompute" },
+  { short: "Ephemeral", full: "Ephemeral sandboxes" },
+  { short: "Dev machines", full: "Cloud dev machines" },
+  { short: "DIY", full: "DIY containers" },
+]
 
 export default function CompareSection() {
   const [focus, setFocus] = useState(0)
@@ -68,13 +73,14 @@ export default function CompareSection() {
           <div data-component="scenario-pills" role="group" aria-label="Highlight column">
             {FOCUS.map((c, i) => (
               <button
-                key={c}
+                key={c.full}
                 type="button"
                 data-active={i === focus}
                 onClick={() => setFocus(i)}
                 aria-pressed={i === focus}
+                aria-label={`Highlight ${c.full}`}
               >
-                {c.split(" ")[0]}
+                {c.short}
               </button>
             ))}
           </div>
