@@ -1,11 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
-  <title id="title">BoxCompute cut-cell monochrome symbol</title>
-  <desc id="desc">A one-color asymmetric workspace cell with a branching route cut from its center.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="BoxCompute">
+  <title>BoxCompute cut-cell monochrome symbol</title>
   <defs>
     <mask id="route-cut">
       <rect width="256" height="256" fill="white"/>
-      <path fill="black" d="M64 113h52l58-44h28v30h-18l-38 29 38 29h18v30h-28l-58-44H64v-30Z"/>
+      <path fill="black" d="M60 110h56l60-46h30v34h-20l-40 30 40 30h20v34h-30l-60-46H60v-36Z"/>
     </mask>
   </defs>
-  <path fill="#232826" mask="url(#route-cut)" d="M54 28h124l50 50v32l-24 18 24 18v56q0 26-26 26H74l-46-46V54q0-26 26-26Z"/>
+  <path fill="black" mask="url(#route-cut)" d="M64 8h120q64 0 64 64v32l-22 24 22 24v32q0 64-64 64H64Q8 248 8 184V72Q8 8 64 8Z"/>
 </svg>
