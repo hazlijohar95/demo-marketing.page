@@ -20,6 +20,23 @@ credentials for) an agent:
    agent's registered credential; one key per agent or integration so each
    can be rotated and revoked independently.
 
+## Machine-readable registration
+
+```json
+{
+  "agent_auth": {
+    "skill": "https://boxcompute.ai/skills/boxcompute-sandbox/SKILL.md",
+    "register_uri": "https://cal.com/muhammad-farhan-helmy-bin-roslan-d7spi3/15min",
+    "provision_uri": "https://app.boxcompute.ai/api-keys",
+    "identity_types_supported": ["api_key"],
+    "credential_types_supported": ["bearer_token"],
+    "bearer_methods_supported": ["header"],
+    "revocation_uri": "https://api.boxcompute.ai/api/v2/auth",
+    "notes": "Registration is human-mediated and invite-only: book a call, create an account, then mint a scoped bc_live key. Agents never use OAuth here."
+  }
+}
+```
+
 ## Using the registered credential
 
 Send the secret only in the HTTPS authorization header:
