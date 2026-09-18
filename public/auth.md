@@ -4,21 +4,23 @@ This guide is for AI agents and the developers wiring them up. There is no
 OAuth or browser login flow for agents: BoxCompute APIs authenticate with
 scoped API keys sent as Bearer tokens.
 
-## 1. Get access (humans, one time)
+## Agent registration
 
-Hosted BoxCompute is invite-only. Request access with a 15-minute call:
+Agent registration is human-mediated and invite-only. To register (provision
+credentials for) an agent:
 
-- https://cal.com/muhammad-farhan-helmy-bin-roslan-d7spi3/15min
+1. **Register for access.** The agent's human books a 15-minute call, which
+   provisions an invitation:
+   - Registration endpoint (human): https://cal.com/muhammad-farhan-helmy-bin-roslan-d7spi3/15min
+2. **Create the account.** Use the invitation link to register an account and
+   sign in at https://app.boxcompute.ai/
+3. **Provision the credential.** Register the agent's key at
+   https://app.boxcompute.ai/api-keys — **New API key**, copy the
+   `bc_live_...` secret immediately. It is shown only once. This key is the
+   agent's registered credential; one key per agent or integration so each
+   can be rotated and revoked independently.
 
-Then use the invitation link to create your account and sign in at
-https://app.boxcompute.ai/
-
-## 2. Create an API key
-
-Manage keys at https://app.boxcompute.ai/api-keys — **New API key**, copy the
-`bc_live_...` secret immediately. It is shown only once.
-
-## 3. Use the key
+## Using the registered credential
 
 Send the secret only in the HTTPS authorization header:
 
@@ -34,7 +36,7 @@ Keys carry scopes (`workspace:create`, `sandbox:read`, `sandbox:create`,
 integration so each can be rotated independently. Never commit keys, put them
 in URLs, or print them to logs.
 
-## 4. Revoke a key
+## Revoking a registration
 
 Use the revoke control on the API keys page, or let the key revoke itself:
 
