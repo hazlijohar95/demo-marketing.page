@@ -1,12 +1,15 @@
 ---
-import { decodeSlug, getEmDashEntry, getSeoMeta } from "emdash"
+import { decodeSlug, getEmDashCollection, getEmDashEntry, getSeoMeta } from "emdash"
 import { PortableText } from "emdash/ui"
 
 import ArrowLeft from "../../components/ArrowLeft.astro"
+import ArrowUpRight from "../../components/ArrowUpRight.astro"
 import Layout from "../../layouts/Layout.astro"
+import PostCover from "../../components/PostCover.jsx"
 import Reveal from "../../components/Reveal.jsx"
 import SiteHeader from "../../components/SiteHeader.jsx"
 import SiteFooter from "../../components/SiteFooter.jsx"
+import { readingMinutes } from "../../lib/reading-time.js"
 
 const slug = decodeSlug(Astro.params.slug)
 if (!slug) return Astro.redirect("/blog/")
@@ -32,23 +35,56 @@ const seo = getSeoMeta(post, {
   path: Astro.url.pathname.replace(/\/$/, ""),
 })
 
-// A bad `published_at` would otherwise render as the string "Invalid Date".
-const publishedAt =
-  post.data.publishedAt && !Number.isNaN(post.data.publishedAt.getTime())
-    ? post.data.publishedAt.toLocaleDateString("en-US", {
+const formatDate = (date: Date, long = false) =>
+  Number.isNaN(date.getTime())
+    ? null
+    : date.toLocaleDateString("en-US", {
         year: "numeric",
-        month: "long",
+        month: long ? "long" : "short",
         day: "numeric",
       })
-    : null
+
+// A bad `published_at` would otherwise render as the string "Invalid Date".
+const publishedAt = post.data.publishedAt ? formatDate(post.data.publishedAt, true) : null
+const publishedIso = post.data.publishedAt?.toISOString().slice(0, 10) ?? undefined
 
 const author = post.data.byline?.displayName ?? null
 const tags = post.data.terms?.tag ?? []
+const topic = tags[0]?.label ?? null
+const minutes = readingMinutes(post.data.content)
+// Same fallback as the index tiles: a CMS cover wins, otherwise the post gets
+// its generated one, so the hero always matches the tile the reader clicked.
+const coverImage =
+  typeof post.data.featured_image === "string"
+    ? post.data.featured_image
+    : (post.data.featured_image?.url ?? null)
 // PortableText renders nothing for empty content, which would leave a header
 // floating over a blank page with no explanation.
 const hasContent = Array.isArray(post.data.content)
   ? post.data.content.length > 0
   : Boolean(post.data.content)
+
+// Related posts: newest three, minus this one, so the tail of a post always
+// offers a next read. A failure here must not take the post down with it —
+// the article is the page, related posts are decoration.
+const { entries: recent } = await getEmDashCollection("posts", {
+  orderBy: { published_at: "desc" },
+  limit: 4,
+}).catch(() => ({ entries: [] }))
+
+const related = (recent ?? [])
+  .filter((entry) => entry.id !== post.id)
+  .slice(0, 3)
+  .map((entry) => ({
+    href: `/blog/${entry.id}/`,
+    title: entry.data.title,
+    topic: entry.data.terms?.tag?.[0]?.label ?? null,
+    minutes: readingMinutes(entry.data.content),
+    // The related rail is narrower than the archive table, so it takes the
+    // short date — a long one pushes the title into an ellipsis.
+    date: entry.data.publishedAt ? formatDate(entry.data.publishedAt) : null,
+    iso: entry.data.publishedAt?.toISOString().slice(0, 10) ?? undefined,
+  }))
 ---
 
 <Layout title={seo.title} description={seo.description}>
@@ -57,54 +93,111 @@ const hasContent = Array.isArray(post.data.content)
     <SiteHeader client:load />
     <div data-component="container">
       <main id="main" tabindex="-1">
-        <section data-section="post" aria-labelledby="post-title">
-          {
-            isPreview ? (
-              <p data-slot="post-preview">Preview — this post isn't published yet.</p>
-            ) : null
-          }
-          <p data-slot="post-back">
-            <a href="/blog/"><ArrowLeft />All posts</a>
-          </p>
-          <Reveal client:load as="header" data-slot="post-header">
+        {/* Two rails and a reading column: the label on the left stays with the
+            reader while the article scrolls, so the page never loses its
+            context the way a top-only breadcrumb does. */}
+        <article data-section="post" data-component="post-layout" aria-labelledby="post-title">
+          <div data-slot="post-rail">
+            <p data-slot="post-back">
+              <a href="/blog/"><ArrowLeft />Blog{topic ? ` / ${topic}` : ""}</a>
+            </p>
+          </div>
+
+          <div data-slot="post-column">
             {
-              tags.length > 0 ? (
-                <ul data-slot="post-tags" aria-label="Topics">
-                  {tags.map((tag) => (
-                    <li data-slot="beta-pill">{tag.label}</li>
+              isPreview ? (
+                <p data-slot="post-preview">Preview — this post isn't published yet.</p>
+              ) : null
+            }
+            <Reveal client:load as="header" data-slot="post-header">
+              <p data-slot="post-meta">
+                {publishedAt ? <time datetime={publishedIso}>{publishedAt}</time> : null}
+                {!publishedAt && isPreview ? <span>Not published yet</span> : null}
+                {(publishedAt || isPreview) && topic ? <span aria-hidden="true">·</span> : null}
+                {topic ? <span>{topic}</span> : null}
+              </p>
+              <h1 id="post-title" {...post.edit.title}>{post.data.title}</h1>
+              {post.data.excerpt ? <p {...post.edit.excerpt}>{post.data.excerpt}</p> : null}
+              {
+                author || minutes ? (
+                  <p data-slot="post-byline">
+                    {author ? (
+                      <>
+                        <span data-slot="byline-mark" aria-hidden="true">
+                          {author.slice(0, 2).toUpperCase()}
+                        </span>
+                        <span>{author}</span>
+                      </>
+                    ) : null}
+                    {author && minutes ? <span aria-hidden="true">·</span> : null}
+                    {minutes ? <span>{minutes} min read</span> : null}
+                  </p>
+                ) : null
+              }
+              {
+                tags.length > 1 ? (
+                  <ul data-slot="post-tags" aria-label="Topics">
+                    {tags.map((tag) => (
+                      <li data-slot="beta-pill">{tag.label}</li>
+                    ))}
+                  </ul>
+                ) : null
+              }
+            </Reveal>
+            <div data-slot="post-hero">
+              {
+                coverImage ? (
+                  <img src={coverImage} alt="" />
+                ) : (
+                  <PostCover client:load slug={post.id} topic={topic} slot="hero" />
+                )
+              }
+            </div>
+            <div data-component="prose">
+              {
+                hasContent ? (
+                  <PortableText value={post.data.content} />
+                ) : (
+                  <p data-slot="post-empty">
+                    This post doesn't have any content yet. Try{" "}
+                    <a href="/blog/">the other posts</a> in the meantime.
+                  </p>
+                )
+              }
+            </div>
+          </div>
+        </article>
+
+        {
+          related.length > 0 ? (
+            <section data-component="post-layout" data-slot="post-related" aria-labelledby="related-title">
+              <div data-slot="post-rail">
+                <h2 id="related-title" data-slot="rail-label">Related posts</h2>
+              </div>
+              <div data-slot="post-column">
+                <ul>
+                  {related.map((row) => (
+                    <li>
+                      <a data-slot="archive-row" href={row.href}>
+                        <span data-slot="row-when">
+                          {row.date ? <time datetime={row.iso}>{row.date}</time> : null}
+                          {row.date && row.topic ? <span aria-hidden="true">·</span> : null}
+                          {row.topic ? <span>{row.topic}</span> : null}
+                        </span>
+                        <span data-slot="row-title">{row.title}</span>
+                        <span data-slot="row-time">{row.minutes ? `${row.minutes}m` : null}</span>
+                        <ArrowUpRight />
+                      </a>
+                    </li>
                   ))}
                 </ul>
-              ) : null
-            }
-            <h1 id="post-title" {...post.edit.title}>{post.data.title}</h1>
-            {post.data.excerpt ? <p {...post.edit.excerpt}>{post.data.excerpt}</p> : null}
-            {
-              author || publishedAt || isPreview ? (
-                <p data-slot="post-meta">
-                  {author ? <span>By {author}</span> : null}
-                  {author && (publishedAt || isPreview) ? <span aria-hidden="true">·</span> : null}
-                  {/* "Not published yet" is only true in preview; on a live post a
-                      missing date is bad data, so print nothing rather than
-                      telling readers a published post is unpublished. */}
-                  {publishedAt ? <span>{publishedAt}</span> : null}
-                  {!publishedAt && isPreview ? <span>Not published yet</span> : null}
+                <p data-slot="related-more">
+                  <a href="/blog/">View more posts<ArrowUpRight /></a>
                 </p>
-              ) : null
-            }
-          </Reveal>
-          <div data-component="prose">
-            {
-              hasContent ? (
-                <PortableText value={post.data.content} />
-              ) : (
-                <p data-slot="post-empty">
-                  This post doesn't have any content yet. Try{" "}
-                  <a href="/blog/">the other posts</a> in the meantime.
-                </p>
-              )
-            }
-          </div>
-        </section>
+              </div>
+            </section>
+          ) : null
+        }
       </main>
       <SiteFooter client:visible />
     </div>

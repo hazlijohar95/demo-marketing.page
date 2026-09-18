@@ -6,28 +6,40 @@ import { prefersReducedMotion } from "../lib/reduced-motion.js"
 // CanvasUI Grid / Ripple / Magnify, translated into the BoxCompute system.
 // The canonical dot grid stays in CSS (square 2px cells on a 6px grid);
 // this canvas only paints *activated* cells over it, so the static state
-// is byte-identical to the rest of the site. Hover inspects (accent),
-// pointer-down spawns a sandbox ripple (mint ring, blue trail).
-// Transparent by default, aria-hidden, idle loop stops when settled.
+// is byte-identical to the rest of the site. Transparent by default,
+// aria-hidden, idle loop stops when settled.
+//
+// Hover reads as measurement, not decoration: cell brightness is a function of
+// distance from the pointer, banded into iso-contours (fract(d / STEP)), so the
+// field resolves into nested level curves like an SDF or a topographic map.
+// Pointer-down drops a contour origin that decays, which re-centres the rings
+// rather than firing a travelling wave.
 const GAP = 6
 const SIZE = 2
-const HOVER_RADIUS = 120
-const RIPPLE_LIFE = 1200
-const RIPPLE_SPEED = 0.28
-const RIPPLE_BAND = 36
-
+const HOVER_RADIUS = 132
+// One ink. The rings carry the structure, so a second hue would only add noise
+// the contours already encode as spacing.
 const PALETTE = {
-  light: { hover: "#3b5cf6", ripple: "#9ae600", trail: "#51a2ff" },
-  dark: { hover: "#8190ff", ripple: "#9ae600", trail: "#51a2ff" },
+  light: { ink: "#c2410c" },
+  dark: { ink: "#f97316" },
 }
+// Contour spacing in px. 17 is deliberately not a multiple of GAP (6): on a
+// multiple, every ring lands on the same lattice columns and reads as a grid
+// artifact instead of a measured field.
+const STEP = 17
+// Fraction of a band that actually inks. Thin bands read as drawn lines;
+// widening this fills the gaps and the contours turn back into a blob.
+const BAND = 0.42
+// Band profile exponent. Squaring looked right in isolation but compounded with
+// the radial falloff to a 74/255 peak — invisible on the dot field. 1.4 keeps
+// the line crisp while letting cells between ring centres carry weight.
+const BAND_POWER = 1.4
+const PULSE_LIFE = 1400
+const PULSE_REACH = 190
 
 function hexToRgb(hex) {
   const n = parseInt(hex.slice(1), 16)
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
-}
-
-function mix(a, b, t) {
-  return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]
 }
 
 function css(rgb, alpha) {
@@ -48,7 +60,7 @@ export default function SandboxField() {
     if (!ctx) return
 
     const pointer = { x: 0, y: 0, tx: 0, ty: 0, inside: false }
-    let ripples = []
+    let pulses = []
     let raf = 0
     let running = false
     let visible = true
@@ -72,22 +84,17 @@ export default function SandboxField() {
 
     function draw(now) {
       ctx.clearRect(0, 0, w, h)
-      ripples = ripples.filter((r) => now - r.t0 < RIPPLE_LIFE)
-      if (!pointer.inside && ripples.length === 0) return
+      pulses = pulses.filter((p) => now - p.t0 < PULSE_LIFE)
+      if (!pointer.inside && pulses.length === 0) return
 
       const palette = PALETTE[themeRef.current] ?? PALETTE.light
-      const hoverRgb = hexToRgb(palette.hover)
-      const rippleRgb = hexToRgb(palette.ripple)
-      const trailRgb = hexToRgb(palette.trail)
+      const ink = hexToRgb(palette.ink)
       const offX = (w % GAP) / 2
-      const rippleStates = ripples.map((r) => {
-        const age = now - r.t0
-        return { ...r, age, radius: age * RIPPLE_SPEED, fade: 1 - age / RIPPLE_LIFE }
-      })
+      const pulseStates = pulses.map((p) => ({ ...p, fade: 1 - (now - p.t0) / PULSE_LIFE }))
 
-      // Only cells within reach of the pointer glow or a live ripple band
-      // can clear the `total < 0.03` guard below. Scanning the whole grid
-      // computed ~12k sqrt per frame to discard 94% of them.
+      // Only cells within reach of the pointer or a live pulse can clear the
+      // `total < 0.03` guard below. Scanning the whole grid computed ~12k sqrt
+      // per frame to discard 94% of them.
       let minX = Infinity
       let minY = Infinity
       let maxX = -Infinity
@@ -102,11 +109,7 @@ export default function SandboxField() {
       }
 
       if (pointer.inside) cover(pointer.x, pointer.y, HOVER_RADIUS)
-      for (const r of rippleStates) {
-        // The band falls off as exp(-band^2 * 2); 2.5 bands is already
-        // below the 0.03 cutoff, so there is nothing to draw beyond it.
-        cover(r.x, r.y, r.radius + RIPPLE_BAND * 2.5)
-      }
+      for (const p of pulseStates) cover(p.x, p.y, PULSE_REACH)
       if (minX > maxX) return
 
       // Snap to the same lattice the full scan used, so cells land on
@@ -114,34 +117,44 @@ export default function SandboxField() {
       const yFrom = 1 + Math.max(0, Math.floor((minY - 1) / GAP)) * GAP
       const xFrom = offX + 1 + Math.max(0, Math.floor((minX - offX - 1) / GAP)) * GAP
 
+      // Triangle wave on distance: 1 at the centre of a contour, 0 between two.
+      // Raised to a power so the band stays thin and reads as a drawn line.
+      const contour = (dist) => {
+        const phase = Math.abs(((dist / STEP) % 1) - 0.5) * 2
+        return phase <= 1 - BAND ? 0 : ((phase - (1 - BAND)) / BAND) ** BAND_POWER
+      }
+
       for (let y = yFrom; y < h && y <= maxY; y += GAP) {
         for (let x = xFrom; x < w && x <= maxX; x += GAP) {
-          const dx = x - pointer.x
-          const dy = y - pointer.y
-          const dist = Math.sqrt(dx * dx + dy * dy)
-          let glow = 0
-          if (pointer.inside && dist < HOVER_RADIUS) {
-            const t = 1 - dist / HOVER_RADIUS
-            glow = t * t
-          }
-          let ring = 0
-          let ringAge = 0
-          for (const r of rippleStates) {
-            const dxr = x - r.x
-            const dyr = y - r.y
-            const d = Math.sqrt(dxr * dxr + dyr * dyr)
-            const band = (d - r.radius) / RIPPLE_BAND
-            const g = Math.exp(-band * band * 2) * r.fade
-            if (g > ring) {
-              ring = g
-              ringAge = r.age / RIPPLE_LIFE
+          // Strength is how strongly this cell belongs to *any* contour origin,
+          // so overlapping fields read as one surface, not stacked rings.
+          let total = 0
+          if (pointer.inside) {
+            const dx = x - pointer.x
+            const dy = y - pointer.y
+            const dist = Math.sqrt(dx * dx + dy * dy)
+            if (dist < HOVER_RADIUS) {
+              // Linear falloff, not squared: squaring it dropped the outer rings
+              // below the alpha floor and only the innermost two were visible.
+              total = contour(dist) * (1 - dist / HOVER_RADIUS)
             }
           }
-          const total = Math.max(glow, ring)
+          for (const p of pulseStates) {
+            const dx = x - p.x
+            const dy = y - p.y
+            const dist = Math.sqrt(dx * dx + dy * dy)
+            if (dist >= PULSE_REACH) continue
+            const falloff = 1 - dist / PULSE_REACH
+            // Rings tighten as the pulse decays, so the field reads as settling
+            // to a finer measurement rather than travelling outward.
+            const phase = Math.abs(((dist / (STEP * (0.6 + p.fade * 0.4))) % 1) - 0.5) * 2
+            const band = phase <= 1 - BAND ? 0 : ((phase - (1 - BAND)) / BAND) ** BAND_POWER
+            total = Math.max(total, band * falloff * p.fade)
+          }
           if (total < 0.03) continue
-          const size = SIZE + total * 2
-          const base = ring > glow ? mix(rippleRgb, trailRgb, ringAge) : hoverRgb
-          ctx.fillStyle = css(base, 0.25 + total * 0.75)
+          const size = SIZE + total * 1.6
+          // Floor of 0.35 so a ring stays a ring at the edge of its falloff.
+          ctx.fillStyle = css(ink, Math.min(1, 0.35 + total * 0.65))
           ctx.fillRect(x - size / 2, y - size / 2, size, size)
         }
       }
@@ -157,7 +170,7 @@ export default function SandboxField() {
       const settled =
         Math.abs(pointer.tx - pointer.x) < 0.1 &&
         Math.abs(pointer.ty - pointer.y) < 0.1 &&
-        ripples.length === 0 &&
+        pulses.length === 0 &&
         !pointer.inside
       if (!visible || settled) {
         running = false
@@ -204,8 +217,8 @@ export default function SandboxField() {
 
     function onDown(event) {
       const p = toLocal(event)
-      ripples.push({ x: p.x, y: p.y, t0: performance.now() })
-      if (ripples.length > 5) ripples = ripples.slice(-5)
+      pulses.push({ x: p.x, y: p.y, t0: performance.now() })
+      if (pulses.length > 5) pulses = pulses.slice(-5)
       pointer.tx = p.x
       pointer.ty = p.y
       pointer.inside = true

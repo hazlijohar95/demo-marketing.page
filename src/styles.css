@@ -41,8 +41,12 @@
   --bx-text: #161616;
   --bx-muted: #5c5c5c;
   --bx-faint: #707070;
-  --bx-accent: #3b5cf6;
-  --bx-accent-text: #3b5cf6;
+  /* Ember. Contrast is matched to the blue this replaced, within 0.02 on every
+     accent surface (5.18/4.96/4.46 light vs blue's 5.19/4.97/4.47), so the swap
+     changes hue without changing legibility or visual weight.
+     --bx-accent is UI (focus rings, bars, borders), --bx-accent-text is type. */
+  --bx-accent: #c2410c;
+  --bx-accent-text: #c2410c;
   --bx-pattern: #dcdcdc;
   --bx-grid-dot: #0000001f;
   --bx-success: #198b43;
@@ -88,7 +92,11 @@
     --bx-text: #ffffff;
     --bx-muted: #d4d4d4;
     --bx-faint: #a3a3a3;
-    --bx-accent-text: #8190ff;
+    /* Both accent tokens lift in dark mode. --bx-accent used to inherit the
+       light value, which left the focus ring at 3.49 on #161616 — barely over
+       the 3.0 non-text minimum. The dark ember takes it to 6.46. */
+    --bx-accent: #f97316;
+    --bx-accent-text: #f97316;
     --bx-pattern: #303030;
     --bx-grid-dot: #ffffff1f;
   }
@@ -275,20 +283,20 @@
 }
 
 /* Page grid: one coordinate system behind every section instead of a stack of
-   separately-boxed bands. A 22px dot field full-bleed, plus five column rules
-   inside the container that section edges align to. Percentage stops hold the
-   column count fixed while the container stays fluid, so this needs no extra
-   DOM and no resize maths. */
+   separately-boxed bands. A 22px dot field full-bleed, plus a hairline on each
+   container edge. Interior column rules used to run here too; they cut through
+   headlines and content, so only the outer edges are ruled now. */
 [data-page="box"] {
   background-image: radial-gradient(circle at 1px 1px, var(--bx-grid-dot) 1px, transparent 0);
   background-size: 22px 22px;
 }
 
 [data-page="box"] > [data-component="container"] {
-  background-image: repeating-linear-gradient(
+  background-image: linear-gradient(
     to right,
     var(--bx-line) 0 1px,
-    transparent 1px 20%
+    transparent 1px calc(100% - 1px),
+    var(--bx-line) calc(100% - 1px) 100%
   );
 }
 
@@ -2608,7 +2616,7 @@
 
 [data-page="box"] [data-line="run"] > span {
   flex: 0 0 auto;
-  color: #8190ff;
+  color: #f97316;
 }
 
 [data-page="box"] [data-line="out"] {
@@ -3375,9 +3383,10 @@
 }
 
 /* blog ------------------------------------------------------------ */
-/* Card stack in the section shell: mono eyebrow, display h1 on the hero
-   scale, then hairline rows. Tags borrow the beta-pill box so the blog
-   inherits the square-corner vocabulary instead of inventing rounded ones. */
+/* Two views of the same archive: a lead tile plus two stacked tiles for what
+   we want read now, then a dense hairline table for everything. The post page
+   puts a sticky label in a left rail beside a single reading column, so the
+   reader keeps their place in the site while the article scrolls. */
 [data-page="box"] [data-slot="blog-intro"] {
   /* Same right edge as the cards below — 720 vs 760 reads as a misalignment
      rather than a distinction. */
@@ -3416,85 +3425,209 @@
   text-wrap: pretty;
 }
 
-[data-page="box"] [data-component="post-list"] {
-  border-top: 1px solid var(--bx-line);
+/* featured tiles --------------------------------------------------- */
+/* 2fr/1fr, and the lead spans both rows so the two small tiles stack beside
+   it at exactly its height — no fixed heights to keep in sync. */
+[data-page="box"] [data-component="post-featured"] {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+  margin-bottom: 72px;
 }
 
-[data-page="box"] [data-slot="post-card"] {
-  max-width: 760px;
-  padding: 32px 0;
-  border-bottom: 1px solid var(--bx-line);
-}
-
-[data-page="box"] [data-slot="post-tags"] {
+[data-page="box"] [data-slot="post-tile"] {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-layer);
+  color: inherit;
+  text-decoration: none;
 }
 
-/* beta-pill is built for the one-word "Beta" badge and sets `nowrap`, which
-   makes the overflow-wrap below it inert. CMS tags are real phrases, so they
-   need to wrap, and 10px is too small for a phrase. */
-[data-page="box"] [data-slot="post-tags"] [data-slot="beta-pill"] {
-  white-space: normal;
-  font-size: 11px;
+[data-page="box"] [data-slot="post-tile"][data-size="lead"] {
+  grid-row: span 2;
 }
 
-[data-page="box"] [data-slot="post-card"] h2 {
-  margin: 16px 0 12px;
+[data-page="box"] [data-slot="post-tile"]:hover {
+  border-color: var(--bx-line-strong);
+}
+
+/* The plate is the frame the cover renders into, and the CSS dot field is its
+   fallback: wherever WebGL is missing the card still reads as a card. The
+   shader canvas is absolutely positioned over it by ShaderMount.
+
+   Fixed 16:9, matching the cover's world box, so no figure crops or stretches.
+   The lead card spans two grid rows and has more height than its content needs;
+   tile-body takes that slack (below) rather than the plate, because a plate
+   grown to ~790x794 renders the cover as one giant near-square figure. */
+[data-page="box"] [data-slot="tile-plate"] {
+  position: relative;
+  flex: 0 0 auto;
+  aspect-ratio: 16 / 9;
+  border-bottom: 1px solid var(--bx-line);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 1px 1px, var(--bx-grid-dot) 1px, transparent 0) 0 0 / 22px 22px,
+    var(--bx-layer-2);
+}
+
+[data-page="box"] [data-slot="tile-plate"] canvas {
+  display: block;
+}
+
+/* A CMS cover replaces the plate and holds the same crop role, so the card
+   keeps its proportions whichever one renders. */
+[data-page="box"] [data-slot="tile-image"] {
+  width: 100%;
+  flex: 0 0 auto;
+  aspect-ratio: 16 / 9;
+  border-bottom: 1px solid var(--bx-line);
+  object-fit: cover;
+}
+
+/* The body, not the plate, absorbs a card's leftover height: the lead card
+   spans two grid rows, and without this its text sat in a short block with
+   ~350px of empty card under it. */
+[data-page="box"] [data-slot="tile-body"] {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px 20px;
+}
+
+[data-page="box"] [data-slot="tile-title"] {
   font-family: var(--bx-sans);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 500;
   line-height: 1.25;
   letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
-/* CMS titles can carry an unbreakable token (a URL, a flag, an image name).
-   Without this the card scrolls the page sideways at 320px. `min-width: 0`
-   lets the span shrink inside the inline-flex link. */
-[data-page="box"] [data-slot="post-card"] h2 span,
-[data-page="box"] [data-slot="post-header"] h1,
-[data-page="box"] [data-slot="post-description"],
-[data-page="box"] [data-slot="beta-pill"] {
-  min-width: 0;
-  overflow-wrap: anywhere;
+[data-page="box"] [data-slot="post-tile"][data-size="lead"] [data-slot="tile-title"] {
+  font-size: 26px;
 }
 
-[data-page="box"] [data-slot="post-card"] h2 a {
-  display: inline-flex;
+[data-page="box"] [data-slot="tile-excerpt"] {
+  max-width: 62ch;
+  color: var(--bx-muted);
+  font-size: 15px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+/* The trailing byline sits at the bottom of the card whatever the excerpt
+   length, so a row of tiles lines its metadata up. */
+[data-page="box"] [data-slot="tile-body"] [data-slot="post-meta"]:last-child {
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+/* archive table ---------------------------------------------------- */
+[data-page="box"] [data-component="post-archive"] [data-slot="archive-label"],
+[data-page="box"] [data-slot="rail-label"] {
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+[data-page="box"] [data-component="post-archive"] ul,
+[data-page="box"] [data-slot="post-related"] ul {
+  margin-top: 20px;
+  border-top: 1px solid var(--bx-line);
+  list-style: none;
+  padding: 0;
+}
+
+/* One row: when · title · author · read time. `minmax(0, 1fr)` on the title
+   is what lets a long CMS title truncate instead of pushing the columns. */
+[data-page="box"] [data-slot="archive-row"] {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr) 10rem 3rem 14px;
   align-items: baseline;
-  gap: 10px;
+  gap: 20px;
+  padding: 16px 4px;
+  border-bottom: 1px solid var(--bx-line);
   color: inherit;
   text-decoration: none;
-  transition: color var(--bx-dur-fast) ease;
 }
 
-[data-page="box"] [data-slot="post-card"] h2 a:hover {
-  color: var(--bx-accent-text);
+[data-page="box"] [data-slot="post-related"] [data-slot="archive-row"] {
+  grid-template-columns: 11rem minmax(0, 1fr) 3rem 14px;
 }
 
-[data-page="box"] [data-slot="post-card"] h2 svg,
-[data-page="box"] [data-slot="post-back"] svg {
+[data-page="box"] [data-slot="archive-row"]:hover {
+  background: var(--bx-layer);
+}
+
+[data-page="box"] [data-slot="row-when"],
+[data-page="box"] [data-slot="row-author"],
+[data-page="box"] [data-slot="row-time"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-page="box"] [data-slot="row-time"] {
+  justify-content: end;
+}
+
+/* Truncation, not wrapping: the value of this view is that every row is one
+   line tall, so 40 rows scan as a table. */
+[data-page="box"] [data-slot="row-title"],
+[data-page="box"] [data-slot="row-author"] {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="row-title"] {
+  font-size: 16px;
+}
+
+[data-page="box"] [data-slot="archive-row"] svg {
   flex: 0 0 auto;
   width: 14px;
   height: 14px;
+  color: var(--bx-faint);
+  opacity: 0;
 }
 
-[data-page="box"] [data-slot="post-description"] {
-  max-width: 62ch;
-  color: var(--bx-muted);
-  /* This is body copy, not a caption — 15px put the list's only prose below
-     the 16px floor the post body already holds. */
-  font-size: 16px;
-  line-height: 1.6;
-  text-wrap: pretty;
+[data-page="box"] [data-slot="archive-row"]:hover svg {
+  opacity: 1;
+}
+
+[data-page="box"] [data-slot="related-more"] {
+  margin-top: 20px;
+  font-family: var(--bx-mono);
+  font-size: 13px;
+}
+
+[data-page="box"] [data-slot="related-more"] a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--bx-accent-text);
+  text-decoration: none;
+}
+
+[data-page="box"] [data-slot="related-more"] svg {
+  width: 12px;
+  height: 12px;
 }
 
 [data-page="box"] [data-slot="post-meta"] {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 20px;
   color: var(--bx-faint);
   font-family: var(--bx-mono);
   font-size: 12px;
@@ -3522,16 +3655,57 @@
 /* Arrows travel on hover; `translate` keeps clear of the reveal's own
    translate on the card. Motion-safe only. */
 @media (prefers-reduced-motion: no-preference) {
-  [data-page="box"] [data-slot="post-card"] h2 svg,
-  [data-page="box"] [data-slot="post-back"] svg {
-    transition: translate var(--bx-dur-fast) var(--bx-ease-out);
+  [data-page="box"] [data-slot="post-tile"] {
+    transition: border-color var(--bx-dur-fast) ease;
   }
-  [data-page="box"] [data-slot="post-card"] h2 a:hover svg {
-    translate: 2px -2px;
+  [data-page="box"] [data-slot="archive-row"] {
+    transition: background var(--bx-dur-fast) ease;
+  }
+  [data-page="box"] [data-slot="archive-row"] svg,
+  [data-page="box"] [data-slot="post-back"] svg,
+  [data-page="box"] [data-slot="related-more"] svg {
+    transition:
+      opacity var(--bx-dur-fast) ease,
+      translate var(--bx-dur-fast) var(--bx-ease-out);
   }
   [data-page="box"] [data-slot="post-back"] a:hover svg {
     translate: -3px 0;
   }
+  [data-page="box"] [data-slot="related-more"] a:hover svg {
+    translate: 2px -2px;
+  }
+}
+
+/* post page ------------------------------------------------------- */
+/* 24 columns like the reference grid: rail 1–6, reading column 7–19. The
+   article stays off-centre on purpose — a centred column with an empty left
+   rail reads as a layout bug. */
+[data-page="box"] [data-component="post-layout"] {
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  column-gap: 10px;
+}
+
+[data-page="box"] [data-component="post-layout"] > [data-slot="post-rail"] {
+  grid-column: 1 / 7;
+}
+
+[data-page="box"] [data-component="post-layout"] > [data-slot="post-column"] {
+  grid-column: 7 / 20;
+  min-width: 0;
+}
+
+[data-page="box"] [data-slot="post-related"] {
+  margin-top: 96px;
+  padding-top: 40px;
+  border-top: 1px solid var(--bx-line);
+}
+
+/* The rail label follows the reader down the article, and stops clear of the
+   sticky bar. */
+[data-page="box"] [data-slot="post-rail"] > * {
+  position: sticky;
+  top: calc(var(--bx-bar-h) + 24px);
 }
 
 [data-page="box"] [data-slot="post-back"],
@@ -3553,6 +3727,12 @@
   color: var(--bx-text);
 }
 
+[data-page="box"] [data-slot="post-back"] svg {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+}
+
 [data-page="box"] [data-slot="post-preview"] {
   margin-bottom: 16px;
   padding: 8px 12px;
@@ -3561,21 +3741,38 @@
 }
 
 [data-page="box"] [data-slot="post-header"] {
-  max-width: 68ch;
-  margin: 24px 0 40px;
+  margin: 0 0 48px;
+}
+
+/* The article's own cover, on the same 16:9 plate as the lead tile so the post
+   opens on the picture the reader just clicked. */
+[data-page="box"] [data-slot="post-hero"] {
+  margin-bottom: 48px;
+  aspect-ratio: 16 / 9;
+}
+
+[data-page="box"] [data-slot="post-hero"] > * {
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--bx-line);
+  border-radius: 0;
+}
+
+[data-page="box"] [data-slot="post-hero"] img {
+  object-fit: cover;
 }
 
 [data-page="box"] [data-slot="post-header"] h1 {
-  margin-top: 16px;
+  margin-top: 12px;
   font-family: var(--bx-sans);
-  font-size: clamp(28px, 7vw, 40px);
+  font-size: clamp(28px, 5vw, 38px);
   font-weight: 500;
   line-height: 1.12;
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
 
-[data-page="box"] [data-slot="post-header"] > p {
+[data-page="box"] [data-slot="post-header"] > p:not([data-slot]) {
   margin-top: 16px;
   color: var(--bx-muted);
   font-size: 18px;
@@ -3583,12 +3780,95 @@
   text-wrap: pretty;
 }
 
-[data-page="box"] [data-slot="post-header"] [data-slot="post-meta"] {
+/* Author initials in place of an avatar: the CMS byline has no image, and a
+   generic placeholder photo is worse than a mono monogram. */
+[data-page="box"] [data-slot="post-byline"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
   font-size: 12px;
 }
 
-[data-page="box"] [data-slot="post-header"] [data-slot="post-tags"] {
-  margin-bottom: 16px;
+[data-page="box"] [data-slot="byline-mark"] {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-layer-2);
+  color: var(--bx-muted);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+[data-page="box"] [data-slot="post-tags"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 20px;
+}
+
+/* beta-pill is built for the one-word "Beta" badge and sets `nowrap`, which
+   makes the overflow-wrap below it inert. CMS tags are real phrases, so they
+   need to wrap, and 10px is too small for a phrase. */
+[data-page="box"] [data-slot="post-tags"] [data-slot="beta-pill"] {
+  white-space: normal;
+  font-size: 11px;
+}
+
+/* CMS titles can carry an unbreakable token (a URL, a flag, an image name).
+   Without this the header scrolls the page sideways at 320px. */
+[data-page="box"] [data-slot="post-header"] h1,
+[data-page="box"] [data-slot="tile-title"],
+[data-page="box"] [data-slot="tile-excerpt"],
+[data-page="box"] [data-slot="beta-pill"] {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* One breakpoint collapses both rails: below this the reading column would be
+   too narrow to hold a line of prose. */
+@media (max-width: 64rem) {
+  [data-page="box"] [data-component="post-layout"] {
+    display: block;
+  }
+  [data-page="box"] [data-slot="post-rail"] > * {
+    position: static;
+  }
+  [data-page="box"] [data-slot="post-rail"] {
+    margin-bottom: 28px;
+  }
+  [data-page="box"] [data-component="post-featured"] {
+    grid-template-columns: 1fr;
+  }
+  [data-page="box"] [data-slot="post-tile"][data-size="lead"] {
+    grid-row: auto;
+  }
+  [data-page="box"] [data-slot="archive-row"] {
+    grid-template-columns: minmax(0, 1fr) 3rem;
+  }
+  [data-page="box"] [data-slot="row-when"] {
+    grid-row: 1;
+    grid-column: 1 / 3;
+  }
+  [data-page="box"] [data-slot="row-title"] {
+    grid-column: 1 / 3;
+    white-space: normal;
+  }
+  /* The author has no column of its own once the row wraps, and the arrow is
+     a hover affordance a touch screen never shows. */
+  [data-page="box"] [data-slot="row-author"],
+  [data-page="box"] [data-slot="archive-row"] svg {
+    display: none;
+  }
+  [data-page="box"] [data-slot="row-time"] {
+    grid-row: 1;
+    grid-column: 2;
+  }
 }
 
 [data-page="box"] [data-component="prose"] {
@@ -3741,8 +4021,8 @@
   [data-page="box"] [data-slot="blog-intro"] {
     margin-bottom: 36px;
   }
-  [data-page="box"] [data-slot="post-card"] {
-    padding-block: 28px;
+  [data-page="box"] [data-component="post-featured"] {
+    margin-bottom: 48px;
   }
   /* ponytail: display:block turns the table into its own scroller instead of
      adding a wrapper element PortableText does not emit. Narrow screens only,
