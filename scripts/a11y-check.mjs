@@ -11,7 +11,9 @@ import test from "node:test"
 const html = readFileSync(new URL("../dist/client/index.html", import.meta.url), "utf8")
 const css = readFileSync(
   new URL(
-    `../dist/client/_astro/${/href="\/_astro\/(index\.[^"]+\.css)"/.exec(html)[1]}`,
+    // Chunk names are a bundler detail (index.*, SiteFooter.*, …) — match any
+    // emitted stylesheet the landing page links, not a specific chunk name.
+    `../dist/client/_astro/${/href="\/_astro\/([^"]+\.css)"/.exec(html)[1]}`,
     import.meta.url,
   ),
   "utf8",
@@ -125,4 +127,24 @@ test("fixed chrome accounts for safe areas", () => {
   assert.ok(css.includes("env(safe-area-inset-bottom)"))
   // The skip link must not scroll away from the viewport it overlays.
   assert.match(css, /\.skip-link\{[^}]*position:fixed/)
+})
+
+test("scroll depth degrades to nothing, never to a frozen dim page", () => {
+  // Both guards are load-bearing. Without @supports, a browser that drops
+  // `animation-timeline` still runs the animation — as 0s, with fill `both`,
+  // which pins every section at its last keyframe: the whole page at half
+  // opacity, shifted up. Without the reduced-motion guard it moves for readers
+  // who asked it not to.
+  const guard = /@supports \(animation-timeline:view\(\)\)\{@media \(prefers-reduced-motion:no-preference\)\{([^@]*)\}\}/.exec(css)
+  assert.ok(guard, "the scroll-depth block lost @supports or its reduced-motion guard")
+  // The minifier reorders shorthand values, so match on the parts.
+  assert.match(guard[1], /animation:[^;]*bx-section-depth/)
+  assert.match(guard[1], /animation:[^;]*linear/)
+  assert.match(guard[1], /animation:[^;]*both/)
+  assert.match(guard[1], /animation-timeline:view\(\)/)
+  // The hero is above the fold at first paint: it recedes, it never arrives.
+  assert.match(guard[1], /\[data-section="?hero"?\]\{animation-name:bx-section-recede\}/)
+  // Sections hold full presence across every height's "covering" phase, so the
+  // dim only ever lands on a section that is marginal at a viewport edge.
+  assert.match(css, /@keyframes bx-section-depth\{0%\{[^}]*\}33%,72%\{opacity:1/)
 })

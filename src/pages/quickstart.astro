@@ -1,0 +1,24 @@
+---
+import Layout from "../layouts/Layout.astro"
+import SiteHeader from "../components/SiteHeader.jsx"
+import SiteFooter from "../components/SiteFooter.jsx"
+import Quickstart from "../components/Quickstart.jsx"
+
+export const prerender = true
+---
+
+<Layout
+  title="SDK quickstart — BoxCompute"
+  description="Register for BoxCompute, install an official SDK, run a command in a Sandbox, and clean up. TypeScript and Python, ~5 minutes."
+>
+  <div data-page="box" id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader client:load />
+    <div data-component="container">
+      <main id="main" tabindex="-1">
+        <Quickstart client:load />
+      </main>
+      <SiteFooter client:visible />
+    </div>
+  </div>
+</Layout>

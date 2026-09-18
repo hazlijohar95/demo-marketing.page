@@ -10,6 +10,11 @@ export default defineConfig({
   // the Worker. The landing page opts back out with `prerender = true`.
   output: "server",
   adapter: cloudflare(),
+  // Docs pages render Markdown with our own terminal-styled code blocks, so
+  // Shiki's inline themes stay off and can't fight the design tokens.
+  markdown: {
+    syntaxHighlight: false,
+  },
   integrations: [
     react(),
     emdash({

@@ -1,0 +1,145 @@
+---
+import Layout from "./Layout.astro"
+import SiteHeader from "../components/SiteHeader.jsx"
+import SiteFooter from "../components/SiteFooter.jsx"
+
+interface Props {
+  frontmatter: {
+    title: string
+    description?: string
+  }
+}
+
+const { title, description } = Astro.props.frontmatter
+
+const GROUPS: { label: string; links: { href: string; label: string }[] }[] = [
+  {
+    label: "Start",
+    links: [
+      { href: "/quickstart/", label: "SDK quickstart" },
+      { href: "/docs/api-keys/", label: "API keys" },
+    ],
+  },
+  {
+    label: "CLI",
+    links: [
+      { href: "/docs/cli/", label: "BoxCompute CLI" },
+      { href: "/docs/cli/quickstart/", label: "CLI quickstart" },
+      { href: "/docs/cli/commands/", label: "Command reference" },
+      { href: "/docs/cli/agents/", label: "Connect coding agents" },
+    ],
+  },
+  {
+    label: "Guides",
+    links: [
+      { href: "/docs/sandboxes/", label: "Manage Sandboxes" },
+      { href: "/docs/execute/", label: "Execute commands" },
+      { href: "/docs/vm-sandbox-beta/", label: "VM Sandboxes (Beta)" },
+      { href: "/docs/files/", label: "Manage files" },
+      { href: "/docs/logs/", label: "Read Sandbox logs" },
+      { href: "/docs/integrations/", label: "Integration guides" },
+      { href: "/docs/integrations/hermes/", label: "Hermes Agent + VMs" },
+    ],
+  },
+  {
+    label: "Reference",
+    links: [
+      { href: "/docs/http-api/", label: "HTTP API reference" },
+      { href: "/docs/limits-and-errors/", label: "Limits and errors" },
+    ],
+  },
+]
+
+const flat = GROUPS.flatMap((g) => g.links)
+// Trailing-slash-insensitive match so /docs/cli and /docs/cli/ both light up.
+const here = Astro.url.pathname.replace(/\/$/, "") || "/"
+const at = flat.findIndex((l) => l.href.replace(/\/$/, "") === here)
+const prev = at > 0 ? flat[at - 1] : null
+const next = at >= 0 && at < flat.length - 1 ? flat[at + 1] : null
+---
+
+<Layout title={`${title} — BoxCompute Docs`} description={description}>
+  <div data-page="box" id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader client:load />
+    <div data-component="container">
+      <div data-component="docs-layout">
+        <aside data-component="docs-side" aria-label="Documentation sections">
+          <nav aria-label="Docs">
+            {
+              GROUPS.map((group) => (
+                <div data-slot="docs-group">
+                  <p data-slot="docs-group-label">{group.label}</p>
+                  <ul>
+                    {group.links.map((link) => {
+                      const current = link.href.replace(/\/$/, "") === here
+                      return (
+                        <li>
+                          <a
+                            href={link.href}
+                            data-current={current ? "true" : undefined}
+                            aria-current={current ? "page" : undefined}
+                          >
+                            {link.label}
+                          </a>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              ))
+            }
+          </nav>
+        </aside>
+        <main id="main" tabindex="-1">
+          <details data-component="docs-toc">
+            <summary>Sections</summary>
+            <nav aria-label="Docs">
+              {
+                GROUPS.map((group) => (
+                  <div data-slot="docs-group">
+                    <p data-slot="docs-group-label">{group.label}</p>
+                    <ul>
+                      {group.links.map((link) => (
+                        <li>
+                          <a href={link.href}>{link.label}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))
+              }
+            </nav>
+          </details>
+          <p data-slot="docs-back">
+            <a href="/docs/">Docs</a> <span aria-hidden="true">/</span> {title}
+          </p>
+          <div data-component="prose" data-docs="true">
+            <slot />
+          </div>
+          {
+            prev || next ? (
+              <nav data-component="docs-pager" aria-label="More docs">
+                {prev ? (
+                  <a href={prev.href} rel="prev">
+                    <span>Previous</span>
+                    <strong>{prev.label}</strong>
+                  </a>
+                ) : (
+                  <span />
+                )}
+                {next ? (
+                  <a href={next.href} rel="next">
+                    <span>Next</span>
+                    <strong>{next.label}</strong>
+                  </a>
+                ) : null}
+              </nav>
+            ) : null
+          }
+        </main>
+      </div>
+      <SiteFooter client:visible />
+    </div>
+  </div>
+</Layout>

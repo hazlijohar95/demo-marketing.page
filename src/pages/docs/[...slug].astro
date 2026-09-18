@@ -1,0 +1,25 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro"
+
+// Markdown sources live in src/content/docs (plain files, no collection
+// config). This rest route prerenders one static page per file so every
+// doc is edge-cacheable HTML, like the landing page and quickstart.
+export const prerender = true
+
+export async function getStaticPaths() {
+  const modules = import.meta.glob("../../content/docs/**/*.md")
+  return Object.keys(modules).map((path) => ({
+    params: {
+      slug: path.replace("../../content/docs/", "").replace(/\.md$/, ""),
+    },
+    props: { load: modules[path] },
+  }))
+}
+
+const { load } = Astro.props
+const { frontmatter, Content } = await load()
+---
+
+<DocsLayout frontmatter={frontmatter}>
+  <Content />
+</DocsLayout>

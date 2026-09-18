@@ -2431,6 +2431,79 @@
   }
 }
 
+/* Scroll depth. [data-reveal] is a one-shot: an element arrives and is done, so
+   the page reads as one flat plane the whole way down. This puts the sections on
+   separate planes instead — whichever one the viewport is on sits at full
+   presence and its neighbours hold back, so scrolling feels like moving through
+   the page rather than past it. Continuous, reversible, and tied to scroll
+   position rather than to a threshold that fires once.
+
+   `animation-timeline: view()` drives it: no scroll listener, no rAF, no JS at
+   all, and it runs off the main thread, so it keeps its frames while the
+   console island and the shader canvases are still booting. Scroll position is
+   the clock, which is why the timing function is `linear` — the shaping lives
+   in the keyframe stops, not in a curve.
+
+   Travel and opacity only, no `scale`: the 22px dot grid behind every section
+   does not scale with it, and content zooming against a fixed grid reads as
+   wobble. It would also soften the console's mono text and the shader canvases
+   mid-scroll. Vertical drift against a pinned grid reads as parallax instead,
+   and it keeps the grid coordinate system this page is built on intact.
+
+   The stops are proportional to the timeline (entering → covering → leaving),
+   which varies with section height: a viewport-tall section finishes entering
+   at 50%, a two-viewport section at 33%. Holding full presence over 33%–72%
+   covers that whole range, so a section is never dimmed while it is the thing
+   being read — only while it is marginal at the top or bottom edge.
+
+   The @supports guard is load-bearing, not optimistic. Where
+   `animation-timeline` is unsupported the declaration is dropped but the
+   animation is not: it would run as a 0s time-based animation and `both` would
+   freeze every section at its final keyframe — the whole page stuck at half
+   opacity, shifted up. Unsupported has to mean no animation, not a broken one. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-page="box"] [data-section] {
+      animation: bx-section-depth linear both;
+      animation-timeline: view();
+    }
+    /* The hero is already on screen at first paint, so it has no arrival to
+       animate — a tall hero would otherwise render its own entry phase as a
+       dimmed above-the-fold first frame. It only recedes. */
+    [data-page="box"] [data-section="hero"] {
+      animation-name: bx-section-recede;
+    }
+  }
+}
+
+@keyframes bx-section-depth {
+  0% {
+    opacity: 0.5;
+    translate: 0 18px;
+  }
+  33%,
+  72% {
+    opacity: 1;
+    translate: none;
+  }
+  100% {
+    opacity: 0.5;
+    translate: 0 -18px;
+  }
+}
+
+@keyframes bx-section-recede {
+  0%,
+  72% {
+    opacity: 1;
+    translate: none;
+  }
+  100% {
+    opacity: 0.5;
+    translate: 0 -18px;
+  }
+}
+
 /* Selection readouts and inspector panels: the chrome around them
    already animates on click, the payload used to hard-swap. 2–6px of
    travel, not 8 — these sit right next to what was just clicked.
@@ -4040,5 +4113,560 @@
   [data-page="box"] [data-component="prose"] pre,
   [data-page="box"] [data-component="prose"] .emdash-code pre[class] {
     border-inline: 0;
+  }
+}
+
+/* quickstart ------------------------------------------------------------ */
+[data-page="box"] [data-slot="qs-title"] {
+  max-width: 20ch;
+  color: var(--bx-muted);
+  font-size: clamp(32px, 4.6vw, 56px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+[data-page="box"] [data-slot="qs-title"] strong {
+  color: var(--bx-text);
+  font-weight: 500;
+}
+
+[data-page="box"] [data-slot="qs-lede"] {
+  max-width: 62ch;
+  margin-top: 18px;
+  color: var(--bx-muted);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+[data-page="box"] [data-slot="qs-meta"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 0;
+  list-style: none;
+}
+
+[data-page="box"] [data-slot="qs-meta"] li {
+  padding: 6px 12px;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-layer);
+  color: var(--bx-muted);
+  font-family: var(--bx-mono);
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+[data-page="box"] [data-section="qs-hero"] [data-slot="hero-actions"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+[data-page="box"] [data-component="qs-toc"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 20px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--bx-line);
+  font-family: var(--bx-mono);
+  font-size: 13px;
+}
+
+[data-page="box"] [data-component="qs-toc"] > span {
+  color: var(--bx-faint);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+[data-page="box"] [data-component="qs-toc"] a {
+  color: var(--bx-muted);
+  padding-block: 6px;
+}
+
+[data-page="box"] [data-component="qs-toc"] a:hover {
+  color: var(--bx-accent-text);
+}
+
+[data-page="box"] [data-component="qs-callout"] {
+  display: block;
+  margin-top: 20px;
+  padding: 16px 20px;
+  border: 1px solid var(--bx-line);
+  border-inline-start: 2px solid var(--bx-accent);
+  background: var(--bx-layer);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--bx-muted);
+}
+
+[data-page="box"] [data-component="qs-callout"] strong {
+  color: var(--bx-text);
+  font-weight: 600;
+}
+
+[data-page="box"] [data-component="qs-callout"] a {
+  color: var(--bx-accent-text);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+[data-page="box"] [data-component="qs-callout"] a svg {
+  width: 12px;
+  height: 12px;
+  vertical-align: -1px;
+}
+
+[data-page="box"] [data-component="qs-callout"][data-tone="warn"] {
+  border-inline-start-color: #d69a00;
+}
+
+[data-page="box"] [data-slot="qs-step-tag"] {
+  flex: 0 0 auto;
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-page="box"] [data-slot="qs-scopes"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 20px 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-page="box"] [data-slot="qs-scopes"] code {
+  display: inline-block;
+  padding: 7px 12px;
+  border: 1px solid var(--bx-line-strong);
+  background: var(--bx-layer);
+  color: var(--bx-text);
+  font-family: var(--bx-mono);
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+[data-page="box"] [data-slot="qs-body"] {
+  max-width: 68ch;
+  margin-top: 20px;
+  color: var(--bx-muted);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+[data-page="box"] [data-slot="qs-body"] a,
+[data-page="box"] [data-section="qs-step"] [data-component="qs-callout"] a,
+[data-page="box"] [data-slot="qs-alt"] a {
+  color: var(--bx-accent-text);
+}
+
+[data-page="box"] [data-slot="qs-body"] a svg,
+[data-page="box"] [data-slot="qs-alt"] a svg {
+  width: 12px;
+  height: 12px;
+  vertical-align: -1px;
+}
+
+[data-page="box"] [data-slot="qs-body"] code,
+[data-page="box"] [data-section="qs-step"] [data-component="qs-callout"] code {
+  padding: 0.1em 0.32em;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-bg);
+  font-family: var(--bx-mono);
+  font-size: 0.875em;
+}
+
+/* Code figure: dark terminal on both themes, same voice as the demo run. */
+[data-page="box"] [data-component="qs-code"] {
+  margin: 20px 0 0;
+  border: 1px solid var(--bx-line-strong);
+  background: #161616;
+  color: #e8e8e8;
+  box-shadow:
+    0 0 0 0.5px var(--bx-line),
+    0 16px 40px -16px rgb(0 0 0 / 0.25),
+    0 4px 12px rgb(0 0 0 / 0.08);
+}
+
+[data-page="box"] [data-slot="qs-code-head"] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px 10px 16px;
+  border-bottom: 1px solid #ffffff1a;
+  font-family: var(--bx-mono);
+  font-size: 12px;
+}
+
+[data-page="box"] [data-slot="qs-code-file"] {
+  color: #ffffff;
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="qs-code-caption"] {
+  color: #a3a3a3;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="qs-code-lang"] {
+  margin-inline-start: auto;
+  padding: 4px 8px;
+  border: 1px solid #ffffff1a;
+  color: #a3a3a3;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+[data-page="box"] [data-slot="qs-code-head"] [data-slot="qs-code-lang"] + [data-slot="qs-copy"] {
+  margin-inline-start: -4px;
+}
+
+[data-page="box"] [data-slot="qs-copy"] {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  margin-inline-start: auto;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 0;
+  appearance: none;
+  background: transparent;
+  color: #a3a3a3;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+[data-page="box"] [data-slot="qs-copy"]:hover {
+  background: #ffffff14;
+  color: #ffffff;
+}
+
+[data-page="box"] [data-slot="qs-copy"] svg {
+  width: 13px;
+  height: 13px;
+}
+
+[data-page="box"] [data-component="qs-code"] pre {
+  margin: 0;
+  padding: 18px 16px;
+  overflow-x: auto;
+  font-family: var(--bx-mono);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+[data-page="box"] [data-component="qs-code"] code {
+  font-family: inherit;
+  white-space: pre;
+}
+
+[data-page="box"] [data-component="qs-grid"] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-page="box"] [data-component="qs-grid"] [data-component="leader-card"] h3 {
+  font-size: 14px;
+}
+
+[data-page="box"] [data-component="qs-grid"] [data-component="leader-card"] svg {
+  color: var(--bx-faint);
+}
+
+[data-page="box"] [data-slot="qs-card-link"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+[data-page="box"] [data-slot="qs-alt"] {
+  margin-top: 24px;
+  color: var(--bx-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 47.999rem) {
+  [data-page="box"] [data-slot="qs-step-tag"] {
+    display: none;
+  }
+  [data-page="box"] [data-slot="qs-code-caption"] {
+    display: none;
+  }
+}
+
+/* docs hub ------------------------------------------------------------ */
+[data-page="box"] [data-component="qs-groups"] {
+  display: grid;
+  gap: 48px;
+}
+
+[data-page="box"] [data-slot="qs-group"] > [data-slot="section-title"] {
+  margin-block: 0 20px;
+}
+
+[data-page="box"] [data-slot="qs-group"] > [data-slot="section-eyebrow"] {
+  margin-block: 0 12px;
+}
+
+/* docs pages ------------------------------------------------------------ */
+[data-page="box"] [data-component="docs-layout"] {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 48px;
+  align-items: start;
+  box-sizing: border-box;
+  padding: var(--bx-section-pad);
+  box-shadow:
+    inset 0 -1px var(--bx-line),
+    inset 1px 0 var(--bx-line),
+    inset -1px 0 var(--bx-line);
+}
+
+[data-page="box"] [data-component="docs-side"] {
+  position: sticky;
+  top: calc(var(--bx-bar-h) + 24px);
+  max-height: calc(100vh - var(--bx-bar-h) - 48px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+[data-page="box"] [data-slot="docs-group"] + [data-slot="docs-group"] {
+  margin-top: 24px;
+}
+
+[data-page="box"] [data-slot="docs-group-label"] {
+  margin: 0 0 8px;
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+[data-page="box"] [data-component="docs-side"] ul,
+[data-page="box"] [data-component="docs-toc"] ul {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-page="box"] [data-component="docs-side"] a {
+  display: block;
+  padding: 7px 12px;
+  border-inline-start: 1px solid var(--bx-line);
+  color: var(--bx-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+[data-page="box"] [data-component="docs-side"] a:hover {
+  color: var(--bx-text);
+  background: var(--bx-layer);
+}
+
+[data-page="box"] [data-component="docs-side"] a[data-current] {
+  border-inline-start: 2px solid var(--bx-accent);
+  color: var(--bx-text);
+  font-weight: 500;
+}
+
+[data-page="box"] [data-component="docs-toc"] {
+  display: none;
+  margin-bottom: 24px;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-layer);
+  font-size: 13px;
+}
+
+[data-page="box"] [data-component="docs-toc"] summary {
+  padding: 12px 16px;
+  color: var(--bx-text);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+[data-page="box"] [data-component="docs-toc"] nav {
+  padding: 0 16px 16px;
+}
+
+[data-page="box"] [data-component="docs-toc"] [data-slot="docs-group-label"] {
+  margin-top: 16px;
+}
+
+[data-page="box"] [data-component="docs-toc"] a {
+  display: block;
+  padding: 6px 0;
+  color: var(--bx-muted);
+}
+
+[data-page="box"] [data-slot="docs-back"] {
+  margin: 0 0 16px;
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 13px;
+}
+
+[data-page="box"] [data-slot="docs-back"] a {
+  color: var(--bx-accent-text);
+}
+
+/* Docs prose builds on the shared prose rules and adds the doc voice:
+   a set title, ruled section breaks, and the dark terminal code blocks
+   the quickstart page uses. */
+[data-page="box"] [data-component="prose"][data-docs] {
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+[data-page="box"] [data-component="prose"][data-docs] h1 {
+  max-width: 22ch;
+  color: var(--bx-text);
+  font-family: var(--bx-sans);
+  font-size: clamp(30px, 3.6vw, 44px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+[data-page="box"] [data-component="prose"][data-docs] h2 {
+  margin-block: 48px 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--bx-line);
+  color: var(--bx-text);
+  font-family: var(--bx-sans);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+[data-page="box"] [data-component="prose"][data-docs] h3 {
+  margin-block: 32px 12px;
+  color: var(--bx-text);
+  font-family: var(--bx-sans);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+[data-page="box"] [data-component="prose"][data-docs] h4 {
+  margin-block: 24px 8px;
+  color: var(--bx-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+[data-page="box"] [data-component="prose"][data-docs] :is(h1, h2, h3, h4) {
+  scroll-margin-top: calc(var(--bx-bar-h) + 16px);
+  overflow-wrap: anywhere;
+}
+
+[data-page="box"] [data-component="prose"][data-docs] pre {
+  padding: 16px;
+  border: 1px solid var(--bx-line-strong);
+  background: #161616;
+  color: #e8e8e8;
+  overflow-x: auto;
+  box-shadow:
+    0 0 0 0.5px var(--bx-line),
+    0 16px 40px -16px rgb(0 0 0 / 0.25);
+}
+
+[data-page="box"] [data-component="prose"][data-docs] pre code {
+  color: inherit;
+  white-space: pre;
+}
+
+[data-page="box"] [data-component="docs-layout"] [data-component="prose"][data-docs] blockquote {
+  border: 1px solid var(--bx-line);
+  border-inline-start: 2px solid var(--bx-accent);
+  background: var(--bx-layer);
+  padding: 12px 16px;
+  color: var(--bx-muted);
+  font-size: 14px;
+}
+
+[data-page="box"] [data-component="docs-layout"] [data-component="prose"][data-docs] blockquote strong {
+  color: var(--bx-text);
+}
+
+[data-page="box"] [data-component="docs-pager"] {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--bx-line);
+}
+
+[data-page="box"] [data-component="docs-pager"] a {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-bg);
+}
+
+[data-page="box"] [data-component="docs-pager"] a:hover {
+  border-color: var(--bx-line-strong);
+}
+
+[data-page="box"] [data-component="docs-pager"] a:last-child {
+  text-align: end;
+}
+
+[data-page="box"] [data-component="docs-pager"] span {
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+[data-page="box"] [data-component="docs-pager"] strong {
+  color: var(--bx-text);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+@media (max-width: 64rem) {
+  [data-page="box"] [data-component="docs-layout"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  [data-page="box"] [data-component="docs-side"] {
+    display: none;
+  }
+  [data-page="box"] [data-component="docs-toc"] {
+    display: block;
   }
 }

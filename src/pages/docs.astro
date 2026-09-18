@@ -1,0 +1,150 @@
+---
+import Layout from "../layouts/Layout.astro"
+import ArrowUpRight from "../components/ArrowUpRight.astro"
+import SiteHeader from "../components/SiteHeader.jsx"
+import SiteFooter from "../components/SiteFooter.jsx"
+
+export const prerender = true
+
+const DOCS = "/docs"
+
+const GROUPS = [
+  {
+    eyebrow: "start here",
+    title: "Start here.",
+    id: "start",
+    items: [
+      {
+        title: "SDK quickstart",
+        body: "Register, install an official SDK, run a command in a Sandbox, and clean up. ~5 min.",
+        href: "/quickstart/",
+      },
+      {
+        title: "API keys",
+        body: "Create, store, scope, use, and revoke API keys safely.",
+        href: `${DOCS}/api-keys/`,
+      },
+      {
+        title: "BoxCompute CLI",
+        body: "Terminal and coding-agent workflows: install, commands, and agent setup.",
+        href: `${DOCS}/cli/quickstart/`,
+      },
+    ],
+  },
+  {
+    eyebrow: "build",
+    title: "Build.",
+    id: "build",
+    items: [
+      {
+        title: "Manage Sandboxes",
+        body: "Create and list workspaces, then create, inspect, and delete Sandbox instances.",
+        href: `${DOCS}/sandboxes/`,
+      },
+      {
+        title: "Execute commands",
+        body: "Run a bounded command synchronously or as an independently observable operation.",
+        href: `${DOCS}/execute/`,
+      },
+      {
+        title: "Manage files",
+        body: "Read, write, inspect, list, create, edit, rename, and remove paths in a Sandbox.",
+        href: `${DOCS}/files/`,
+      },
+      {
+        title: "Read Sandbox logs",
+        body: "Query current or retained workload and command output without starting compute.",
+        href: `${DOCS}/logs/`,
+      },
+      {
+        title: "VM Sandboxes (Beta)",
+        body: "Create and manage VM sandboxes: execution, file transfer, network selection, cleanup.",
+        href: `${DOCS}/vm-sandbox-beta/`,
+      },
+      {
+        title: "Integration guides",
+        body: "Connect a supported agent framework, including Hermes Agent with VM Sandboxes.",
+        href: `${DOCS}/integrations/`,
+      },
+    ],
+  },
+  {
+    eyebrow: "reference",
+    title: "Reference.",
+    id: "reference",
+    items: [
+      {
+        title: "HTTP API reference",
+        body: "Public v2 routes, authentication, request bodies, and response shapes.",
+        href: `${DOCS}/http-api/`,
+      },
+      {
+        title: "Limits, errors, and unsupported features",
+        body: "Public API input limits and HTTP failure behavior.",
+        href: `${DOCS}/limits-and-errors/`,
+      },
+    ],
+  },
+]
+---
+
+<Layout
+  title="Docs — BoxCompute"
+  description="Guides and references for BoxCompute: SDK quickstart, Sandboxes, execution, files, logs, CLI, integrations, and the HTTP API."
+>
+  <div data-page="box" id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader client:load />
+    <div data-component="container">
+      <main id="main" tabindex="-1">
+        <section data-section="qs-hero" aria-labelledby="docs-title">
+          <div>
+            <p data-slot="section-eyebrow">
+              <span aria-hidden="true">#</span> docs
+            </p>
+            <h1 id="docs-title" data-slot="qs-title">
+              Everything to ship with <strong>BoxCompute.</strong>
+            </h1>
+            <p data-slot="qs-lede">
+              The SDK quickstart is a guided, interactive page. The rest live here too, as
+              focused guides and references — every card below takes you to the right page.
+            </p>
+          </div>
+        </section>
+        <section data-section="qs-docs" aria-label="Documentation index">
+          <div data-component="qs-groups">
+            {
+              GROUPS.map((group) => (
+                <div data-slot="qs-group" aria-labelledby={`docs-${group.id}`}>
+                  <p data-slot="section-eyebrow">
+                    <span aria-hidden="true">#</span> {group.eyebrow}
+                  </p>
+                  <h2 data-slot="section-title" id={`docs-${group.id}`}>
+                    <strong>{group.title}</strong>
+                  </h2>
+                  <ul data-component="qs-grid">
+                    {group.items.map((item, i) => (
+                      <li data-component="leader-card">
+                        <div data-slot="card-top">
+                          <span data-slot="rank">{String(i + 1).padStart(2, "0")}</span>
+                          <ArrowUpRight />
+                        </div>
+                        <h3>
+                          <a href={item.href} data-slot="qs-card-link">
+                            {item.title}
+                          </a>
+                        </h3>
+                        <p>{item.body}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))
+            }
+          </div>
+        </section>
+      </main>
+      <SiteFooter client:visible />
+    </div>
+  </div>
+</Layout>
