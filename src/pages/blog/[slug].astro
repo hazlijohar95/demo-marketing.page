@@ -89,6 +89,20 @@ const related = (recent ?? [])
 ---
 
 <Layout title={seo.title} description={seo.description}>
+  {/* BlogPosting structured data. JSON-LD in body is valid; values come from
+      the same post fields as the visible header so the two can't disagree. */}
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: post.data.title,
+      description: post.data.excerpt ?? seo.description,
+      ...(coverImage ? { image: [new URL(coverImage, Astro.url.origin).href] } : {}),
+      ...(publishedIso ? { datePublished: publishedIso } : {}),
+      ...(author ? { author: { "@type": "Person", name: author } } : {}),
+    })}
+  />
   <div data-page="box" id="top">
     <a class="skip-link" href="#main">Skip to content</a>
     <SiteHeader client:load />
@@ -157,7 +171,7 @@ const related = (recent ?? [])
             <div data-slot="post-hero">
               {
                 coverImage ? (
-                  <img src={coverImage} alt="" />
+                  <img src={coverImage} alt={`Cover art for ${post.data.title}`} />
                 ) : (
                   <PostCover client:load slug={post.id} topic={topic} slot="hero" />
                 )

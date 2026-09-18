@@ -43,8 +43,20 @@ const FAQS = [
 ]
 
 export default function FaqSection() {
+  // FAQPage structured data for rich results. Rendered from the same source
+  // as the visible accordion so the two can never disagree.
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQS.map(({ question, answer }) => ({
+      "@type": "Question",
+      name: question,
+      acceptedAnswer: { "@type": "Answer", text: answer },
+    })),
+  }
   return (
     <section data-section="faq" id="faq" aria-labelledby="faq-title">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <div data-slot="section-header">
         <Reveal>
           <SectionHeading id="faq" eyebrow="answers" strong="Good questions." rest="" />

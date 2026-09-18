@@ -97,7 +97,7 @@ const tiles = [
                   {tiles.map((row) => (
                     <a data-slot="post-tile" data-size={row.size} href={row.href}>
                       {row.image ? (
-                        <img data-slot="tile-image" src={row.image} alt="" loading="lazy" />
+                        <img data-slot="tile-image" src={row.image} alt={row.title} loading="lazy" />
                       ) : (
                         <PostCover client:load slug={row.slug} topic={row.topic} slot={row.cover} />
                       )}

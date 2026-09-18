@@ -30,6 +30,9 @@ const {
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#161616" />
     <meta name="description" content={description} />
+    {/* Self-referential: boxcompute.ai serves different content, so the
+        canonical must be this deployment, not the brand domain. */}
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.url.origin).href} />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="ai-catalog" href="/.well-known/ai-catalog.json" />
     <meta property="og:type" content="website" />
