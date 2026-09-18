@@ -13,7 +13,7 @@ const FAQS = [
   {
     question: "Will it work with my agent?",
     answer:
-      "Yes. Model-independent via SDKs, CLI, HTTP API. CLI skill for Codex, Claude, Pi, others.",
+      "If it can make an HTTP call, yes. There are SDKs and a CLI too, plus a CLI skill for Codex, Claude, Pi, and friends.",
   },
   {
     question: "Does my workspace keep its progress?",
@@ -28,12 +28,17 @@ const FAQS = [
   {
     question: "Can I keep sensitive work private?",
     answer:
-      "Each task gets an isolated Sandbox. Self-hosted origins via CLI --url keep data close.",
+      "Each task gets its own isolated Sandbox. And if the work can't leave the building, point the CLI at your own host with --url — your data never has to visit us.",
   },
   {
     question: "What if my connection drops mid-run?",
     answer:
       "Start a durable operation with an idempotency key. Polling, 24h retained output, explicit cancel. Closing the client never cancels it. Check exitCode, timedOut, truncation.",
+  },
+  {
+    question: "Will BoxCompute make my agent smarter?",
+    answer:
+      "We can't legally promise that. We can promise it a quiet room — its own machine, its files left alone, no eviction mid-thought. Honestly, that's most of it.",
   },
 ]
 

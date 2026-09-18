@@ -28,7 +28,7 @@ export default function HowItWorks() {
         <Reveal>
           <SectionHeading id="how-it-works" eyebrow="the loop" strong="Give it a goal." rest="Let it get to work." />
           <p>
-            Bring your agent. BoxCompute provides the Sandbox.
+            You bring the agent and the idea. We bring the machine.
           </p>
         </Reveal>
         <a data-slot="header-button" data-variant="neutral" href="/docs">

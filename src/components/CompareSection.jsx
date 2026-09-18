@@ -24,7 +24,7 @@ const ROWS = [
     label: "Stays observable across reconnects",
     color: CHART_COLORS.ops,
     us: { state: "yes", text: "Durable ops + retained logs" },
-    others: ["Varies", "A terminal", "You build it"],
+    others: ["While it's alive", "A terminal", "You build it"],
   },
   {
     label: "Works with any model or framework",
@@ -36,7 +36,7 @@ const ROWS = [
     label: "Bounded, auditable commands",
     color: CHART_COLORS.output,
     us: { state: "yes", text: "Structured, time-boxed" },
-    others: ["Varies", "A terminal", "You build it"],
+    others: ["Up to a point", "A terminal", "You build it"],
   },
   {
     label: "Private option",

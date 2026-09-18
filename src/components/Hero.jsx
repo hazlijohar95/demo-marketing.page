@@ -1,6 +1,6 @@
 import { ArrowUpRight } from "lucide-react"
 
-import { APP_URL } from "../content.js"
+import { DEMO_URL } from "../content.js"
 import SandboxField from "./SandboxField.jsx"
 
 export default function Hero() {
@@ -26,11 +26,11 @@ export default function Hero() {
             Its own Sandbox: a full Linux VM, isolated and controlled.
           </p>
           <div data-slot="hero-actions" data-entrance style={{ "--enter-delay": "180ms" }}>
-            <a data-slot="header-button" data-variant="contrast" href={APP_URL}>
-              <strong>Open BoxCompute</strong> <ArrowUpRight aria-hidden="true" />
-            </a>
-            <a data-slot="header-button" data-variant="neutral" href="#console">
-              <strong>Watch it work</strong>
+            {/* Invite-first: hosted is invite-only, so the hero primary
+                requests the invite instead of duplicating the header's
+                app login. */}
+            <a data-slot="header-button" data-variant="contrast" href={DEMO_URL} target="_blank" rel="noreferrer">
+              <strong>Request an invite</strong> <ArrowUpRight aria-hidden="true" />
             </a>
           </div>
         </div>

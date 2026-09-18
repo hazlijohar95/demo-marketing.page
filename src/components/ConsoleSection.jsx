@@ -1,6 +1,6 @@
 import Reveal from "./Reveal.jsx"
 import ConsoleReveal from "./ConsoleReveal.jsx"
-import DotField from "./DotField.jsx"
+import StageBackdrop from "./StageBackdrop.jsx"
 
 export default function ConsoleSection() {
   return (
@@ -13,7 +13,7 @@ export default function ConsoleSection() {
       </h2>
       <Reveal data-slot="console-stage">
         <span data-slot="stage-pattern" aria-hidden="true">
-          <DotField />
+          <StageBackdrop />
         </span>
         <ConsoleReveal />
       </Reveal>

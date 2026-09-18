@@ -89,13 +89,13 @@ const FEATURES = [
   {
     rank: "02",
     title: "Stays until you delete it.",
-    body: "No automatic expiry. Files under /workspace live as long as the Sandbox does.",
+    body: "No automatic expiry. Files under /workspace live as long as the Sandbox does — which is entirely up to you.",
     visual: <PersistVisual />,
   },
   {
     rank: "03",
     title: "Survive disconnects.",
-    body: "Durable ops: polling, 24h output, explicit cancel.",
+    body: "Close your laptop mid-run. With polling, 24h of retained output, and explicit cancel, the job won't notice.",
     visual: <OpsVisual />,
     label: "Durable operations",
   },
@@ -112,7 +112,7 @@ export default function PlatformSection() {
             strong="Your agent does the work."
             rest="We give it the space."
           />
-          <p>No local setup. A Sandbox in an owned workspace, bounded commands.</p>
+          <p>No local setup. A Sandbox in its own workspace, with commands that know their place.</p>
         </Reveal>
       </div>
       <div data-component="card-grid">

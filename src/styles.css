@@ -121,7 +121,6 @@
   [data-page="box"] [data-component="spec-board"],
   [data-page="box"] [data-component="lifecycle"],
   [data-page="box"] [data-component="console-live"],
-  [data-page="box"] [data-component="demo-figure"],
   [data-page="box"] [data-component="compare-scroll"],
   [data-page="box"] [data-component="mini-visual"] {
     transition:
@@ -162,14 +161,12 @@
 }
 
 [data-page="box"] [data-component="console-live"],
-[data-page="box"] [data-component="demo-figure"],
 [data-page="box"] [data-component="spec-board"],
 [data-page="box"] [data-component="lifecycle"],
 [data-page="box"] [data-component="compare-table"],
 [data-page="box"] [data-component="mini-visual"],
 [data-page="box"] [data-slot="hero-meta"],
-[data-page="box"] [data-component="scenario-pills"],
-[data-page="box"] [data-slot="demo-meters"] {
+[data-page="box"] [data-component="scenario-pills"] {
   font-family: var(--bx-mono);
 }
 
@@ -259,12 +256,6 @@
   top: 12px;
 }
 
-/* Two skip links stack: content first, console bypass second. Without the
-   offset the second paints directly over the first on focus. */
-[data-page="box"] .skip-link + .skip-link:focus-visible {
-  top: 48px;
-}
-
 /* Anchor and skip-link landings clear the sticky bar. #main is the skip target
    and is focusable, so it needs the same offset the sections get. */
 [data-page="box"] section[id],
@@ -274,8 +265,6 @@
 
 /* dot pattern shared by every divider band */
 [data-page="box"] [data-slot="hero-pattern"],
-[data-page="box"] [data-slot="footer-pattern"],
-[data-page="box"] [data-slot="stage-pattern"],
 [data-page="box"] [data-slot="closing-pattern"] {
   background: var(--bx-pattern);
   mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0H2V2H0V0Z' fill='black'/%3E%3C/svg%3E");
@@ -296,22 +285,12 @@
   margin: 0 auto;
 }
 
-/* Page grid: one coordinate system behind every section instead of a stack of
-   separately-boxed bands. A 22px dot field full-bleed, plus a hairline on each
-   container edge. Interior column rules used to run here too; they cut through
-   headlines and content, so only the outer edges are ruled now. */
+/* Page grid: a 22px dot field full-bleed behind every section. No vertical
+   edge rules: they cut through the hero copy and the footer mark, so
+   sections are separated by horizontal hairlines only. */
 [data-page="box"] {
   background-image: radial-gradient(circle at 1px 1px, var(--bx-grid-dot) 1px, transparent 0);
   background-size: 22px 22px;
-}
-
-[data-page="box"] > [data-component="container"] {
-  background-image: linear-gradient(
-    to right,
-    var(--bx-line) 0 1px,
-    transparent 1px calc(100% - 1px),
-    var(--bx-line) calc(100% - 1px) 100%
-  );
 }
 
 /* Grid knock-out. The grid is a backdrop for empty space, so anything that
@@ -750,19 +729,14 @@
 [data-page="box"] [data-section]:not([data-section="hero"]) {
   position: relative;
   box-sizing: border-box;
-  box-shadow:
-    inset 0 -1px var(--bx-line),
-    inset 1px 0 var(--bx-line),
-    inset -1px 0 var(--bx-line);
+  box-shadow: inset 0 -1px var(--bx-line);
   padding: var(--bx-section-pad);
 }
 
 [data-page="box"] [data-section="console"] {
   box-shadow:
     0 -1px var(--bx-line),
-    inset 0 -1px var(--bx-line),
-    inset 1px 0 var(--bx-line),
-    inset -1px 0 var(--bx-line);
+    inset 0 -1px var(--bx-line);
 }
 
 @media (max-width: 75rem) {
@@ -1291,31 +1265,46 @@
 [data-page="box"] [data-component="footer"] {
   position: relative;
   display: grid;
-  gap: 56px;
+  gap: 48px;
   box-sizing: border-box;
   min-height: 0;
-  /* Same inline pad as every other band; the old clamp() ran ~8px wider at
-     each width, putting the footer on a leading edge of its own. */
-  padding: 64px var(--bx-pad-inline) 24px;
-  font-size: 11px;
+  /* Same inline pad as every other band at every width, so the mark and the
+     bottom row always clear the container's edge hairlines. */
+  padding: 56px var(--bx-pad-inline) 28px;
+  border-top: 1px solid var(--bx-line);
+  font-size: 13px;
 }
 
 [data-page="box"] [data-slot="footer-grid"] {
   display: grid;
-  grid-template-columns: 120px repeat(3, minmax(0, 1fr));
-  gap: 72px;
+  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+  gap: 48px;
   align-items: start;
 }
 
+[data-page="box"] [data-slot="footer-brand"] {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+}
+
 [data-page="box"] [data-slot="footer-mark"] {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   width: fit-content;
+  color: var(--bx-text);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.01em;
 }
 
 [data-page="box"] [data-slot="footer-mark"] img {
   display: block;
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
 }
 
@@ -1325,29 +1314,38 @@
   }
 }
 
+[data-page="box"] [data-slot="footer-brand"] p {
+  max-width: 26ch;
+  margin: 0;
+  color: var(--bx-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
 [data-page="box"] [data-slot="footer-column"] {
   display: grid;
   align-content: start;
-  gap: 18px;
+  gap: 16px;
   min-width: 0;
 }
 
 [data-page="box"] [data-slot="footer-column"] h3 {
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1;
+  color: var(--bx-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
   letter-spacing: 0;
 }
 
 [data-page="box"] [data-slot="footer-column"] nav {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 [data-page="box"] [data-slot="footer-column"] a,
 [data-page="box"] [data-slot="footer-column"] p {
   color: var(--bx-muted);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 400;
   line-height: 1.5;
 }
@@ -1357,14 +1355,9 @@
 }
 
 [data-page="box"] [data-slot="footer-column"] a svg {
-  width: 11px;
-  height: 11px;
+  width: 12px;
+  height: 12px;
   vertical-align: -1px;
-}
-
-[data-page="box"] [data-slot="footer-pattern"] {
-  height: 16px;
-  overflow: hidden;
 }
 
 [data-page="box"] [data-slot="footer-bottom"],
@@ -1376,8 +1369,10 @@
 [data-page="box"] [data-slot="footer-bottom"] {
   justify-content: space-between;
   gap: 24px;
-  font-size: 11px;
-  line-height: 1;
+  border-top: 1px solid var(--bx-line);
+  padding-top: 20px;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 [data-page="box"] [data-slot="footer-bottom"] > div:first-child {
@@ -1415,6 +1410,9 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 40px;
   }
+  [data-page="box"] [data-slot="footer-brand"] {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 40rem) {
@@ -1423,12 +1421,6 @@
   }
   [data-page="box"] [data-slot="footer-bottom"] {
     flex-wrap: wrap;
-  }
-}
-
-@media (min-width: 90rem) {
-  [data-page="box"] [data-component="footer"] {
-    padding-inline: 0;
   }
 }
 
@@ -2642,116 +2634,6 @@
   color: var(--bx-bg);
 }
 
-[data-page="box"] [data-component="demo-figure"] {
-  border: 1px solid var(--bx-line);
-  background: #161616;
-  color: #e8e8e8;
-}
-
-[data-page="box"] [data-slot="demo-head"] {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 16px;
-  border-bottom: 1px solid #ffffff1a;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1;
-  text-transform: uppercase;
-  letter-spacing: 0;
-}
-
-[data-page="box"] [data-slot="demo-head"] > span {
-  color: #a3a3a3;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-[data-page="box"] [data-slot="demo-status"] {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  flex: 0 0 auto;
-  color: #e8e8e8;
-}
-
-[data-page="box"] [data-slot="demo-status"]::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  background: var(--bx-success);
-}
-
-/* Running is amber and blinking; done is the solid green the rest of the
-   page uses for success. The previous rule set --bx-success for both, so
-   the dot never distinguished the two states. */
-[data-page="box"] [data-slot="demo-status"][data-state="running"]::before {
-  background: var(--bx-warn);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  [data-page="box"] [data-slot="demo-status"][data-state="running"]::before {
-    animation: bx-caret 1s steps(1, end) infinite;
-  }
-}
-
-[data-page="box"] [data-slot="demo-log"] {
-  display: grid;
-  gap: 10px;
-  min-height: 308px;
-  padding: 20px 16px;
-  font-size: 12px;
-  line-height: 1.7;
-  align-content: start;
-}
-
-[data-page="box"] [data-slot="demo-log"] p {
-  display: flex;
-  gap: 12px;
-  align-items: baseline;
-  overflow-wrap: anywhere;
-}
-
-[data-page="box"] [data-line="cmd"] {
-  color: #ffffff;
-  font-weight: 600;
-}
-
-[data-page="box"] [data-line="cmd"] > span {
-  flex: 0 0 auto;
-  color: #a3a3a3;
-  font-weight: 400;
-}
-
-[data-page="box"] [data-line="run"] {
-  color: #d4d4d4;
-}
-
-[data-page="box"] [data-line="run"] > span {
-  flex: 0 0 auto;
-  color: #f97316;
-}
-
-[data-page="box"] [data-line="out"] {
-  padding-inline-start: 24px;
-  color: #a3a3a3;
-}
-
-[data-page="box"] [data-line="win"] {
-  color: #ffffff;
-}
-
-[data-page="box"] [data-line="win"]::before {
-  content: "";
-  flex: 0 0 auto;
-  width: 6px;
-  height: 6px;
-  align-self: center;
-  background: var(--bx-success);
-}
-
 [data-page="box"] [data-slot="demo-caret"] {
   display: inline-block;
   width: 7px;
@@ -2773,59 +2655,6 @@
   50% {
     opacity: 0;
   }
-}
-
-[data-page="box"] [data-slot="demo-foot"] {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 16px;
-  border-top: 1px solid #ffffff1a;
-  color: #a3a3a3;
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-[data-page="box"] [data-slot="demo-foot"] button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  flex: 0 0 auto;
-  height: 28px;
-  margin: 0;
-  padding: 0 12px;
-  border: 1px solid #ffffff33;
-  border-radius: 0;
-  appearance: none;
-  background: transparent;
-  color: #e8e8e8;
-  font: inherit;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1;
-  cursor: pointer;
-  transition-property: transform, border-color, background-color;
-  transition-duration: 120ms;
-  transition-timing-function: ease-out;
-}
-
-[data-page="box"] [data-slot="demo-foot"] button:hover {
-  border-color: #ffffff66;
-  background: #ffffff0d;
-}
-
-[data-page="box"] [data-slot="demo-foot"] button:active {
-  transform: scale(0.96);
-}
-
-[data-page="box"] [data-slot="demo-foot"] button svg {
-  width: 13px;
-  height: 13px;
-}
-
-[data-page="box"] [data-slot="demo-foot"] [data-slot="demo-count"] {
-  font-variant-numeric: tabular-nums;
 }
 
 [data-page="box"] [data-slot="dot-drift"] {
@@ -3236,46 +3065,6 @@
   }
 }
 
-/* demo meters */
-[data-page="box"] [data-slot="demo-meters"] {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  padding: 10px 16px;
-  border-bottom: 1px solid #ffffff1a;
-  background: #ffffff06;
-}
-[data-page="box"] [data-slot="demo-meter"] {
-  display: grid;
-  gap: 6px;
-  color: #a3a3a3;
-  font-size: 10px;
-  text-transform: uppercase;
-  font-variant-numeric: tabular-nums;
-}
-[data-page="box"] [data-slot="demo-meter"] i {
-  display: block;
-  height: 6px;
-  background: #ffffff14;
-  border: 1px solid #ffffff1a;
-  overflow: hidden;
-}
-/* linear, because this is a progress readout. The duration comes from the
-   JS beat clock so the fill is continuous instead of easing to a stop
-   between steps; --bx-dur-bar is the fallback. */
-[data-page="box"] [data-slot="demo-meter"] b {
-  display: block;
-  width: 100%;
-  height: 100%;
-  transform-origin: left center;
-  transition: transform var(--demo-beat, var(--bx-dur-bar)) linear;
-}
-@media (max-width: 40rem) {
-  [data-page="box"] [data-slot="demo-meters"] {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* lifecycle flow */
 [data-page="box"] [data-component="lifecycle"] {
   margin-top: 16px;
@@ -3445,8 +3234,8 @@
 
 /* console stage ------------------------------------------------------- */
 /* The recreation reads as an artifact on a recessed shelf instead of a
-   second app filling the viewport: tinted surface, dot texture behind,
-   and a width cap so the console never crowds the section edges. */
+   second app filling the viewport: tinted surface, mesh-gradient glow
+   behind, and a width cap so the console never crowds the section edges. */
 [data-page="box"] [data-slot="console-stage"] {
   position: relative;
   isolation: isolate;
@@ -3458,7 +3247,19 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  opacity: 0.45;
+}
+
+/* Static mesh backdrop: fills the stage, no drift — it renders once. */
+[data-page="box"] [data-slot="stage-mesh"] {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+[data-page="box"] [data-slot="stage-mesh"] > * {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 [data-page="box"] [data-slot="console-stage"] > [data-component="console-live"],
@@ -3506,9 +3307,6 @@
   }
   [data-page="box"] [data-component="scenario-pills"] button {
     padding: 15px 16px;
-  }
-  [data-page="box"] [data-slot="demo-foot"] button {
-    min-height: 44px;
   }
   [data-page="box"] [data-slot="live-tabs"] button,
   [data-page="box"] [data-slot="live-inspector-tabs"] button {
@@ -4622,10 +4420,7 @@
   align-items: start;
   box-sizing: border-box;
   padding: var(--bx-section-pad);
-  box-shadow:
-    inset 0 -1px var(--bx-line),
-    inset 1px 0 var(--bx-line),
-    inset -1px 0 var(--bx-line);
+  box-shadow: inset 0 -1px var(--bx-line);
 }
 
 [data-page="box"] [data-component="docs-side"] {

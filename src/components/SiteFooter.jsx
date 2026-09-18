@@ -1,14 +1,12 @@
 import { ArrowUpRight } from "lucide-react"
 
 import { APP_URL, DEMO_URL, REPO_URL } from "../content.js"
-import DotField from "./DotField.jsx"
 
 const COLUMNS = [
   {
     heading: "Product",
     links: [
       { href: "/#console", label: "Console" },
-      { href: "/#demo", label: "Demo" },
       { href: "/#platform", label: "Platform" },
       { href: "/#how-it-works", label: "How it works" },
       { href: "/#faq", label: "FAQ" },
@@ -35,9 +33,13 @@ export default function SiteFooter() {
   return (
     <footer data-component="footer">
       <div data-slot="footer-grid">
-        <a data-slot="footer-mark" href="/" aria-label="BoxCompute home">
-          <img src="/brand/boxcompute-symbol.svg" width="40" height="40" alt="" />
-        </a>
+        <div data-slot="footer-brand">
+          <a data-slot="footer-mark" href="/" aria-label="BoxCompute home">
+            <img src="/brand/boxcompute-symbol.svg" width="32" height="32" alt="" />
+            <span>BoxCompute</span>
+          </a>
+          <p>Built for ambitious agents.</p>
+        </div>
         {COLUMNS.map((column) => (
           <div data-slot="footer-column" key={column.heading}>
             {/* h3, not h2: these are nav group labels, not peers of the page's
@@ -58,13 +60,9 @@ export default function SiteFooter() {
           </div>
         ))}
       </div>
-      <div data-slot="footer-pattern" aria-hidden="true">
-        <DotField />
-      </div>
       <div data-slot="footer-bottom">
         <div>
           <span>© {new Date().getFullYear()} BoxCompute</span>
-          <span>Built for ambitious agents.</span>
         </div>
         <div data-slot="footer-controls">
           <span data-slot="status">Isolated by default</span>

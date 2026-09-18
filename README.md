@@ -85,9 +85,7 @@ resources. No sandboxed plugins, so no `LOADER` binding.
   Chats/Agents tabs, searchable chat list, user card; center conversation
   with replayable staged run, working composer with send flow, model
   badge; right workbench with Files/Terminal/Previews tabs, file
-  previews, run log, metric cards), `DemoSection` (playable
-  terminal: 3 scenarios, autoplay on scroll, replay, reduced-motion
-  fallback), `PlatformSection` (ranked leader-cards), `CompareSection`
+  previews, run log, metric cards), `PlatformSection` (ranked leader-cards), `CompareSection`
   (honest pattern comparison table), `SpecSection` (plain spec rows),
   `HowItWorks` (hairline step rows), `FaqSection` (accordion rows),
   `ClosingSection`, `SiteFooter`, plus `SectionHeading`, `Reveal`,

@@ -7,7 +7,6 @@ import { APP_URL } from "../content.js"
 // still resolve to same-document fragment scrolls.
 const NAV_LINKS = [
   { href: "/#console", label: "Console" },
-  { href: "/#demo", label: "Demo" },
   { href: "/#platform", label: "Platform" },
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#faq", label: "FAQ" },
