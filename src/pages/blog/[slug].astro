@@ -4,6 +4,7 @@ import { PortableText } from "emdash/ui"
 
 import ArrowLeft from "../../components/ArrowLeft.astro"
 import ArrowUpRight from "../../components/ArrowUpRight.astro"
+import BlogVisual from "../../components/BlogVisual.jsx"
 import Layout from "../../layouts/Layout.astro"
 import PostCover from "../../components/PostCover.jsx"
 import Reveal from "../../components/Reveal.jsx"
@@ -93,14 +94,23 @@ const related = (recent ?? [])
     <SiteHeader client:load />
     <div data-component="container">
       <main id="main" tabindex="-1">
+        <div data-slot="post-progress" aria-hidden="true"><span></span></div>
         {/* Two rails and a reading column: the label on the left stays with the
             reader while the article scrolls, so the page never loses its
             context the way a top-only breadcrumb does. */}
         <article data-section="post" data-component="post-layout" aria-labelledby="post-title">
           <div data-slot="post-rail">
-            <p data-slot="post-back">
-              <a href="/blog/"><ArrowLeft />Blog{topic ? ` / ${topic}` : ""}</a>
-            </p>
+            <div data-slot="post-rail-inner">
+              <p data-slot="post-back">
+                <a href="/blog/"><ArrowLeft />Blog{topic ? ` / ${topic}` : ""}</a>
+              </p>
+              {/* Populated from the article's h2s by the script below; stays
+                  hidden when the post has fewer than two sections. */}
+              <nav data-slot="post-toc" aria-label="On this page" hidden>
+                <p>On this page</p>
+                <ol data-slot="post-toc-list"></ol>
+              </nav>
+            </div>
           </div>
 
           <div data-slot="post-column">
@@ -153,6 +163,7 @@ const related = (recent ?? [])
                 )
               }
             </div>
+            <BlogVisual slug={post.id} />
             <div data-component="prose">
               {
                 hasContent ? (
@@ -202,4 +213,8 @@ const related = (recent ?? [])
       <SiteFooter client:visible />
     </div>
   </div>
+  <script>
+    import { initPostEnhance } from "../../lib/post-enhance.js"
+    initPostEnhance()
+  </script>
 </Layout>

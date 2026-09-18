@@ -22,12 +22,12 @@ const result = await boxcompute.sandboxes.execute("sbx_REDACTED", {
 
 ```python
 result = boxcompute.sandboxes.execute(
-"sbx_REDACTED",
-argv=["python3", "-c", "print(sum(range(100000)))"],
-cwd="/workspace/jobs",
-env={"MODE": "development"},
-timeout_seconds=120,
-max_output_bytes=262_144,
+    "sbx_REDACTED",
+    argv=["python3", "-c", "print(sum(range(100000)))"],
+    cwd="/workspace/jobs",
+    env={"MODE": "development"},
+    timeout_seconds=120,
+    max_output_bytes=262_144,
 )
 ```
 
@@ -63,12 +63,12 @@ The response wraps the result:
 ```json
 {
   "result": {
-"stdout": "4999950000\n",
-"stderr": "",
-"exitCode": 0,
-"timedOut": false,
-"stdoutTruncated": false,
-"stderrTruncated": false
+    "stdout": "4999950000\n",
+    "stderr": "",
+    "exitCode": 0,
+    "timedOut": false,
+    "stdoutTruncated": false,
+    "stderrTruncated": false
   }
 }
 ```
@@ -90,17 +90,14 @@ let operation = await boxcompute.operations.start("sbx_REDACTED", {
   idempotencyKey: crypto.randomUUID(),
 });
 while (operation.state === "accepted" || operation.state === "running") {
-  operation = await boxcompute.operations.wait(
-"sbx_REDACTED",
-operation.operationId,
-{ timeoutSeconds: 30 },
-  );
+  operation = await boxcompute.operations.wait("sbx_REDACTED", operation.operationId, {
+    timeoutSeconds: 30,
+  });
 }
-const stdout = await boxcompute.operations.output(
-  "sbx_REDACTED",
-  operation.operationId,
-  { stream: "stdout", offset: 0 },
-);
+const stdout = await boxcompute.operations.output("sbx_REDACTED", operation.operationId, {
+  stream: "stdout",
+  offset: 0,
+});
 ```
 ### Python
 
@@ -108,21 +105,21 @@ const stdout = await boxcompute.operations.output(
 import uuid
 
 operation = boxcompute.operations.start(
-"sbx_REDACTED",
-argv=["python3", "-c", "print(sum(range(100000)))"],
-idempotency_key=str(uuid.uuid4()),
+    "sbx_REDACTED",
+    argv=["python3", "-c", "print(sum(range(100000)))"],
+    idempotency_key=str(uuid.uuid4()),
 )
 while operation.state.value in {"accepted", "running"}:
-operation = boxcompute.operations.wait(
+    operation = boxcompute.operations.wait(
+        "sbx_REDACTED",
+        operation.operation_id,
+        timeout_seconds=30,
+    )
+stdout = boxcompute.operations.output(
     "sbx_REDACTED",
     operation.operation_id,
-    timeout_seconds=30,
-)
-stdout = boxcompute.operations.output(
-"sbx_REDACTED",
-operation.operation_id,
-stream="stdout",
-offset=0,
+    stream="stdout",
+    offset=0,
 )
 ```
 
@@ -142,16 +139,16 @@ The `202` response contains `{ "operation": ... }`. Save its opaque `operationId
 ```json
 {
   "operation": {
-"operationId": "op_0123456789abcdef0123456789abcdef",
-"state": "accepted",
-"exitCode": null,
-"signal": null,
-"acceptedAt": "2026-09-06T07:00:00Z",
-"startedAt": null,
-"finishedAt": null,
-"stdoutOffset": 0,
-"stderrOffset": 0,
-"expiresAt": null
+    "operationId": "op_0123456789abcdef0123456789abcdef",
+    "state": "accepted",
+    "exitCode": null,
+    "signal": null,
+    "acceptedAt": "2026-09-06T07:00:00Z",
+    "startedAt": null,
+    "finishedAt": null,
+    "stdoutOffset": 0,
+    "stderrOffset": 0,
+    "expiresAt": null
   }
 }
 ```

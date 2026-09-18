@@ -21,11 +21,11 @@ const logs = await boxcompute.sandboxes.logs("sbx_REDACTED", {
 
 ```python
 logs = boxcompute.sandboxes.logs(
-"sbx_REDACTED",
-since="2026-09-06T00:00:00Z",
-stream="stderr",
-source="process",
-limit=100,
+    "sbx_REDACTED",
+    since="2026-09-06T00:00:00Z",
+    stream="stderr",
+    source="process",
+    limit=100,
 )
 ```
 
@@ -59,17 +59,17 @@ The response contains the customer-facing Sandbox ID, entries, a `truncated` fla
 ```json
 {
   "logs": {
-"sandboxId": "sbx_REDACTED",
-"entries": [
-  {
-    "timestamp": "2026-09-06T01:02:03.000Z",
-    "stream": "stderr",
-    "source": "process",
-    "message": "database ready"
-  }
-],
-"truncated": false,
-"retention_seconds": 2592000
+    "sandboxId": "sbx_REDACTED",
+    "entries": [
+      {
+        "timestamp": "2026-09-06T01:02:03.000Z",
+        "stream": "stderr",
+        "source": "process",
+        "message": "database ready"
+      }
+    ],
+    "truncated": false,
+    "retention_seconds": 2592000
   }
 }
 ```

@@ -43,18 +43,18 @@ import uuid
 from boxcompute import BoxCompute
 
 with BoxCompute(api_key=os.environ["BOXCOMPUTE_API_KEY"]) as boxcompute:
-workspaces = boxcompute.workspaces.list()
-workspace = workspaces[0] if workspaces else boxcompute.workspaces.create(
-    name="Agent workspace",
-    idempotency_key="workspace-bootstrap-v1",
-)
-sandbox = boxcompute.sandboxes.create(
-    workspace_id=workspace.id,
-    name="Worker 1",
-    idempotency_key=str(uuid.uuid4()),
-)
-current = boxcompute.sandboxes.inspect(sandbox.id)
-boxcompute.sandboxes.delete(current.id)
+    workspaces = boxcompute.workspaces.list()
+    workspace = workspaces[0] if workspaces else boxcompute.workspaces.create(
+        name="Agent workspace",
+        idempotency_key="workspace-bootstrap-v1",
+    )
+    sandbox = boxcompute.sandboxes.create(
+        workspace_id=workspace.id,
+        name="Worker 1",
+        idempotency_key=str(uuid.uuid4()),
+    )
+    current = boxcompute.sandboxes.inspect(sandbox.id)
+    boxcompute.sandboxes.delete(current.id)
 ```
 
 Generate one idempotency key per intended Sandbox creation and reuse it only when retrying that

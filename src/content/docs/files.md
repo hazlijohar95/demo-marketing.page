@@ -33,9 +33,9 @@ console.log(listing.entries);
 ```python
 boxcompute.files.mkdir("sbx_REDACTED", "/workspace/src", recursive=True)
 boxcompute.files.write(
-"sbx_REDACTED",
-"/workspace/src/main.js",
-b"console.log('hello')\n",
+    "sbx_REDACTED",
+    "/workspace/src/main.js",
+    b"console.log('hello')\n",
 )
 
 page = boxcompute.files.read("sbx_REDACTED", "/workspace/src/main.js")
@@ -48,7 +48,7 @@ print(listing.entries)
 
 ## Direct HTTP
 
-## Write and read a file
+### Write and read a file
 
 Create parent directories first, then upload raw bytes:
 
@@ -85,7 +85,7 @@ Each response contains at most `maxBytes`, which defaults to 8 MiB and can be 1 
 
 The cursor keeps a multi-request read on one file version. If the file changes, continuation returns `409 CURSOR_STALE`; restart at offset 0 without a cursor. An invalid cursor returns `400 INVALID_CURSOR`, and an offset beyond EOF returns `400 INVALID_RANGE`. Writes remain limited to 8 MiB per complete file.
 
-## Edit text atomically
+### Edit text atomically
 
 Hash the complete bytes you read, then send that hash with a conditional text replacement:
 
@@ -107,7 +107,7 @@ curl -X PATCH \
 
 A stale hash returns `412 PRECONDITION_FAILED` without changing the file. Missing or ambiguous `oldText` returns `409 EDIT_CONFLICT`, and binary content returns `400 BINARY_FILE`. If the connection fails before a response arrives, read the file again before deciding whether to retry.
 
-## Inspect and list
+### Inspect and list
 
 ```bash
 curl \
@@ -127,7 +127,7 @@ List returns `{ "entries": [...], "nextCursor": string | null }` for one page of
 
 Pages preserve the filesystem's stable native directory order. A directory membership change during pagination returns `409 CURSOR_STALE`; restart from the first page. Metadata for existing children can reflect its value when each page is read. Invalid or path-mismatched cursors return `400 INVALID_CURSOR`.
 
-## Rename or remove a path
+### Rename or remove a path
 
 Rename a path within the same Sandbox workspace:
 

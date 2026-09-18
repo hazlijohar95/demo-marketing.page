@@ -3964,6 +3964,114 @@
   font-size: 11px;
 }
 
+/* Engineered post figures: one glanceable diagram per article, same voice
+   as the terminal code blocks — square, hairline, mono caption. */
+[data-page="box"] [data-component="post-visual"] {
+  margin: 0 0 48px;
+  border: 1px solid var(--bx-line-strong);
+  background: var(--bx-bg);
+  box-shadow:
+    0 0 0 0.5px var(--bx-line),
+    0 16px 40px -16px rgb(0 0 0 / 0.25);
+}
+
+[data-page="box"] [data-component="post-visual"] svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+[data-page="box"] [data-slot="post-visual-caption"] {
+  padding: 12px 16px;
+  border-top: 1px solid var(--bx-line);
+  color: var(--bx-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+[data-page="box"] [data-slot="post-visual-caption"] span {
+  color: var(--bx-accent-text);
+  font-family: var(--bx-mono);
+  font-size: 12px;
+}
+
+/* Reading progress: a 2px ember bar pinned under the sticky header. The
+   width is the feedback, so there is no transition to honour. */
+[data-page="box"] [data-slot="post-progress"] {
+  position: fixed;
+  top: var(--bx-bar-h);
+  inset-inline: 0;
+  z-index: 9;
+  height: 2px;
+  pointer-events: none;
+}
+
+[data-page="box"] [data-slot="post-progress"] span {
+  display: block;
+  height: 100%;
+  background: var(--bx-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+/* transform-origin has no logical keyword, so the fill needs the same
+   explicit mirror the other progress fills use. */
+[dir="rtl"] [data-page="box"] [data-slot="post-progress"] span {
+  transform-origin: right;
+}
+
+/* Rail contents: the back link plus the auto-built section list. The
+   sticky rule above targets the wrapper, so both travel as one. */
+[data-page="box"] [data-slot="post-toc"] {
+  margin-top: 28px;
+}
+
+[data-page="box"] [data-slot="post-toc"][hidden] {
+  display: none;
+}
+
+[data-page="box"] [data-slot="post-toc"] > p {
+  margin: 0 0 8px;
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+[data-page="box"] [data-slot="post-toc-list"] {
+  display: grid;
+  gap: 2px;
+}
+
+[data-page="box"] [data-slot="post-toc-list"] a {
+  display: block;
+  padding: 6px 12px;
+  border-inline-start: 1px solid var(--bx-line);
+  color: var(--bx-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+[data-page="box"] [data-slot="post-toc-list"] a:hover {
+  color: var(--bx-text);
+  background: var(--bx-layer);
+}
+
+[data-page="box"] [data-slot="post-toc-list"] a[data-current] {
+  border-inline-start: 2px solid var(--bx-accent);
+  color: var(--bx-text);
+  font-weight: 500;
+}
+
+/* Anchored headings clear the sticky bar, same as docs sections. */
+[data-page="box"] [data-slot="post-column"] [data-component="prose"] h2[id] {
+  scroll-margin-top: calc(var(--bx-bar-h) + 16px);
+}
+
 /* CMS titles can carry an unbreakable token (a URL, a flag, an image name).
    Without this the header scrolls the page sideways at 320px. */
 [data-page="box"] [data-slot="post-header"] h1,
@@ -4676,6 +4784,156 @@
 [data-page="box"] [data-component="prose"][data-docs] pre code {
   color: inherit;
   white-space: pre;
+}
+
+/* Docs code chrome ---------------------------------------------------
+   Shiki colours the tokens at build time (github-dark-dimmed); the plate
+   stays on the design tokens: square corners, hairline border, dark #161616
+   on both themes, mono. The <figure> wrapper + header row are added by the
+   DocsLayout enhancement script, so markdown stays plain fenced blocks and
+   no-JS readers still get the bare <pre> styled by the rule above. */
+[data-page="box"] [data-component="docs-code"] {
+  margin: 0;
+  border: 1px solid var(--bx-line-strong);
+  background: #161616;
+  color: #e8e8e8;
+  box-shadow:
+    0 0 0 0.5px var(--bx-line),
+    0 16px 40px -16px rgb(0 0 0 / 0.25);
+}
+
+[data-page="box"] [data-slot="docs-code-head"] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 8px 8px 16px;
+  border-bottom: 1px solid #ffffff1a;
+  font-family: var(--bx-mono);
+  font-size: 12px;
+  line-height: 1;
+}
+
+[data-page="box"] [data-slot="docs-code-lang"] {
+  color: #ffffff;
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="docs-copy"] {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  margin-inline-start: auto;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 0;
+  appearance: none;
+  background: transparent;
+  color: #a3a3a3;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+[data-page="box"] [data-slot="docs-copy"]:hover {
+  background: #ffffff14;
+  color: #ffffff;
+}
+
+[data-page="box"] [data-slot="docs-copy"][data-copied="true"] {
+  color: #ffffff;
+}
+
+[data-page="box"] [data-slot="docs-copy"] svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* Inside the chrome the <pre> is just the scroll area: no second border,
+   no second shadow. Shiki's inline plate colour is dropped so the figure's
+   #161616 shows through; token <span> colours are inline and untouched. */
+[data-page="box"] [data-component="docs-code"] pre,
+[data-page="box"] [data-component="docs-code"] pre.astro-code {
+  margin: 0;
+  padding: 16px;
+  border: 0;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none;
+  color: inherit;
+  overflow-x: auto;
+  font-family: var(--bx-mono);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+[data-page="box"] [data-component="docs-code"] pre code {
+  background: transparent;
+  font-family: inherit;
+  white-space: pre;
+}
+
+/* SDK tabs: one switcher per TypeScript/Python pair, same pill voice as
+   the quickstart language toggle so the two surfaces match. */
+[data-page="box"] [data-component="docs-tabs"] {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+[data-page="box"] [data-slot="docs-tablist"] {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  width: fit-content;
+  max-width: 100%;
+  background: var(--bx-layer);
+  border: 1px solid var(--bx-line);
+}
+
+[data-page="box"] [data-slot="docs-tablist"] button {
+  margin: 0;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 0;
+  appearance: none;
+  background: transparent;
+  color: var(--bx-muted);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition-property: background-color, color;
+  transition-duration: 120ms;
+  transition-timing-function: ease-out;
+}
+
+[data-page="box"] [data-slot="docs-tablist"] button[data-active="true"] {
+  background: var(--bx-text);
+  color: var(--bx-bg);
+}
+
+[data-page="box"] [data-component="docs-tabs"] [data-panel][hidden] {
+  display: none;
+}
+
+@media (max-width: 48rem) {
+  /* Full-bleed terminal on phones, same as the bare-pre rule above. The
+     inner <pre> must not also bleed — it would escape the figure. */
+  [data-page="box"] [data-component="prose"] [data-component="docs-code"] {
+    margin-inline: -24px;
+    border-inline: 0;
+  }
+  [data-page="box"] [data-component="prose"] [data-component="docs-code"] pre {
+    margin-inline: 0;
+    border-inline: 0;
+  }
 }
 
 [data-page="box"] [data-component="docs-layout"] [data-component="prose"][data-docs] blockquote {

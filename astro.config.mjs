@@ -10,10 +10,16 @@ export default defineConfig({
   // the Worker. The landing page opts back out with `prerender = true`.
   output: "server",
   adapter: cloudflare(),
-  // Docs pages render Markdown with our own terminal-styled code blocks, so
-  // Shiki's inline themes stay off and can't fight the design tokens.
+  // Docs pages render Markdown as dark-terminal code blocks. Shiki supplies
+  // token colours only; the background, border, and radius stay on the
+  // design tokens in styles.css so highlighted code can't fight the system.
   markdown: {
-    syntaxHighlight: false,
+    syntaxHighlight: "shiki",
+    shikiConfig: {
+      theme: "github-dark-dimmed",
+      langs: ["ts", "typescript", "python", "bash", "shell", "json", "http", "text", "plaintext"],
+      wrap: false,
+    },
   },
   integrations: [
     react(),
