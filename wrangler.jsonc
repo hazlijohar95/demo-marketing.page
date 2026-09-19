@@ -1,10 +1,10 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "boxcompute",
-  // Replace with your own Cloudflare account id when deploying a fork.
-  // An explicit id keeps deploys non-interactive when a login has more than
-  // one account; `CLOUDFLARE_ACCOUNT_ID` in the environment also works.
-  "account_id": "9c006d850453ab5c068f5688d138521b",
+  // No account_id on purpose: a hardcoded one fails with error 7003 for anyone
+  // deploying to a different account, which breaks the Deploy to Cloudflare
+  // button. Set CLOUDFLARE_ACCOUNT_ID instead when a login has more than one
+  // account and the deploy has to stay non-interactive.
   "main": "./src/worker.ts",
   "compatibility_date": "2026-02-24",
   "compatibility_flags": ["nodejs_compat"],

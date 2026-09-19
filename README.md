@@ -13,10 +13,15 @@ system and an interactive recreation of the product console.
 [![CI](https://github.com/hazlijohar95/boxcompute-marketing.page/actions/workflows/ci.yml/badge.svg)](https://github.com/hazlijohar95/boxcompute-marketing.page/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-black?style=flat-square)](LICENSE)
 [![Astro](https://img.shields.io/badge/astro-7.3-black?style=flat-square&logo=astro)](https://astro.build)
-[![Bun](https://img.shields.io/badge/bun-1.3-black?style=flat-square&logo=bun)](https://bun.sh)
+[![Bun](https://img.shields.io/badge/bun-1.4-black?style=flat-square&logo=bun)](https://bun.sh)
 [![Cloudflare Workers](https://img.shields.io/badge/cloudflare-workers-black?style=flat-square&logo=cloudflare)](https://workers.cloudflare.com)
 
 [Live site](https://boxcompute.ai) · [Docs](https://boxcompute.ai/docs) · [Quick start](#quick-start) · [Architecture](#architecture)
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/hazlijohar95/boxcompute-marketing.page)
+
+One click forks this repo, provisions the D1 database, R2 bucket, and KV
+namespace, and deploys the Worker. Requires the repository to be public.
 
 </div>
 
@@ -106,8 +111,7 @@ src/
 `client:visible`, so Astro code-splits their JS per section and nothing below
 the fold costs anything until it scrolls in.
 
-**Cloudflare bindings** (`wrangler.jsonc`) — fork-friendly once you swap
-`account_id`:
+**Cloudflare bindings** (`wrangler.jsonc`):
 
 | Binding | Resource | Purpose |
 | :--- | :--- | :--- |
@@ -116,7 +120,10 @@ the fold costs anything until it scrolls in.
 | `SESSION` | KV | Astro sessions |
 | `triggers.crons` | `* * * * *` | Scheduled publishing |
 
-The first `wrangler deploy` provisions the named D1 and R2 resources.
+The first `wrangler deploy` provisions the named D1 and R2 resources. There is
+no `account_id` in `wrangler.jsonc` on purpose — a hardcoded one fails for
+anyone deploying to a different account. Set `CLOUDFLARE_ACCOUNT_ID` if your
+login has more than one account.
 
 **Agent-readable by design.** `middleware.js` serves a markdown
 representation of the homepage to clients sending `Accept: text/markdown`,
@@ -149,25 +156,6 @@ language. All of it lives under `[data-page="box"]` in `src/styles/`, layered
   properties. Everything is disabled under `prefers-reduced-motion`, where
   the console demo renders its full transcript instantly.
 
-## Vocabulary
-
-The domain terms the code uses. Worth skimming before changing the console
-demo or the blog pipeline.
-
-| Term | Meaning |
-| :--- | :--- |
-| **Sandbox** | An isolated full Linux VM for one task. Deleted with its filesystem. |
-| **Workspace** | The durable parent holding many Sandboxes. Never deleted. |
-| **Console demo** | The interactive recreation of the real console, driven by staged data in `src/content/console-data.js` — never by the live product. The screenshot it was built from is `public/product/console-desktop.png`. |
-| **Demo playback** | The beat-clocked message stream plus guided tour. Autoruns on scroll-in and loops; Pause stops it, and any click inside hands control to the visitor for good. |
-| **Prose enhancement** | The JS upgrading CMS and docs pages: code chrome, progress, TOC, language tabs. |
-| **Code chrome** | The bordered figure, language badge, and copy button wrapped around every bare `<pre>`. |
-| **Cover art** | Per-post shader art derived only from slug and topic, so a post's tile and hero are always the same picture. |
-| **Contour field** | The hero canvas painting activated dot-grid cells as distance iso-contours. |
-| **Environment** | SSR-safe browser reads shared by all islands: media queries, OS theme, motion preference, in-view observation. |
-| **Reveal** | Scroll-triggered `.is-visible`; instant under reduced-motion. |
-| **SDK language** | The persisted TypeScript/Python choice shared by Quickstart and docs (`bx-sdk-lang`). |
-
 ## Testing
 
 ```bash
@@ -188,24 +176,6 @@ of the actual HTTP responses, including headers.
 > means there is no builtin to shadow it and no way to get that false
 > green by accident. Node runs the suites, which is why it stays a
 > prerequisite alongside Bun.
-
-## Contributing
-
-Issues and pull requests are welcome.
-
-- Run `bun check` before opening a PR. It builds, so it catches both unit
-  regressions and broken pages — and it is exactly what CI runs, so a green
-  local run means a green PR.
-- Match the surrounding style: no formatter is enforced, so mirror the file
-  you are editing.
-- Keep new logic in `src/lib/` framework-free and add a `*.test.mjs` beside
-  it.
-- Accessibility and reduced-motion behaviour are requirements, not polish.
-  `scripts/a11y-check.mjs` will tell you if you broke them.
-
-CI (`.github/workflows/ci.yml`) runs `bun check` on every push to `main` and
-every pull request. It needs no secrets — `wrangler dev` serves the real
-worker locally through workerd — so it passes on forks too.
 
 ## License
 
