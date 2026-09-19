@@ -1,4 +1,4 @@
-import { useInView } from "../lib/use-in-view.js"
+import { useInView } from "../lib/environment.js"
 
 export const CHART_COLORS = {
   timeout: "#51a2ff",

@@ -3,7 +3,7 @@
 // copy button. Syntax colours, when present, come from build-time Shiki;
 // this module only adds the header row, so it works the same on CMS prose
 // that ships unhighlighted code.
-import { copyText } from "./clipboard.js"
+import { COPY_RESET_MS, copyText } from "./clipboard.js"
 
 const COPY_ICON =
   '<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="8" height="8"></rect><path d="M11 5V3H3v8h2"></path></svg><span>Copy</span>'
@@ -23,7 +23,7 @@ function attachCopy(button, badge, source) {
       button.innerHTML = COPY_ICON
       button.setAttribute("aria-label", `Copy ${badge} to clipboard`)
       button.removeAttribute("data-copied")
-    }, 1600)
+    }, COPY_RESET_MS)
   })
 }
 

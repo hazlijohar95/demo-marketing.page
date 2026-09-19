@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react"
 
-import { useSystemTheme } from "../theme.js"
-import { prefersReducedMotion } from "../lib/reduced-motion.js"
+import { prefersReducedMotion, useSystemTheme } from "../lib/environment.js"
 import { hexToRgb, rgba as css } from "../lib/color.js"
+import { CONTOUR_STEP, contour } from "../lib/field-contour.js"
 
 // CanvasUI Grid / Ripple / Magnify, translated into the BoxCompute system.
 // The canonical dot grid stays in CSS (square 2px cells on a 6px grid);
@@ -24,17 +24,10 @@ const PALETTE = {
   light: { ink: "#c2410c" },
   dark: { ink: "#f97316" },
 }
-// Contour spacing in px. 17 is deliberately not a multiple of GAP (6): on a
-// multiple, every ring lands on the same lattice columns and reads as a grid
-// artifact instead of a measured field.
-const STEP = 17
-// Fraction of a band that actually inks. Thin bands read as drawn lines;
-// widening this fills the gaps and the contours turn back into a blob.
-const BAND = 0.42
-// Band profile exponent. Squaring looked right in isolation but compounded with
-// the radial falloff to a 74/255 peak — invisible on the dot field. 1.4 keeps
-// the line crisp while letting cells between ring centres carry weight.
-const BAND_POWER = 1.4
+// Contour spacing in px. CONTOUR_STEP is deliberately not a multiple of
+// GAP (6): on a multiple, every ring lands on the same lattice columns and
+// reads as a grid artifact instead of a measured field.
+const STEP = CONTOUR_STEP
 const PULSE_LIFE = 1400
 const PULSE_REACH = 190
 
@@ -109,13 +102,6 @@ export default function SandboxField() {
       const yFrom = 1 + Math.max(0, Math.floor((minY - 1) / GAP)) * GAP
       const xFrom = offX + 1 + Math.max(0, Math.floor((minX - offX - 1) / GAP)) * GAP
 
-      // Triangle wave on distance: 1 at the centre of a contour, 0 between two.
-      // Raised to a power so the band stays thin and reads as a drawn line.
-      const contour = (dist) => {
-        const phase = Math.abs(((dist / STEP) % 1) - 0.5) * 2
-        return phase <= 1 - BAND ? 0 : ((phase - (1 - BAND)) / BAND) ** BAND_POWER
-      }
-
       for (let y = yFrom; y < h && y <= maxY; y += GAP) {
         for (let x = xFrom; x < w && x <= maxX; x += GAP) {
           // Strength is how strongly this cell belongs to *any* contour origin,
@@ -139,8 +125,7 @@ export default function SandboxField() {
             const falloff = 1 - dist / PULSE_REACH
             // Rings tighten as the pulse decays, so the field reads as settling
             // to a finer measurement rather than travelling outward.
-            const phase = Math.abs(((dist / (STEP * (0.6 + p.fade * 0.4))) % 1) - 0.5) * 2
-            const band = phase <= 1 - BAND ? 0 : ((phase - (1 - BAND)) / BAND) ** BAND_POWER
+            const band = contour(dist, STEP * (0.6 + p.fade * 0.4))
             total = Math.max(total, band * falloff * p.fade)
           }
           if (total < 0.03) continue

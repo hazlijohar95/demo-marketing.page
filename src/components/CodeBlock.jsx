@@ -1,19 +1,9 @@
-import { useEffect, useState } from "react"
 import { Check, Copy } from "lucide-react"
 
-import { copyText } from "../lib/clipboard.js"
+import { useCopy } from "../lib/clipboard.js"
 
 export default function CodeBlock({ filename, caption, code, langLabel }) {
-  const [copied, setCopied] = useState(false)
-  useEffect(() => {
-    if (!copied) return
-    const id = window.setTimeout(() => setCopied(false), 1600)
-    return () => window.clearTimeout(id)
-  }, [copied])
-  const copy = async () => {
-    await copyText(code)
-    setCopied(true)
-  }
+  const [copied, copy] = useCopy(code)
   return (
     <figure data-component="qs-code">
       <figcaption data-slot="qs-code-head">

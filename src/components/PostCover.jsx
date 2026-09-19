@@ -1,7 +1,6 @@
 import { Dithering } from "@paper-design/shaders-react"
 
-import { useSystemTheme } from "../theme.js"
-import { useInView } from "../lib/use-in-view.js"
+import { useInView, useSystemTheme } from "../lib/environment.js"
 import { postCover } from "../lib/post-cover.js"
 
 // Generated cover art for a post — see lib/post-cover.js for how a slug and a

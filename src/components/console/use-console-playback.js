@@ -1,46 +1,35 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
-import { prefersReducedMotion } from "../../lib/reduced-motion.js"
-import { useIsomorphicLayoutEffect } from "../../lib/isomorphic-layout.js"
-import { BEAT_MS } from "../../lib/tour-schedule.js"
+import { prefersReducedMotion, useIsomorphicLayoutEffect } from "../../lib/environment.js"
+import { streamDuration } from "../../lib/tour-schedule.js"
+import { useTimerBag } from "../../lib/use-timers.js"
 
 // Stream playback: staged message reveal + composer send + replay/stop.
-// Owns the stream timer bag; the guided tour owns a separate bag so
-// play() can clear the stream without killing the tour schedule.
+// Timer ownership lives in the shared bag; the guided tour holds its own
+// bag so play() clears the stream without killing the tour schedule.
 export function useConsolePlayback(chat, chatId) {
   const [extra, setExtra] = useState([])
   const [visible, setVisible] = useState(null)
   const [working, setWorking] = useState(false)
   const [draft, setDraft] = useState("")
   const [preview, setPreview] = useState(null)
-  const timers = useRef([])
+  const { schedule, clear } = useTimerBag()
   const logRef = useRef(null)
   const stickRef = useRef(true)
-
-  const clearTimers = useCallback(() => {
-    timers.current.forEach((id) => window.clearTimeout(id))
-    timers.current = []
-  }, [])
-
-  useEffect(() => {
-    return () => {
-      timers.current.forEach((id) => window.clearTimeout(id))
-    }
-  }, [])
 
   // Shared beat scheduler for play/send: reveal one message per beat,
   // then settle. `base` offsets follow-up streams past the base script.
   const scheduleStream = useCallback((count, base = 0) => {
     setVisible(base + 1)
     for (let i = 1; i < count; i += 1) {
-      timers.current.push(window.setTimeout(() => setVisible(base + i + 1), i * BEAT_MS))
+      schedule(streamDuration(i), () => setVisible(base + i + 1))
     }
-    timers.current.push(window.setTimeout(() => setWorking(false), count * BEAT_MS))
-  }, [])
+    schedule(streamDuration(count), () => setWorking(false))
+  }, [schedule])
 
   const play = useCallback(
     (script) => {
-      clearTimers()
+      clear()
       setWorking(true)
       if (prefersReducedMotion()) {
         setVisible(script.length)
@@ -49,7 +38,7 @@ export function useConsolePlayback(chat, chatId) {
       }
       scheduleStream(script.length)
     },
-    [clearTimers],
+    [clear, scheduleStream],
   )
 
   // Autoplay the run on mount and on every chat switch: the island is
@@ -86,10 +75,10 @@ export function useConsolePlayback(chat, chatId) {
   // WCAG 2.2.2: the run auto-starts on scroll-in and moves for longer than 5s,
   // so it needs a stop. Showing the finished state is a valid stop.
   const stop = useCallback(() => {
-    clearTimers()
+    clear()
     setVisible(chat.messages.length + extra.length)
     setWorking(false)
-  }, [chat.messages.length, extra.length, clearTimers])
+  }, [chat.messages.length, extra.length, clear])
 
   const send = useCallback(
     (value) => {

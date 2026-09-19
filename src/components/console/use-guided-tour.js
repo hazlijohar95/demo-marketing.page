@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 
-import { prefersReducedMotion } from "../../lib/reduced-motion.js"
+import { prefersReducedMotion } from "../../lib/environment.js"
 import { tourSchedule } from "../../lib/tour-schedule.js"
+import { useTimerBag } from "../../lib/use-timers.js"
 import { FOLLOW_UP, FOLLOW_UP_STEPS, TYPE_MS } from "../../content/console-data.js"
 
 // Guided tour: one full round — goal in, run streams, files it wrote, the
@@ -13,24 +14,17 @@ import { FOLLOW_UP, FOLLOW_UP_STEPS, TYPE_MS } from "../../content/console-data.
 // and silently drop the follow-up. `latest` always holds the fresh actions.
 export function useGuidedTour({ chat, send, replay, setPreview, setRightTab, setDraft }) {
   const [tourStep, setTourStep] = useState(null)
-  const tourTimers = useRef([])
+  const { schedule, clear } = useTimerBag()
   const touring = useRef(false)
   const latest = useRef(null)
   latest.current = { send, replay, chat, setPreview, setRightTab }
 
-  useEffect(() => {
-    return () => {
-      tourTimers.current.forEach((id) => window.clearTimeout(id))
-    }
-  }, [])
-
   const stopTour = useCallback(() => {
     if (!touring.current) return
     touring.current = false
-    tourTimers.current.forEach((id) => window.clearTimeout(id))
-    tourTimers.current = []
+    clear()
     setTourStep(null)
-  }, [])
+  }, [clear])
 
   const typeInto = useCallback(
     (text, then) => {
@@ -41,13 +35,11 @@ export function useGuidedTour({ chat, send, replay, setPreview, setRightTab, set
       }
       const chars = [...text]
       chars.forEach((_, i) => {
-        tourTimers.current.push(
-          window.setTimeout(() => setDraft(text.slice(0, i + 1)), i * TYPE_MS),
-        )
+        schedule(i * TYPE_MS, () => setDraft(text.slice(0, i + 1)))
       })
-      tourTimers.current.push(window.setTimeout(then, chars.length * TYPE_MS + 320))
+      schedule(chars.length * TYPE_MS + 320, then)
     },
-    [setDraft],
+    [setDraft, schedule],
   )
 
   const beats = tourSchedule(chat.messages.length, FOLLOW_UP_STEPS)
@@ -91,12 +83,12 @@ export function useGuidedTour({ chat, send, replay, setPreview, setRightTab, set
         step.act()
       }
       if (beats.steps[i] === 0) run()
-      else tourTimers.current.push(window.setTimeout(run, beats.steps[i]))
+      else schedule(beats.steps[i], run)
     })
-    tourTimers.current.push(window.setTimeout(stopTour, beats.end))
+    schedule(beats.end, stopTour)
     // TOUR closes over the latest actions via `latest`, so only the beat
-    // clock values belong in deps.
-  }, [beats.steps, beats.end, stopTour, setDraft])
+    // clock values belong in deps (`schedule` is stable).
+  }, [beats.steps, beats.end, stopTour, setDraft, schedule])
 
   return { tourStep, touring, startTour, stopTour, TOUR }
 }

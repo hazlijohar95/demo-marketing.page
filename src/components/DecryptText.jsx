@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-import { prefersReducedMotion } from "../lib/reduced-motion.js"
+import { prefersReducedMotion } from "../lib/environment.js"
 
 // CanvasUI Decrypt Reveal, voiced for BoxCompute: staged mono lines
 // descramble from product glyphs, left to right, spaces never scrambled

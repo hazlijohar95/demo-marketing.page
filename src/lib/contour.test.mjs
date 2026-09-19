@@ -1,18 +1,13 @@
 // node src/lib/contour.test.mjs
-// Guards the hero field's contour banding. Kept as a mirror of the function in
-// SandboxField.jsx rather than an import: that module reaches for canvas and
-// window at import time, so pulling it into node would need a DOM shim to test
-// eight lines of arithmetic.
+// Guards the hero field's contour banding. Imports the real derivation from
+// field-contour.js — the same function SandboxField.jsx paints with — so the
+// test crosses the module's interface instead of mirroring eight lines of
+// arithmetic that could drift from the shipped field.
 import assert from "node:assert/strict"
 
-const STEP = 17
-const BAND = 0.42
-const BAND_POWER = 1.4
+import { CONTOUR_STEP, contour } from "./field-contour.js"
 
-const contour = (dist) => {
-  const phase = Math.abs(((dist / STEP) % 1) - 0.5) * 2
-  return phase <= 1 - BAND ? 0 : ((phase - (1 - BAND)) / BAND) ** BAND_POWER
-}
+const STEP = CONTOUR_STEP
 
 // Bands must land on multiples of STEP. If this drifts the rings stop being
 // iso-lines of distance and the whole "measured field" read is gone.

@@ -7,11 +7,18 @@
 // constant the stream uses.
 export const BEAT_MS = 850
 
+// One beat per streamed message. Shared by the playback scheduler (which
+// reveals one message per beat) and the tour clock below, so the rule is
+// stated once instead of once per caller.
+export function streamDuration(count) {
+  return count * BEAT_MS
+}
+
 // Beats to hold on a step whose only job is to show a panel.
 const LOOK = 1.7
 
 export function tourSchedule(messageCount, followUpCount) {
-  const stream = messageCount * BEAT_MS
+  const stream = streamDuration(messageCount)
   // +1 beat of rest so "Done" is legible before the panels start moving.
   const files = stream + BEAT_MS
   const open = files + LOOK * BEAT_MS
@@ -20,6 +27,6 @@ export function tourSchedule(messageCount, followUpCount) {
   return {
     steps: [0, files, open, numbers, followUp].map(Math.round),
     // The follow-up types, streams its own messages, then rests a beat.
-    end: Math.round(followUp + (followUpCount + 2) * BEAT_MS),
+    end: Math.round(followUp + streamDuration(followUpCount + 2)),
   }
 }

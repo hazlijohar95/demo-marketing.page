@@ -1,7 +1,12 @@
 // node src/lib/tour-schedule.test.mjs
 import assert from "node:assert/strict"
 
-import { BEAT_MS, tourSchedule } from "./tour-schedule.js"
+import { BEAT_MS, streamDuration, tourSchedule } from "./tour-schedule.js"
+
+// The shared rule both the playback scheduler and the tour clock build on:
+// one beat per streamed message.
+assert.equal(streamDuration(0), 0)
+assert.equal(streamDuration(4), 4 * BEAT_MS)
 
 // The one thing that must hold: a tour beat never narrates a panel while
 // the stream it describes is still printing, and the tour never ends
@@ -17,7 +22,7 @@ for (const messages of [2, 5, 6, 12]) {
 
   // Step 1 shows the files the run wrote — it has to wait for the run.
   assert.ok(
-    steps[1] > messages * BEAT_MS,
+    steps[1] > streamDuration(messages),
     `files step (${steps[1]}) must clear the ${messages}-message stream`,
   )
 

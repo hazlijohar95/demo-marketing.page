@@ -1,7 +1,6 @@
 import { StaticMeshGradient } from "@paper-design/shaders-react"
 
-import { useSystemTheme } from "../theme.js"
-import { useInView } from "../lib/use-in-view.js"
+import { useInView, useSystemTheme } from "../lib/environment.js"
 
 // Mesh backdrop for the console stage. Static (renders once, no motion) so it
 // is cheap and motion-safe by design — no reduced-motion branch needed.

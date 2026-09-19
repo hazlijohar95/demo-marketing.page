@@ -1,7 +1,6 @@
 import { DotGrid } from "@paper-design/shaders-react"
 
-import { useSystemTheme } from "../theme.js"
-import { useInView } from "../lib/use-in-view.js"
+import { useInView, useSystemTheme } from "../lib/environment.js"
 
 const DOTS = {
   light: { back: "#ffffff", fill: "#d2d2d2" },

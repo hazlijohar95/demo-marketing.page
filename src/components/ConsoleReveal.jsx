@@ -1,7 +1,6 @@
 import ConsoleDemo from "./ConsoleDemo.jsx"
 import { ParticleReveal } from "./canvasui/ParticleReveal.jsx"
-import { useSystemTheme } from "../theme.js"
-import { useMediaQuery } from "../lib/use-media-query.js"
+import { useMediaQuery, useSystemTheme } from "../lib/environment.js"
 
 // True Canvas UI Particle Reveal over the live console recreation:
 // the console renders as grayscale dust until the cursor approaches,

@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 
 import { createRectCache } from "./rect-cache.js"
-import { useIsomorphicLayoutEffect } from "../../lib/isomorphic-layout.js"
+import { useIsomorphicLayoutEffect } from "../../lib/environment.js"
 
 const DEFAULTS = {
   radius: 500,

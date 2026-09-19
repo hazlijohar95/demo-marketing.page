@@ -1,20 +1,16 @@
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
 
-import { onVisible } from "../lib/visible.js"
-import { prefersReducedMotion } from "../lib/reduced-motion.js"
+import { useInView } from "../lib/environment.js"
 
+// Scroll reveal: adds `.is-visible` once the element scrolls into view.
+// Built on the shared in-view hook so the reduced-motion instant path and
+// the backgrounded-tab fallback live in exactly one place.
 export default function Reveal({ as: Tag = "div", delay = 0, children, ...rest }) {
-  const ref = useRef(null)
+  const [ref, seen] = useInView(0.12)
 
   useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    if (prefersReducedMotion()) {
-      el.classList.add("is-visible")
-      return
-    }
-    return onVisible(el, () => el.classList.add("is-visible"))
-  }, [])
+    if (seen) ref.current?.classList.add("is-visible")
+  }, [seen])
 
   return (
     <Tag ref={ref} data-reveal style={{ "--reveal-delay": `${delay}ms` }} {...rest}>

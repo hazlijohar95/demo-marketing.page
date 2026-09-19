@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 
-import { prefersReducedMotion } from "./reduced-motion.js"
+import { prefersReducedMotion } from "./environment.js"
 
 // Node has no window: the SSR guard must return false, never throw.
 assert.equal(prefersReducedMotion(), false)
