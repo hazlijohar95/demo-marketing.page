@@ -168,6 +168,17 @@ invariants against actual HTTP responses, headers included. Not a DOM
 snapshot. If a `Link` header goes missing or the markdown negotiation breaks,
 it fails.
 
+## How this happened
+
+I was running a workshop and the audience asked me to iterate on someone
+else's site, live, in front of everyone. They picked boxcompute.ai.
+
+Turns out [Farhan Helmy](https://github.com/farhan-helmy), who co-founded it,
+is a mutual on X. So I did the thing you should absolutely not do: redesigned
+a friend's landing page on stage with no plan and no way to back out.
+
+This repo is what came out of it. sorry farhan. you're welcome farhan.
+
 ## License
 
 [MIT](LICENSE), with one exception, and the exception matters:
