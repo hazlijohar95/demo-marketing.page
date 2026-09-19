@@ -146,30 +146,23 @@ rather than remember.
 
 ## Design system
 
-Adapted from the [`opencode.ai/data`](https://opencode.ai/data) visual
-language. All of it lives under `[data-page="box"]` in `src/styles/`, layered
+All of it lives under `[data-page="box"]` in `src/styles/`, layered
 `tokens → base → sections` so cascade order is explicit and not vibes.
 
-- **Mono everywhere.** IBM Plex Mono, `font-synthesis: none`,
-  `letter-spacing: 0`. Inter exists for prose and nothing else.
-- **Square corners.** `border-radius: 0` almost everywhere. The exceptions are
-  the round send button and status dot in the live composer (`50%`) and the
-  composer shell itself (`16px`). That's the list.
+- **Mono everywhere.** IBM Plex Mono, `font-synthesis: none`. Inter for prose.
+- **Square corners.** `border-radius: 0`, except the live composer shell and
+  its round send button and status dot.
 - **Hairlines, not boxes.** Sections draw with `inset` box-shadows so stacked
   sections share one 1px divider instead of quietly rendering two.
-- **A 6px dot grid** behind the hero, closing band, and footer. A WebGL
-  `DotField` with `gapX/gapY={6}`, lazy-mounted on view so the three GL
-  contexts don't all spin up at once, with a CSS radial-gradient mask
-  underneath for anyone without it.
+- **A 6px dot grid** behind the hero, closing band, and footer. WebGL
+  `DotField`, lazy-mounted on view, with a CSS mask underneath as fallback.
 - **Tabular numbers** on every rank, step, and count, because numbers that
   shift horizontally while they animate are a crime.
-- **Theme** flips a small token set via `html[data-theme]`, set pre-paint so
-  there's no flash. Accent is `#c2410c`, lifting to `#f97316` in dark mode.
-  `system` follows the OS.
-- **Motion is restrained and optional.** Hero staggers once at 0/100/200/300ms.
-  Buttons press to `scale(0.96)`. Transitions name exact properties. All of it
-  is off under `prefers-reduced-motion`, where the console demo just prints its
-  full transcript immediately.
+- **Theme** flips a token set via `html[data-theme]`, set pre-paint so there's
+  no flash. Accent `#c2410c`, lifting to `#f97316` in dark.
+- **Motion is restrained and optional.** Everything is off under
+  `prefers-reduced-motion`, where the console demo prints its full transcript
+  immediately.
 
 ## Testing
 
