@@ -10,9 +10,10 @@ locality) for the structure.
 - **Console demo** — the interactive recreation of the real console on the
   landing page (sidebar, conversation, workbench), driven by staged data in
   `src/content/console-data.js`, not by the product.
-- **Demo playback** — the beat-clocked message stream plus the opt-in guided
-  tour. One beat per message (`streamDuration`); the tour narrates only after
-  the stream it describes has finished.
+- **Demo playback** — the beat-clocked message stream plus the guided tour.
+  One beat per message (`streamDuration`); the tour narrates only after the
+  stream it describes has finished. It autoruns on scroll-in and loops; one
+  Pause stops it, and any click inside the app hands control over for good.
 - **Prose enhancement** — the JS that upgrades CMS-rendered article and docs
   pages: code chrome, post progress/TOC, docs language tabs. Post page and
   docs layout are its two adapters.

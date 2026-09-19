@@ -1,18 +1,15 @@
-import { ArrowUpRight, Play, RotateCcw, Square } from "lucide-react"
-
-import { DESKTOP_SHOT } from "../../content/console-data.js"
+import { Pause, Play } from "lucide-react"
 
 export default function ConsoleHeader({
   chat,
   done,
-  working,
   tourStep,
   TOUR,
-  onToggleTour,
-  onReplayStop,
+  running,
+  onToggleRun,
   progress,
 }) {
-  const touringActive = tourStep !== null
+  const runLabel = running ? "Pause the demo" : "Play the demo"
   return (
     <div data-slot="live-head">
       <span data-slot="live-url">
@@ -37,41 +34,17 @@ export default function ConsoleHeader({
       <span data-slot="live-head-right">
         {progress ? <span data-slot="live-progress" aria-hidden="true">{progress}</span> : null}
         <span data-slot="live-badge" role="status">{done ? "Done" : "Working"}</span>
+        {/* The demo's only control. Icon-only: the head row is status, and a
+            self-running demo needs one affordance, not a console of them. */}
         <button
           type="button"
-          onClick={onToggleTour}
-          title="Guided tour (T)"
-          aria-label={touringActive ? "Stop the tour" : "Play a guided tour"}
+          data-slot="live-run"
+          onClick={onToggleRun}
+          title={runLabel}
+          aria-label={runLabel}
         >
-          {touringActive ? (
-            <>
-              <Square aria-hidden="true" /> Stop
-            </>
-          ) : (
-            <>
-              <Play aria-hidden="true" /> Play tour
-            </>
-          )}
+          {running ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
         </button>
-        <button
-          type="button"
-          onClick={onReplayStop}
-          title={working ? "Stop this run (R)" : "Replay this run (R)"}
-          aria-label={working ? "Stop this run" : "Replay this run"}
-        >
-          {working ? (
-            <>
-              <Square aria-hidden="true" /> Stop
-            </>
-          ) : (
-            <>
-              <RotateCcw aria-hidden="true" /> Replay
-            </>
-          )}
-        </button>
-        <a href={DESKTOP_SHOT} target="_blank" rel="noreferrer" aria-label="View full size">
-          Full size <ArrowUpRight aria-hidden="true" />
-        </a>
       </span>
     </div>
   )

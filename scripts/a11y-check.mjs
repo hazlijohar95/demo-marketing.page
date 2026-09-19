@@ -286,7 +286,7 @@ test("landing advertises theme, rss, and quickstart wayfinding", () => {
   assert.ok(html.includes("bx-theme"), "theme pre-paint script missing")
   assert.ok(html.includes('data-component="theme-toggle"'), "theme toggle missing")
   assert.ok(html.includes('href="/quickstart/"'), "quickstart wayfinding missing")
-  assert.ok(html.includes("T tour"), "demo shortcut hint missing")
+  assert.ok(html.includes('aria-label="Pause the demo"'), "demo pause control missing")
 })
 
 test("docs index filters and guides carry inpage nav + feedback", async () => {

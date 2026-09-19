@@ -19,6 +19,7 @@ export default function ConsoleConversation({
   allMessages,
   shownCount,
   working,
+  rewinding,
   logRef,
   onLogScroll,
   draft,
@@ -42,6 +43,7 @@ export default function ConsoleConversation({
 
       <div
         data-slot="live-log"
+        data-rewinding={rewinding ? "" : undefined}
         ref={logRef}
         onScroll={onLogScroll}
         role="log"
@@ -53,11 +55,13 @@ export default function ConsoleConversation({
         {allMessages.slice(0, shownCount).map((message, i) => (
           <Message key={i} message={message} />
         ))}
-        {working ? (
-          <p data-line="run" aria-hidden="true">
-            <span data-slot="demo-caret" />
-          </p>
-        ) : null}
+        {/* Always mounted. Unmounting it shrank the log by its own line height
+            the moment the run finished, and a log scrolled to the bottom then
+            clamped 28px in one frame. Reserving the row keeps the height
+            stable for the whole cycle. */}
+        <p data-line="run" data-idle={!working ? "" : undefined} aria-hidden="true">
+          <span data-slot="demo-caret" />
+        </p>
       </div>
 
       <div data-slot="live-composer">

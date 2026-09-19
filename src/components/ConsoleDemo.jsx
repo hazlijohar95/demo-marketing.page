@@ -1,4 +1,3 @@
-import { useEffect } from "react"
 import { ArrowUpRight } from "lucide-react"
 
 import { APP_URL } from "../content.js"
@@ -11,28 +10,6 @@ import ConsoleInspector from "./console/ConsoleInspector.jsx"
 export default function ConsoleDemo() {
   const demo = useConsoleDemo()
 
-  // Keyboard shortcuts: R replays/stops, T toggles the tour.
-  // Ignored inside inputs so typing "t" never hijacks the composer.
-  useEffect(() => {
-    const onKey = (event) => {
-      if (event.metaKey || event.ctrlKey || event.altKey) return
-      const tag = event.target?.tagName
-      if (tag === "INPUT" || tag === "TEXTAREA") return
-      const key = event.key.toLowerCase()
-      if (key === "r") {
-        event.preventDefault()
-        if (demo.working) demo.stop()
-        else demo.replay()
-      } else if (key === "t") {
-        event.preventDefault()
-        if (demo.touring.current) demo.stopTour()
-        else demo.startTour()
-      }
-    }
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, [demo.working, demo.stop, demo.replay, demo.startTour, demo.stopTour])
-
   const progress = `${Math.min(demo.shownCount, demo.allMessages.length)}/${demo.allMessages.length}`
 
   return (
@@ -40,17 +17,16 @@ export default function ConsoleDemo() {
       <ConsoleHeader
         chat={demo.chat}
         done={demo.done}
-        working={demo.working}
         tourStep={demo.tourStep}
         TOUR={demo.TOUR}
         progress={progress}
-        onToggleTour={() => (demo.touring.current ? demo.stopTour() : demo.startTour())}
-        onReplayStop={demo.working ? demo.stop : demo.replay}
+        running={demo.running}
+        onToggleRun={demo.toggleRun}
       />
 
-      {/* Touching the app hands control back — the head controls sit
-          outside this element so Play/Stop/Replay stay usable. */}
-      <div data-component="live-grid" onPointerDownCapture={demo.stopTour} onKeyDownCapture={demo.stopTour}>
+      {/* Touching the app hands control over — the Pause control sits outside
+          this element so it stays usable. */}
+      <div data-component="live-grid" onPointerDownCapture={demo.takeOver} onKeyDownCapture={demo.takeOver}>
         <ConsoleSidebar
           chatId={demo.chatId}
           setChatId={demo.setChatId}
@@ -66,6 +42,7 @@ export default function ConsoleDemo() {
           allMessages={demo.allMessages}
           shownCount={demo.shownCount}
           working={demo.working}
+          rewinding={demo.rewinding}
           logRef={demo.logRef}
           onLogScroll={demo.onLogScroll}
           draft={demo.draft}
@@ -85,7 +62,7 @@ export default function ConsoleDemo() {
       </div>
 
       <p data-slot="live-foot">
-        Interactive recreation · illustrated data · <span aria-hidden="true">T tour · R replay ·</span>{" "}
+        Interactive recreation · illustrated data ·{" "}
         <a href={APP_URL} target="_blank" rel="noreferrer">
           Open the real console <ArrowUpRight aria-hidden="true" />
         </a>

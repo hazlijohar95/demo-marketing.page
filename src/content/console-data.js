@@ -1,7 +1,5 @@
 import { Boxes, KeyRound, LayoutDashboard } from "lucide-react"
 
-export const DESKTOP_SHOT = "/product/console-desktop.png?v=a2a2ab4"
-
 // One id per chat, interpolated into the transcript instead of retyped —
 // the head chip, the terminal and the URL have to agree or the console
 // reads as three unrelated mockups.

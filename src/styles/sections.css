@@ -583,37 +583,36 @@
   padding: 48px var(--bx-pad-inline);
 }
 
+/* Gated-access marker. Same chip vocabulary as every other small label in the
+   system — hairline box, layer fill, mono type, one 6px square dot — so it
+   reads as a spec label rather than a highlighted sentence. The solid
+   layer-2 block it replaced was the heaviest fill on the page, above the h1.
+   Ember, not success green: invite-only is a gate, not an OK state. */
 [data-page="box"] [data-slot="hero-meta"] {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  width: fit-content;
+  gap: 10px;
   max-width: 100%;
   min-width: 0;
-  height: 24px;
-  padding-inline: 4px 8px;
-  background: var(--bx-layer-2);
+  padding: 6px 12px;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-layer);
   color: var(--bx-muted);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.1;
+  font-family: var(--bx-mono);
+  font-size: 12px;
+  line-height: 1.2;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
+/* The status square shared with the footer status and the console badge. */
 [data-page="box"] [data-slot="hero-meta"]::before {
   content: "";
   flex: 0 0 auto;
-  width: 16px;
-  height: 16px;
-  background: var(--bx-success);
-  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0H2V2H0V0Z' fill='black'/%3E%3C/svg%3E");
-  mask-repeat: repeat;
-  mask-size: 6px 6px;
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0H2V2H0V0Z' fill='black'/%3E%3C/svg%3E");
-  -webkit-mask-repeat: repeat;
-  -webkit-mask-size: 6px 6px;
+  width: 6px;
+  height: 6px;
+  background: var(--bx-accent);
 }
 
 [data-page="box"] [data-slot="hero-canvas"] {
@@ -1333,6 +1332,14 @@
   font-weight: 400;
 }
 
+/* Icon-only, so it needs its own 24px floor to clear WCAG 2.5.8 — the text
+   buttons got there from their label. */
+[data-page="box"] [data-slot="live-run"] {
+  justify-content: center;
+  min-width: 24px;
+  padding-inline: 4px;
+}
+
 /* Guided-tour readout. It lives in the head row on purpose: that row has
    a fixed height, so turning the tour on never changes the console's
    total height — the particle-reveal wrapper is a fixed calc(). */
@@ -1808,10 +1815,39 @@
   }
 }
 
+/* A message settles in rather than blinking on. 3px, because it arrives at the
+   end of a list the reader is already looking at — not a section entrance. */
 @keyframes bx-live-in {
   from {
     opacity: 0;
+    transform: translateY(3px);
   }
+}
+
+/* The loop restart dissolves the finished transcript before rewinding it:
+   ten messages cut to one in a single frame read as a glitch. A transition,
+   not keyframes — pausing mid-dissolve retargets from wherever it got to.
+   `linear`, not --bx-ease-out: a strong ease-out front-loads a crossfade so
+   hard it reads as a cut again (0.12 opacity inside the first 50ms). A
+   dissolve wants even progress. Paired with REWIND_MS in tour-schedule.js,
+   which holds the narration for it. */
+[data-page="box"] [data-slot="live-log"] {
+  transition: opacity var(--bx-dur-ui) linear;
+}
+
+[data-page="box"] [data-slot="live-log"][data-rewinding] {
+  opacity: 0;
+}
+
+/* The caret row holds its space when the run is done — see ConsoleConversation.
+   Blinking an invisible caret for the life of the page is pure waste, so the
+   animation stops with it. */
+[data-page="box"] [data-slot="live-log"] > [data-line="run"][data-idle] {
+  opacity: 0;
+}
+
+[data-page="box"] [data-line="run"][data-idle] [data-slot="demo-caret"] {
+  animation: none;
 }
 
 [data-page="box"] [data-slot="live-composer"] {
