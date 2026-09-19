@@ -14,16 +14,9 @@ sandboxes for AI agents.
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/hazlijohar95/boxcompute-marketing.page)
 
-One click forks this repo, provisions the D1 database, R2 bucket, and KV
-namespace, and deploys the Worker. Requires the repository to be public.
-
 </div>
 
 ---
-
-Yes, it's a landing page with a test suite, a cron trigger, and an
-accessibility harness that boots a real Worker and reads the actual HTTP
-headers. We are aware. It catches things.
 
 ## Quick start
 
@@ -114,11 +107,6 @@ src/
 **Islands.** Only `SiteHeader` and `Hero` are `client:load`. Everything else on
 the homepage is `client:visible`.
 
-**The console on the homepage is a lie.** It's a recreation driven by staged
-data in `src/content/console-data.js`, never the live product. It was built
-from a screenshot. It is a very careful lie and we would like it to stay that
-way, so keep the demo data and the real API separate.
-
 **Cloudflare bindings** (`wrangler.jsonc`):
 
 | Binding | Resource | Purpose |
@@ -134,15 +122,6 @@ There is deliberately **no `account_id`** in `wrangler.jsonc`. A hardcoded one
 works perfectly on the machine that wrote it and fails with error 7003 for
 every other human on earth, which is the exact failure mode that breaks deploy
 buttons. Set `CLOUDFLARE_ACCOUNT_ID` if your login has more than one account.
-
-**Agent-readable by design.** `middleware.js` serves a markdown version of the
-homepage to anything sending `Accept: text/markdown`, and attaches RFC 8288
-`Link` headers pointing at the API catalog and OpenAPI spec.
-`src/lib/skillSource.js` is the single source for the published agent skill, so
-the digest in `/.well-known/agent-skills/index.json` cannot drift from the
-bytes served at `/skills/boxcompute-sandbox/SKILL.md`. Two files claiming
-different hashes for the same skill is a bug we decided to make impossible
-rather than remember.
 
 ## Design system
 
