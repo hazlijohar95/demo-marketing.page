@@ -139,6 +139,18 @@ Everything lives under `[data-page="box"]` in `src/styles/`, layered
 
 **Accent** &nbsp;![](https://img.shields.io/badge/-c2410c-c2410c?style=flat-square) `#c2410c` light &nbsp;·&nbsp; ![](https://img.shields.io/badge/-f97316-f97316?style=flat-square) `#f97316` dark &nbsp;— theme flips a token set on `html[data-theme]`, set pre-paint so there's no flash.
 
+### Iterating on it
+
+This design was pushed around with the following. Thanks to all of them — if
+you're taking the UI somewhere new, start here rather than from scratch.
+
+| | |
+| :--- | :--- |
+| [**Impeccable**](https://github.com/pbakaus/impeccable) | Design guidance for coding agents. `polish`, `audit`, `critique`, `distill`, and 20 more |
+| [**Interfaces**](https://github.com/jakubkrehel/skills) | `better-*` skills for UI, typography, color, accessibility, layout, and copy |
+| [**UI Skills**](https://github.com/ibelick/ui-skills) | Skills for design engineers, with a browsable registry and CLI |
+| [**Canvas UI**](https://canvasui.dev/components) | The canvas components behind the console reveal. Vendored, see [License](#license) |
+
 ## Testing
 
 ```bash
