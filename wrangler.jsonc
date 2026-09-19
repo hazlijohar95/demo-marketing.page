@@ -1,10 +1,13 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "boxcompute",
-  // No account_id on purpose: a hardcoded one fails with error 7003 for anyone
-  // deploying to a different account, which breaks the Deploy to Cloudflare
-  // button. Set CLOUDFLARE_ACCOUNT_ID instead when a login has more than one
-  // account and the deploy has to stay non-interactive.
+  // No account_id or resource ids on purpose. A hardcoded account_id fails with
+  // error 7003 for anyone deploying to a different account, and pinned D1/KV ids
+  // fail the same way because those resources live in one account only — both
+  // break forks and the Deploy to Cloudflare button. Wrangler resolves D1 and R2
+  // by name and provisions anything missing, so a fork deploys untouched. Set
+  // CLOUDFLARE_ACCOUNT_ID when a login has more than one account and the deploy
+  // has to stay non-interactive.
   "main": "./src/worker.ts",
   "compatibility_date": "2026-02-24",
   "compatibility_flags": ["nodejs_compat"],
@@ -12,7 +15,6 @@
     {
       "binding": "DB",
       "database_name": "boxcompute-cms",
-      "database_id": "fe1f7075-285b-4905-a4e5-34950990c5f4",
     },
   ],
   "r2_buckets": [
@@ -21,12 +23,11 @@
       "bucket_name": "boxcompute-media",
     },
   ],
-  // Astro sessions. Wrangler provisioned this on first deploy; pinning the id
-  // stops later deploys from creating a second namespace.
+  // Astro sessions. Auto-provisioned per account; the data is transient, so a
+  // fresh namespace only means signing back into the CMS.
   "kv_namespaces": [
     {
       "binding": "SESSION",
-      "id": "1ec3d931856145cb91f59886ae6cf7cf",
     },
   ],
   // Drives scheduled publishing and EmDash maintenance. Without it, a post

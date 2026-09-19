@@ -116,12 +116,12 @@ the homepage is `client:visible`.
 | `SESSION` | KV | Astro sessions |
 | `triggers.crons` | `* * * * *` | Scheduled publishing |
 
-The first `wrangler deploy` provisions the named D1 and R2 resources.
-
-There is deliberately **no `account_id`** in `wrangler.jsonc`. A hardcoded one
-works perfectly on the machine that wrote it and fails with error 7003 for
-every other human on earth, which is the exact failure mode that breaks deploy
-buttons. Set `CLOUDFLARE_ACCOUNT_ID` if your login has more than one account.
+Fork it and `bun run deploy` works as-is. `wrangler.jsonc` carries **no
+`account_id` and no resource ids** on purpose: hardcoded ones work perfectly on
+the machine that wrote them and fail with error 7003 for every other human on
+earth, which is the exact failure mode that breaks deploy buttons. D1 and R2
+resolve by name, KV and anything missing gets provisioned on first deploy. Set
+`CLOUDFLARE_ACCOUNT_ID` if your login has more than one account.
 
 ## Design system
 
