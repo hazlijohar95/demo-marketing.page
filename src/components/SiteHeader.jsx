@@ -76,6 +76,18 @@ export default function SiteHeader() {
   useEffect(() => {
     if (!open) return
     firstLinkRef.current?.focus()
+    // Scroll lock. The overlay is fixed and contains its own overscroll, but a
+    // drag starting on the header strip above it still scrolled the document
+    // underneath, so the page moved behind a menu that did not. position:fixed
+    // on the body rather than overflow:hidden, because iOS Safari ignores
+    // overflow on the scrolling element; the stored offset goes back on close
+    // so the reader lands exactly where they opened it.
+    const scrollY = window.scrollY
+    const { body } = document
+    const prev = { position: body.style.position, top: body.style.top, width: body.style.width }
+    body.style.position = "fixed"
+    body.style.top = `-${scrollY}px`
+    body.style.width = "100%"
     // The menu is a fixed overlay covering everything below the bar, so the
     // content behind it must leave the tab order. The header bar itself stays
     // interactive: it holds the close button.
@@ -91,6 +103,10 @@ export default function SiteHeader() {
     }
     document.addEventListener("keydown", onKey)
     return () => {
+      body.style.position = prev.position
+      body.style.top = prev.top
+      body.style.width = prev.width
+      window.scrollTo(0, scrollY)
       if (behind) behind.inert = false
       if (skip) skip.inert = false
       document.removeEventListener("keydown", onKey)
@@ -138,8 +154,17 @@ export default function SiteHeader() {
             >
               <strong>Docs</strong>
             </a>
-            <a data-slot="header-button" data-variant="contrast" href={APP_URL}>
-              <strong>Open BoxCompute</strong> <ArrowUpRight aria-hidden="true" />
+            <a data-slot="header-button" data-variant="contrast" href={APP_URL} aria-label="Open BoxCompute">
+              {/* Two labels, one accessible name. The bar holds brand + Docs +
+                  primary + menu, which does not fit 390px at the full label —
+                  the ellipsis fallback rendered "Ope...", so the CTA stopped
+                  naming its own action. aria-label above is the name either
+                  way, so the swap is purely visual. */}
+              <strong>
+                <span data-label="long">Open BoxCompute</span>
+                <span data-label="short">Open</span>
+              </strong>{" "}
+              <ArrowUpRight aria-hidden="true" />
             </a>
             <button
               data-slot="menu-button"

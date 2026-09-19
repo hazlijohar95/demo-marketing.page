@@ -216,9 +216,19 @@
 
 [data-page="box"] [data-slot="header-button"] {
   padding: 0 12px;
-  flex-shrink: 1;
+  /* flex-shrink: 0, not 1. Shrinking let the ellipsis eat the labels down to
+     "D." and "Ope..." on every phone — an ellipsis is a graceful degradation
+     for user content, not for a two-word CTA the bar exists to carry. The
+     label swap below keeps the row inside 320px instead. */
+  flex-shrink: 0;
   min-width: 0;
   max-width: 100%;
+}
+
+/* One label shows at a time. The long one is the default so a wide bar and a
+   no-CSS render both read in full. */
+[data-page="box"] [data-slot="header-button"] [data-label="short"] {
+  display: none;
 }
 
 [data-page="box"] [data-slot="header-button"] strong {
@@ -264,6 +274,14 @@
   [data-page="box"] [data-slot="header-actions"] [data-slot="header-button"][data-variant="neutral"] {
     padding: 0 8px;
   }
+  /* Short label on the primary: the full one cannot coexist with brand, Docs
+     and the 44px menu inside 390px. */
+  [data-page="box"] [data-slot="header-actions"] [data-slot="header-button"] [data-label="long"] {
+    display: none;
+  }
+  [data-page="box"] [data-slot="header-actions"] [data-slot="header-button"] [data-label="short"] {
+    display: inline;
+  }
   [data-page="box"] [data-slot="header-bar"] {
     gap: 8px;
     padding-inline: 16px 12px;
@@ -271,6 +289,10 @@
   [data-page="box"] [data-slot="brand"] {
     font-size: 20px;
     gap: 8px;
+    /* The brand is the one flexible item in the row: it can ellipsize to a
+      mark + partial word and still be recognisable, where a CTA cannot. */
+    min-width: 0;
+    overflow: hidden;
   }
 }
 
@@ -286,6 +308,12 @@
   }
   [data-page="box"] [data-slot="header-button"] {
     padding: 0 8px;
+  }
+  /* At 320 even the short labels overrun. Docs goes: it is the first item in
+     the mobile menu and it is in the footer, so nothing becomes unreachable
+     — unlike the clipped glyphs this replaces. */
+  [data-page="box"] [data-slot="header-actions"] [data-slot="header-button"][data-variant="neutral"] {
+    display: none;
   }
 }
 
@@ -2478,6 +2506,39 @@
   color: var(--bx-bg);
 }
 
+/* Segmented control on a phone. At 390px the four-pill row measures 415px and
+   was clipped by the page's overflow-x: clip — the trailing pills could not be
+   tapped at all, which also stranded the comparison table's only column
+   selector. It becomes a snap scroller instead: full bleed to the section pad,
+   momentum-free snapping onto whole pills, and no visible scrollbar.
+   -webkit-overflow-scrolling is still required for momentum inside a nested
+   scroller on older iOS. */
+@media (max-width: 47.999rem) {
+  [data-page="box"] [data-component="demo-controls"] {
+    justify-content: flex-start;
+    width: 100%;
+    min-width: 0;
+  }
+  [data-page="box"] [data-component="scenario-pills"] {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* A pill row is a control, not prose: a horizontal drag must pan it and a
+       vertical drag must still scroll the page. */
+    touch-action: pan-x pan-y;
+  }
+  [data-page="box"] [data-component="scenario-pills"]::-webkit-scrollbar {
+    display: none;
+  }
+  [data-page="box"] [data-component="scenario-pills"] button {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+}
+
 [data-page="box"] [data-slot="demo-caret"] {
   display: inline-block;
   width: 7px;
@@ -2575,8 +2636,11 @@
   vertical-align: top;
 }
 
-[data-page="box"] [data-component="compare-table"] tr:last-child th,
-[data-page="box"] [data-component="compare-table"] tr:last-child td {
+/* Scoped to tbody: `thead` has exactly one row, so an unscoped `tr:last-child`
+   also matched it and the header row lost the rule separating it from the
+   first comparison. Only the final body row should drop its border. */
+[data-page="box"] [data-component="compare-table"] tbody tr:last-child th,
+[data-page="box"] [data-component="compare-table"] tbody tr:last-child td {
   border-bottom: 0;
 }
 
@@ -2633,6 +2697,46 @@
   color: var(--bx-faint);
   font-size: 11px;
   line-height: 1.5;
+}
+
+/* The table on a phone. 620px of columns panned across 342px of screen loses
+   the row label the moment you reach any data — you are reading "Full Linux VM
+   by default" with no idea which capability it answers. Pinning the label
+   column to the leading edge fixes that on its own. No scroll-snap: the four
+   comparator columns are not equal width, so snap had no consistent target and
+   fired an unbidden 24px scroll on load, opening the table already misaligned. */
+@media (max-width: 47.999rem) {
+  [data-page="box"] [data-component="compare-scroll"] {
+    -webkit-overflow-scrolling: touch;
+  }
+  [data-page="box"] [data-component="compare-table"] {
+    /* Narrower columns than the desktop 680 floor: 4 × 148 + a 148 label reads
+       without cramping and keeps one comparator fully on screen per pan. */
+    min-width: 620px;
+  }
+  [data-page="box"] [data-component="compare-table"] :is(th, td) {
+    padding: 14px 12px;
+  }
+  [data-page="box"] [data-component="compare-table"] tbody th {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 1;
+    width: 148px;
+    max-width: 148px;
+    /* Opaque, or the panned columns read straight through the pinned label. */
+    background: var(--bx-bg);
+    /* The hairline that separates pinned from panning content. box-shadow, not
+       a border: a border would travel in the collapsed border model. */
+    box-shadow: 1px 0 var(--bx-line);
+  }
+  [data-page="box"] [data-component="compare-table"] thead th:first-child {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 1;
+    width: 148px;
+    background: var(--bx-bg);
+    box-shadow: 1px 0 var(--bx-line);
+  }
 }
 
 /* opencode/data-style visuals -------------------------------------- */
@@ -3179,6 +3283,86 @@
   }
   [data-page="box"] [data-slot="post-back"] a {
     min-height: 44px;
+  }
+
+  /* Remaining sub-44px controls, measured rather than assumed. Inline links
+     inside a sentence (qs-body, qs-callout, qs-alt, live-foot, blog-empty) are
+     deliberately absent: WCAG 2.5.8 exempts them, and padding a link in running
+     text breaks the line box it sits in. Cards whose whole face is already the
+     target via ::after{inset:0} are absent for the same reason. */
+
+  /* Header home link and footer mark: both are 28-32px of logo+wordmark. */
+  [data-page="box"] [data-slot="brand"],
+  [data-page="box"] [data-slot="footer-mark"] {
+    min-height: 44px;
+  }
+
+  /* Footer navigation is a list of stacked 20px links a thumb has to hit
+     without catching its neighbour. Padding, not min-height: the row has to
+     grow its hit area, and the 10px grid gap is not part of any target. */
+  [data-page="box"] [data-slot="footer-column"] nav {
+    gap: 0;
+  }
+  [data-page="box"] [data-slot="footer-column"] nav a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  [data-page="box"] [data-component="theme-toggle"] button {
+    min-height: 44px;
+    padding-inline: 14px;
+  }
+
+  /* Filter and search fields: a 36px box is a desktop affordance. */
+  [data-page="box"] [data-component="docs-filter"] input {
+    min-height: 44px;
+  }
+  [data-page="box"] [data-component="qs-toc"] a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  /* The scope checklist: the label is the target (native label behaviour), so
+     the 16px box only needs its row to reach 44. */
+  [data-page="box"] [data-slot="qs-scopes"] label {
+    min-height: 44px;
+  }
+
+  [data-page="box"] [data-slot="qs-copy"] {
+    min-height: 44px;
+    padding-inline: 14px;
+  }
+
+  /* Console recreation chrome. It is a scaled-down app on purpose, but every
+     one of these is a real control on a real page. The head row has a fixed
+     token height that the desktop particle-reveal wrapper also reads, so the
+     row grows via the token rather than being overridden locally — otherwise a
+     44px button inside a 44px row cannot clear its own padding. */
+  [data-page="box"] [data-component="console-live"] {
+    --live-head-h: 56px;
+  }
+  [data-page="box"] [data-slot="live-head-right"] [data-slot="live-run"] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  [data-page="box"] [data-slot="live-nav"] button,
+  [data-page="box"] [data-slot="live-user"] button,
+  [data-page="box"] [data-slot="mv-ops"] {
+    min-height: 44px;
+  }
+  [data-page="box"] [data-slot="live-search"] {
+    padding-block: 0;
+  }
+  [data-page="box"] [data-slot="live-search"] input {
+    min-height: 44px;
+  }
+  [data-page="box"] [data-slot="live-search"] a {
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -4320,6 +4504,30 @@
   font-family: var(--bx-mono);
   font-size: 13px;
   line-height: 1.7;
+  -webkit-overflow-scrolling: touch;
+  /* Snippets are the one block that cannot reflow, so on a phone they always
+     have content past the right edge — and nothing said so. Same
+     background-attachment trick the compare table uses: the local layers hide
+     the fixed shadow layers until there is actually something to scroll to, so
+     the cue is truthful in both directions and costs no JS. Dark values, since
+     this figure is dark on both themes. */
+  background-image:
+    linear-gradient(to right, #161616, #161616),
+    linear-gradient(to left, #161616, #161616),
+    linear-gradient(to right, #00000080, transparent),
+    linear-gradient(to left, #00000080, transparent);
+  background-position:
+    left center,
+    right center,
+    left center,
+    right center;
+  background-repeat: no-repeat;
+  background-size:
+    20px 100%,
+    20px 100%,
+    12px 100%,
+    12px 100%;
+  background-attachment: local, local, scroll, scroll;
 }
 
 [data-page="box"] [data-component="qs-code"] code {

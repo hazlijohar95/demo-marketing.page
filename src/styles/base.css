@@ -1,4 +1,33 @@
 /* Base typography, reset, focus, skip-link, dot pattern — extracted from styles.css. */
+
+/* Document reset. The UA's 8px body margin was never cleared, so every band —
+   the sticky header included — sat inset 8px from the viewport on all four
+   sides and the full-bleed dot grid stopped short of the screen edge. On a
+   390px phone that is 4% of the width spent on an accident.
+   text-size-adjust: iOS Safari inflates text when a phone rotates to landscape
+   and never restores it, which desyncs every px-based rhythm in the system.
+   dvh, not vh: the dynamic unit tracks the collapsing mobile browser chrome,
+   so the page floor is the visible viewport rather than the largest one. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  /* A rubber-band drag at either end must not chain to the document and
+     trigger a browser pull-to-refresh mid-read. */
+  overscroll-behavior-y: none;
+}
+
+/* The blue-grey flash the UA paints on tap is a rounded box with its own
+   timing; it reads as foreign in a square-corner hairline system. Removed in
+   favour of the explicit :active states the controls already declare — never
+   removed without one, or the tap would have no feedback at all. */
+[data-page="box"] :is(a, button, summary, [role="button"]) {
+  -webkit-tap-highlight-color: transparent;
+}
 /* Sans display, mono data (Vercel-style split) -------------------------
    Headings, body, nav and buttons speak in grotesque sans.
    Terminals, boards, tables and anything tabular stays in mono. */
