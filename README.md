@@ -7,9 +7,6 @@
 **The marketing site, docs, and blog for BoxCompute** — isolated Linux VM
 sandboxes for AI agents.
 
-Astro islands on Cloudflare Workers, with a square-cornered, hairline design
-system and an interactive recreation of the product console.
-
 [![CI](https://github.com/hazlijohar95/boxcompute-marketing.page/actions/workflows/ci.yml/badge.svg)](https://github.com/hazlijohar95/boxcompute-marketing.page/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-black?style=flat-square)](LICENSE)
 
