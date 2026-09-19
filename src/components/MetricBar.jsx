@@ -1,7 +1,4 @@
-import { useEffect, useRef, useState } from "react"
-
-import { onVisible } from "../lib/visible.js"
-import { prefersReducedMotion } from "../lib/reduced-motion.js"
+import { useInView } from "../lib/use-in-view.js"
 
 export const CHART_COLORS = {
   timeout: "#51a2ff",
@@ -16,23 +13,8 @@ export const CHART_COLORS = {
   violet: "#7c86ff",
 }
 
-function useInView() {
-  const ref = useRef(null)
-  const [seen, setSeen] = useState(false)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    if (prefersReducedMotion()) {
-      setSeen(true)
-      return
-    }
-    return onVisible(el, () => setSeen(true), 0.2)
-  }, [])
-  return [ref, seen]
-}
-
 export function MetricBar({ fill = 0, color = "var(--bx-accent)", active = false, label }) {
-  const [ref, seen] = useInView()
+  const [ref, seen] = useInView(0.2)
   const pct = Math.max(0, Math.min(100, fill))
   return (
     <span

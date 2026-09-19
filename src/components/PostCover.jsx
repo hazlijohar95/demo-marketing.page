@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from "react"
 import { Dithering } from "@paper-design/shaders-react"
 
 import { useSystemTheme } from "../theme.js"
-import { onVisible } from "../lib/visible.js"
+import { useInView } from "../lib/use-in-view.js"
 import { postCover } from "../lib/post-cover.js"
 
 // Generated cover art for a post — see lib/post-cover.js for how a slug and a
@@ -15,15 +14,7 @@ import { postCover } from "../lib/post-cover.js"
 // CSS dot plate underneath stays visible wherever WebGL isn't available.
 export default function PostCover({ slug, topic, slot = "tile" }) {
   const theme = useSystemTheme()
-  const ref = useRef(null)
-  const [show, setShow] = useState(false)
-
-  useEffect(() => {
-    if (show) return
-    const el = ref.current
-    if (!el) return
-    return onVisible(el, () => setShow(true), 0.05)
-  }, [show])
+  const [ref, show] = useInView(0.05)
 
   const cover = postCover(slug, topic, slot, theme)
 

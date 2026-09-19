@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from "react"
 import { StaticMeshGradient } from "@paper-design/shaders-react"
 
 import { useSystemTheme } from "../theme.js"
-import { onVisible } from "../lib/visible.js"
+import { useInView } from "../lib/use-in-view.js"
 
 // Mesh backdrop for the console stage. Static (renders once, no motion) so it
 // is cheap and motion-safe by design — no reduced-motion branch needed.
@@ -16,15 +15,7 @@ const MESH = {
 
 export default function StageBackdrop() {
   const theme = useSystemTheme()
-  const ref = useRef(null)
-  const [show, setShow] = useState(false)
-
-  useEffect(() => {
-    if (show) return
-    const el = ref.current
-    if (!el) return
-    return onVisible(el, () => setShow(true), 0.05)
-  }, [theme, show])
+  const [ref, show] = useInView(0.05)
 
   const colors = MESH[theme] ?? MESH.light
 

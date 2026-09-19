@@ -1,0 +1,4517 @@
+/* Page sections (shell/header/hero/console/…). Extracted verbatim from styles.css line 281+. */
+[data-page="box"] [data-component="container"] {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+/* Page grid: a 22px dot field full-bleed behind every section. No vertical
+   edge rules: they cut through the hero copy and the footer mark, so
+   sections are separated by horizontal hairlines only. */
+[data-page="box"] {
+  background-image: radial-gradient(circle at 1px 1px, var(--bx-grid-dot) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+/* Grid knock-out. The grid is a backdrop for empty space, so anything that
+   carries text or rows sits on an opaque plate and the ruling stops at its
+   edge. Same device the hero already uses for its title and copy. Listed in
+   one place rather than per-component so the rule stays reviewable: cards,
+   boards and the console already own an opaque background, and the gaps
+   between them are genuine blank space where the grid should read through.
+   `:not([data-component])` keeps this on the heading/copy block — the
+   segmented controls are also direct div children of the header. */
+[data-page="box"] :is(
+    [data-slot="section-header"] > div:not([data-component]),
+    [data-component="steps"],
+    [data-component="faq-list"],
+    [data-section="closing"] > div:not([data-component])
+  ) {
+  background: var(--bx-bg);
+}
+
+/* The plate has to clear the text it protects, or the ruling resumes tight
+   against the last glyph. */
+[data-page="box"] [data-slot="section-header"] > div:not([data-component]),
+[data-page="box"] [data-section="closing"] > div:not([data-component]) {
+  padding-inline-end: 16px;
+  padding-bottom: 12px;
+}
+
+/* A trailing-aligned block (the spec legend) needs the plate on its leading
+   side instead, or its 16px end-pad pushes it 16px off the trailing edge the
+   sibling sections' segmented controls sit on. */
+[data-page="box"] [data-slot="section-header"] > div:not([data-component]):not(:first-child) {
+  padding-inline: 16px 0;
+}
+
+/* header ------------------------------------------------------------ */
+[data-page="box"] [data-component="top"] {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-sizing: border-box;
+  width: 100%;
+  /* Physical insets for a physical concern: the notch is on the same screen
+     side whatever the reading direction. */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  background: var(--bx-bg);
+  /* Hairline only once the page has moved: at rest the bar should merge with
+     the hero, not sit in a box of its own. */
+  box-shadow: inset 0 -1px transparent;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-component="top"] {
+    transition: box-shadow var(--bx-dur-ui) ease;
+  }
+}
+
+[data-page="box"] [data-component="top"][data-scrolled="true"] {
+  box-shadow: inset 0 -1px var(--bx-line);
+}
+
+[data-page="box"] [data-component="top"] * {
+  box-sizing: border-box;
+}
+
+[data-page="box"] [data-slot="header-bar"] {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: var(--bx-bar-h);
+  padding-block: 20px;
+  padding-inline: 24px 20px;
+  overflow: hidden;
+}
+
+[data-page="box"] [data-slot="brand"] {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-inline-end: auto;
+  color: var(--bx-text);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+[data-page="box"] [data-slot="brand"] img {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-page="box"] [data-slot="brand"] img {
+    filter: grayscale(1) invert(1);
+  }
+}
+
+[data-page="box"] [data-component="section-nav"] {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+[data-page="box"] [data-component="section-nav"] ul {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-page="box"] [data-component="section-nav"] a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 15px;
+  color: var(--bx-muted);
+  font-size: 13px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+[data-page="box"] [data-component="section-nav"] a:hover {
+  color: var(--bx-text);
+}
+
+/* Current section. A rule under the label rather than a filled pill: the bar
+   already carries two filled buttons, and a third fill would compete with the
+   primary action. */
+[data-page="box"] [data-component="section-nav"] a[data-current] {
+  position: relative;
+  color: var(--bx-text);
+}
+
+[data-page="box"] [data-component="section-nav"] a[data-current]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 15px;
+  bottom: 2px;
+  height: 1px;
+  background: var(--bx-accent);
+}
+
+[data-page="box"] [data-slot="header-actions"] {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+
+[data-page="box"] [data-slot="header-button"],
+[data-page="box"] [data-slot="menu-button"] {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  overflow: hidden;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  appearance: none;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.1;
+  cursor: pointer;
+}
+
+[data-page="box"] [data-slot="header-button"] svg,
+[data-page="box"] [data-slot="menu-button"] svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+
+[data-page="box"] [data-slot="header-button"]::before,
+[data-page="box"] [data-slot="menu-button"]::before {
+  position: absolute;
+  top: 0;
+  inset-inline: 0;
+  height: 16px;
+  pointer-events: none;
+  content: "";
+  background: linear-gradient(180deg, #ffffff00 0%, #ffffff12 100%);
+}
+
+[data-page="box"] [data-slot="header-button"] {
+  padding: 0 12px;
+  flex-shrink: 1;
+  min-width: 0;
+  max-width: 100%;
+}
+
+[data-page="box"] [data-slot="header-button"] strong {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+[data-page="box"] [data-slot="header-button"][data-variant="neutral"] {
+  display: inline-flex;
+  gap: 6px;
+  color: #161616;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 0 #00000024,
+    0 0 0 0.5px #00000024,
+    0 1px 1.5px 0 #0000001a;
+}
+
+/* The primary CTA already declares a transition for these properties
+   (see the polish pass) but nothing ever changed them — hover was dead.
+   Colour and shadow only, no transform: this button is on screen in the
+   sticky header all day, so the feedback stays near-imperceptible. */
+@media (hover: hover) and (pointer: fine) {
+  [data-page="box"] [data-slot="header-button"][data-variant="neutral"]:hover,
+  [data-page="box"] [data-slot="menu-button"]:hover {
+    box-shadow:
+      0 0 0 0 #00000038,
+      0 0 0 0.5px #00000038,
+      0 1px 2px 0 #00000024;
+  }
+  [data-page="box"] [data-slot="header-button"][data-variant="contrast"]:hover {
+    background: #3a3a3a;
+  }
+}
+
+/* The Docs button stays visible on small screens: it is the invite-only
+   escape hatch, and the mobile menu already costs an extra tap. Tighten
+   padding instead of hiding so brand + Docs + Open + menu fit 360px. */
+@media (max-width: 47.999rem) {
+  [data-page="box"] [data-slot="header-actions"] [data-slot="header-button"][data-variant="neutral"] {
+    padding: 0 8px;
+  }
+  [data-page="box"] [data-slot="header-bar"] {
+    gap: 8px;
+    padding-inline: 16px 12px;
+  }
+  [data-page="box"] [data-slot="brand"] {
+    font-size: 20px;
+    gap: 8px;
+  }
+}
+
+/* 320px: brand + two CTAs + 44px menu exceed the viewport with
+   overflow:hidden clipping mid-glyph. Shrink the mark and shorten gaps. */
+@media (max-width: 22.5rem) {
+  [data-page="box"] [data-slot="brand"] {
+    font-size: 18px;
+  }
+  [data-page="box"] [data-slot="brand"] img {
+    width: 28px;
+    height: 28px;
+  }
+  [data-page="box"] [data-slot="header-button"] {
+    padding: 0 8px;
+  }
+}
+
+[data-page="box"] [data-slot="header-button"][data-variant="contrast"] {
+  gap: 8px;
+  color: #ffffff;
+  background: #242424;
+  box-shadow:
+    0 0 0 0 #00000000,
+    0 0 0 0.5px #3a3a3a,
+    0 1px 1.5px 0 #00000033,
+    inset 0 -1px 2px 0 #0000000f,
+    inset 0 1px 2px 0 #ffffff24;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-page="box"] [data-slot="header-button"][data-variant="contrast"] {
+    background: #5c5c5c;
+  }
+}
+
+[data-page="box"] [data-slot="menu-button"] {
+  display: inline-flex;
+  width: 32px;
+  padding: 0;
+  color: #3a3a3a;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 0 #00000024,
+    0 0 0 0.5px #00000024,
+    0 1px 1.5px 0 #0000001a;
+}
+
+[data-page="box"] [data-slot="menu-icons"] {
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+}
+
+[data-page="box"] [data-slot="menu-icons"] svg {
+  grid-area: 1 / 1;
+  width: 14px;
+  height: 14px;
+  transition:
+    opacity 180ms var(--bx-ease-out),
+    transform 180ms var(--bx-ease-out),
+    filter 180ms var(--bx-ease-out);
+}
+
+[data-page="box"] [data-slot="menu-icons"][data-open="false"] svg:last-child,
+[data-page="box"] [data-slot="menu-icons"][data-open="true"] svg:first-child {
+  opacity: 0;
+  transform: scale(0.25);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-page="box"] [data-slot="menu-button"] {
+    color: #fafafa;
+    background: #ffffff0f;
+    box-shadow:
+      0 -0.5px 0 0 #ffffff33,
+      0 0 0 0.5px #ffffff33,
+      0 1px 2px 0 #00000066;
+  }
+}
+
+[data-page="box"] [data-slot="mobile-menu"] {
+  position: fixed;
+  top: var(--bx-bar-h);
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 9;
+  display: none;
+  overflow: auto;
+  /* Without these the last item sits under the home indicator and the first
+     one clips against a landscape notch. */
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  /* Keeps a scroll gesture inside the overlay instead of chaining to the
+     page behind it. */
+  overscroll-behavior: contain;
+  background: var(--bx-bg);
+  border-top: 1px solid var(--bx-line);
+}
+
+[data-page="box"] [data-menu-open="true"] [data-slot="mobile-menu"]:not([hidden]) {
+  display: block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-slot="mobile-menu"] {
+    transition:
+      opacity 180ms ease-out,
+      translate 180ms ease-out;
+    transition-behavior: allow-discrete;
+  }
+  [data-page="box"] [data-menu-open="false"] [data-slot="mobile-menu"],
+  [data-page="box"] [data-slot="mobile-menu"][hidden] {
+    opacity: 0;
+    translate: 0 -8px;
+  }
+  @starting-style {
+    [data-page="box"] [data-menu-open="true"] [data-slot="mobile-menu"]:not([hidden]) {
+      opacity: 0;
+      translate: 0 -8px;
+    }
+  }
+}
+
+[data-page="box"] [data-slot="mobile-menu-item"] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 65px;
+  padding: 24px;
+  color: var(--bx-text);
+  border-bottom: 1px solid var(--bx-line);
+  font-size: 13px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+[data-page="box"] [data-slot="mobile-menu-item"]:hover {
+  background: var(--bx-layer);
+}
+
+[data-page="box"] [data-slot="mobile-menu-item"] strong {
+  font-weight: 400;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="mobile-menu-item"] svg {
+  width: 14px;
+  height: 14px;
+  margin-inline-start: auto;
+  color: var(--bx-faint);
+}
+
+@media (min-width: 48rem) {
+  [data-page="box"] [data-component="section-nav"] {
+    display: flex;
+  }
+  [data-page="box"] [data-slot="menu-button"] {
+    display: none;
+  }
+  [data-page="box"] [data-slot="mobile-menu"] {
+    display: none !important;
+  }
+}
+
+@media (min-width: 90rem) {
+  [data-page="box"] [data-slot="header-bar"] {
+    display: grid;
+    grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
+    gap: 32px;
+  }
+  [data-page="box"] [data-slot="brand"] {
+    margin-inline-end: 0;
+  }
+}
+
+/* sections ------------------------------------------------------------ */
+[data-page="box"] [data-section]:not([data-section="hero"]) {
+  position: relative;
+  box-sizing: border-box;
+  box-shadow: inset 0 -1px var(--bx-line);
+  padding: var(--bx-section-pad);
+}
+
+[data-page="box"] [data-section="console"] {
+  box-shadow:
+    0 -1px var(--bx-line),
+    inset 0 -1px var(--bx-line);
+}
+
+@media (max-width: 75rem) {
+  [data-page="box"] {
+    --bx-pad-inline: 32px;
+    --bx-section-pad: 64px var(--bx-pad-inline);
+  }
+}
+
+@media (max-width: 47.999rem) {
+  [data-page="box"] {
+    --bx-pad-inline: 24px;
+    --bx-section-pad: 48px var(--bx-pad-inline);
+  }
+}
+
+/* The console has no heading — the stage IS the section and supplies its
+   own padding. Left at the standard section pad, that pad stacks with the
+   stage's and leaves an empty band where the heading used to be. */
+[data-page="box"] [data-section][data-section="console"] {
+  padding: 0;
+}
+
+[data-page="box"] [data-slot="section-header"] {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+[data-page="box"] [data-slot="section-header"] > div {
+  display: grid;
+  gap: 18px;
+  /* Wide heading, narrow sub-copy. At the display size the old 460px cap
+     wrapped two-clause titles into four ragged lines. */
+  max-width: 46rem;
+}
+
+/* Section eyebrow. The `#` anchor already existed but only appeared on hover,
+   so sections had no visible label and every band opened at the same pitch.
+   Promoting it to a permanent mono line gives each section an identity and
+   sets up the size jump into the title below it. */
+[data-page="box"] [data-slot="section-eyebrow"] {
+  margin: 0;
+  color: var(--bx-accent-text);
+  font-family: var(--bx-mono);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+[data-page="box"] [data-slot="section-eyebrow"] span {
+  opacity: 0.55;
+}
+
+[data-page="box"] [data-slot="section-title"] {
+  max-width: 1200px;
+  color: var(--bx-muted);
+  /* Warp's display step: the heading has to out-rank the eyebrow and the
+     body copy by more than 28px managed against 16px body. */
+  font-size: clamp(28px, 3.4vw, 40px);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+[data-page="box"] [data-slot="section-title"] strong {
+  color: var(--bx-text);
+  font-weight: 500;
+}
+
+/* `p:not([data-slot])` so this stays the sub-copy rule only: a bare `p` here
+   also matches the eyebrow and, being more specific and later, silently
+   overrode it. */
+[data-page="box"] [data-slot="section-header"] p:not([data-slot]) {
+  max-width: 460px;
+  color: var(--bx-muted);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+[data-page="box"] [data-slot="heading-link"] {
+  position: relative;
+  color: inherit;
+  text-decoration: none;
+}
+
+[data-page="box"] [data-slot="heading-anchor"] {
+  position: absolute;
+  top: -0.08em;
+  inset-inline-end: 100%;
+  margin-inline-end: 0.48em;
+  color: var(--bx-accent);
+  opacity: 0;
+}
+
+[data-page="box"] [data-slot="heading-link"]:hover [data-slot="heading-anchor"],
+[data-page="box"] [data-slot="heading-link"]:focus-visible [data-slot="heading-anchor"] {
+  opacity: 1;
+}
+
+@media (max-width: 47.999rem) {
+  [data-page="box"] [data-slot="section-header"] {
+    flex-direction: column;
+  }
+  [data-page="box"] [data-slot="section-title"] {
+    font-size: 24px;
+  }
+}
+
+/* hero ------------------------------------------------------------ */
+[data-page="box"] [data-section="hero"] {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 24px;
+  min-height: 0;
+  overflow: hidden;
+  padding: 48px var(--bx-pad-inline);
+}
+
+[data-page="box"] [data-slot="hero-meta"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+  height: 24px;
+  padding-inline: 4px 8px;
+  background: var(--bx-layer-2);
+  color: var(--bx-muted);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="hero-meta"]::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  background: var(--bx-success);
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0H2V2H0V0Z' fill='black'/%3E%3C/svg%3E");
+  mask-repeat: repeat;
+  mask-size: 6px 6px;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0H2V2H0V0Z' fill='black'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: repeat;
+  -webkit-mask-size: 6px 6px;
+}
+
+[data-page="box"] [data-slot="hero-canvas"] {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  min-width: 0;
+}
+
+[data-page="box"] [data-section="hero"] h1 {
+  order: 1;
+  color: var(--bx-text);
+  font-size: 40px;
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+/* Keeps the hard two-line break the old <br> gave us, without the <br> —
+   a break contributes no whitespace to the computed accessible name. */
+[data-page="box"] [data-section="hero"] h1 > span {
+  display: block;
+}
+
+[data-page="box"] [data-slot="hero-pattern"] {
+  order: 2;
+  flex: 0 0 auto;
+  width: 100%;
+  height: 16px;
+  overflow: hidden;
+}
+
+[data-page="box"] [data-slot="hero-copy"] {
+  order: 3;
+  display: grid;
+  gap: 16px;
+  color: var(--bx-muted);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+[data-page="box"] [data-slot="hero-copy"] p {
+  margin: 0;
+}
+
+[data-page="box"] [data-slot="hero-actions"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (min-width: 48rem) {
+  [data-page="box"] [data-section="hero"] {
+    gap: 16px;
+    padding: 64px var(--bx-pad-inline) 32px;
+  }
+  /* Grid, not two absolutely-positioned corners. Absolute children contribute
+     no height, so the 232px floor was also a ceiling: on a coarse pointer the
+     44px CTA row already overlapped the title, and a translated three-line
+     title clipped outright. 8px + space-between reproduces today's English
+     geometry exactly (140 + 8 + 84 = 232) and grows past it when it must. */
+  [data-page="box"] [data-slot="hero-canvas"] {
+    position: relative;
+    display: grid;
+    justify-items: start;
+    align-content: space-between;
+    gap: 8px;
+    min-height: 232px;
+    overflow: hidden;
+  }
+  [data-page="box"] [data-slot="hero-pattern"] {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1280px;
+    height: 351px;
+    transform: translate(-50%, -50%);
+  }
+  [data-page="box"] [data-section="hero"] h1 {
+    z-index: 1;
+    width: min(100%, max-content);
+    max-width: 100%;
+    padding: 0;
+    padding-inline-end: 12px;
+    padding-bottom: 12px;
+    background: var(--bx-bg);
+    font-size: 64px;
+    text-wrap: balance;
+  }
+  [data-page="box"] [data-slot="hero-copy"] {
+    justify-self: end;
+    z-index: 1;
+    width: min(563px, 100%);
+    padding: 0;
+    padding-block-start: 12px;
+    padding-inline-start: 16px;
+    background: var(--bx-bg);
+    text-align: end;
+  }
+  [data-page="box"] [data-slot="hero-copy"] [data-slot="hero-actions"] {
+    justify-content: flex-end;
+  }
+}
+
+@media (min-width: 90rem) {
+  [data-page="box"] [data-section="hero"] {
+    padding-inline: 0;
+  }
+}
+
+/* console ------------------------------------------------------------ */
+/* (live recreation styles live under "live console recreation" below) */
+
+/* platform cards ------------------------------------------------------------ */
+[data-page="box"] [data-component="card-grid"] {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+[data-page="box"] [data-component="leader-card"] {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  padding: 24px;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-bg);
+  box-shadow:
+    0 0 0 0.5px #0000001f,
+    0 1px 2px -1px #00000014,
+    0 2px 4px 0 #0000000a;
+}
+
+/* Hover lift is gated: a tap on a touch device fires :hover and leaves
+   the card stuck in the lifted state, and one of these cards holds an
+   interactive button. */
+@media (hover: hover) and (pointer: fine) {
+  [data-page="box"] [data-component="leader-card"]:hover {
+    border-color: var(--bx-line-strong);
+    box-shadow:
+      0 0 0 0.5px #00000024,
+      0 6px 16px #0000000d,
+      0 2px 6px #0000000f;
+    transform: translateY(-1px);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
+  [data-page="box"] [data-component="leader-card"]:hover {
+    transform: none;
+  }
+}
+
+[data-page="box"] [data-component="leader-card"] {
+  transition:
+    transform 220ms ease-out,
+    border-color 220ms ease-out,
+    box-shadow 220ms ease-out,
+    background-color 480ms ease;
+}
+
+@media (prefers-color-scheme: dark) and (hover: hover) and (pointer: fine) {
+  [data-page="box"] [data-component="leader-card"]:hover {
+    background: #242424;
+  }
+}
+
+[data-page="box"] [data-slot="card-top"] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+[data-page="box"] [data-slot="rank"] {
+  color: var(--bx-faint);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-page="box"] [data-component="leader-card"] h3 {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+[data-page="box"] [data-component="leader-card"] p {
+  color: var(--bx-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+[data-page="box"] [data-slot="beta-pill"] {
+  width: fit-content;
+  padding: 5px 10px;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-layer);
+  color: var(--bx-muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+@media (max-width: 60rem) {
+  [data-page="box"] [data-component="card-grid"] {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* steps ------------------------------------------------------------ */
+[data-page="box"] [data-component="steps"] {
+  border-top: 1px solid var(--bx-line);
+}
+
+[data-page="box"] [data-component="steps"] > li {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: baseline;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--bx-line);
+}
+
+[data-page="box"] [data-slot="step-number"] {
+  color: var(--bx-faint);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-page="box"] [data-component="steps"] h3 {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+[data-page="box"] [data-component="steps"] p {
+  color: var(--bx-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media (max-width: 47.999rem) {
+  [data-page="box"] [data-component="steps"] > li {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+  [data-page="box"] [data-component="steps"] p {
+    grid-column: 2;
+  }
+}
+
+/* faq ------------------------------------------------------------ */
+[data-page="box"] [data-component="faq-list"] {
+  border-top: 1px solid var(--bx-line);
+}
+
+[data-page="box"] [data-component="faq-list"] details {
+  border-bottom: 1px solid var(--bx-line);
+}
+
+[data-page="box"] [data-component="faq-list"] summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 0;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+[data-page="box"] [data-component="faq-list"] summary::-webkit-details-marker {
+  display: none;
+}
+
+[data-page="box"] [data-component="faq-list"] summary svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  color: var(--bx-faint);
+  transition: transform var(--bx-dur-ui) var(--bx-ease-in-out);
+}
+
+[data-page="box"] [data-component="faq-list"] details[open] summary svg {
+  transform: rotate(45deg);
+}
+
+/* The group is exclusive (name="faq"), so opening one row snapped its
+   sibling shut in the same frame. Both ends now travel. Browsers without
+   interpolate-size / ::details-content keep today's instant behaviour. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-component="faq-list"] details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size var(--bx-dur-ui) var(--bx-ease-out),
+      content-visibility var(--bx-dur-ui) allow-discrete;
+  }
+  [data-page="box"] [data-component="faq-list"] details[open]::details-content {
+    block-size: auto;
+  }
+}
+
+[data-page="box"] [data-component="faq-list"] details > p {
+  max-width: 640px;
+  padding-bottom: 24px;
+  color: var(--bx-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-page="box"] [data-component="faq-list"] summary svg {
+    transition: none;
+  }
+}
+
+/* closing ------------------------------------------------------------ */
+[data-page="box"] [data-section="closing"] {
+  overflow: hidden;
+}
+
+[data-page="box"] [data-slot="closing-pattern"] {
+  height: 16px;
+  margin-bottom: 40px;
+  overflow: hidden;
+}
+
+[data-page="box"] [data-section="closing"] h2 {
+  max-width: 46rem;
+  color: var(--bx-muted);
+  font-size: clamp(28px, 3.4vw, 40px);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+[data-page="box"] [data-section="closing"] h2 strong {
+  color: var(--bx-text);
+  font-weight: 500;
+}
+
+[data-page="box"] [data-section="closing"] > p {
+  margin-top: 18px;
+  color: var(--bx-muted);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+[data-page="box"] [data-section="closing"] [data-slot="hero-actions"] {
+  margin-top: 32px;
+}
+
+@media (max-width: 47.999rem) {
+  [data-page="box"] [data-section="closing"] h2 {
+    font-size: 24px;
+  }
+}
+
+/* footer ------------------------------------------------------------ */
+[data-page="box"] [data-component="footer"] {
+  position: relative;
+  display: grid;
+  gap: 48px;
+  box-sizing: border-box;
+  min-height: 0;
+  /* Same inline pad as every other band at every width, so the mark and the
+     bottom row always clear the container's edge hairlines. */
+  padding: 56px var(--bx-pad-inline) 28px;
+  border-top: 1px solid var(--bx-line);
+  font-size: 13px;
+}
+
+[data-page="box"] [data-slot="footer-grid"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+  gap: 48px;
+  align-items: start;
+}
+
+[data-page="box"] [data-slot="footer-brand"] {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+}
+
+[data-page="box"] [data-slot="footer-mark"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  color: var(--bx-text);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+[data-page="box"] [data-slot="footer-mark"] img {
+  display: block;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-page="box"] [data-slot="footer-mark"] img {
+    filter: grayscale(1) invert(1);
+  }
+}
+
+[data-page="box"] [data-slot="footer-brand"] p {
+  max-width: 26ch;
+  margin: 0;
+  color: var(--bx-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+[data-page="box"] [data-slot="footer-column"] {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-width: 0;
+}
+
+[data-page="box"] [data-slot="footer-column"] h3 {
+  color: var(--bx-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+[data-page="box"] [data-slot="footer-column"] nav {
+  display: grid;
+  gap: 10px;
+}
+
+[data-page="box"] [data-slot="footer-column"] a,
+[data-page="box"] [data-slot="footer-column"] p {
+  color: var(--bx-muted);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+[data-page="box"] [data-slot="footer-column"] a:hover {
+  color: var(--bx-text);
+}
+
+[data-page="box"] [data-slot="footer-column"] a svg {
+  width: 12px;
+  height: 12px;
+  vertical-align: -1px;
+}
+
+[data-page="box"] [data-slot="footer-bottom"],
+[data-page="box"] [data-slot="footer-bottom"] > div {
+  display: flex;
+  align-items: center;
+}
+
+[data-page="box"] [data-slot="footer-bottom"] {
+  justify-content: space-between;
+  gap: 24px;
+  border-top: 1px solid var(--bx-line);
+  padding-top: 20px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+[data-page="box"] [data-slot="footer-bottom"] > div:first-child {
+  gap: 24px;
+}
+
+[data-page="box"] [data-slot="footer-bottom"] span {
+  color: var(--bx-muted);
+}
+
+[data-page="box"] [data-slot="footer-controls"] {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 0;
+}
+
+[data-page="box"] [data-slot="status"] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+[data-page="box"] [data-slot="status"]::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--bx-success);
+}
+
+@media (max-width: 60rem) {
+  [data-page="box"] [data-slot="footer-grid"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 40px;
+  }
+  [data-page="box"] [data-slot="footer-brand"] {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 40rem) {
+  [data-page="box"] [data-slot="footer-grid"] {
+    grid-template-columns: 1fr;
+  }
+  [data-page="box"] [data-slot="footer-bottom"] {
+    flex-wrap: wrap;
+  }
+}
+
+/* live console recreation ------------------------------------------------------ */
+[data-page="box"] [data-component="console-live"] {
+  --live-bg: var(--bx-bg);
+  --live-text: var(--bx-text);
+  --live-soft: var(--bx-muted);
+  --live-muted: var(--bx-muted);
+  --live-line: var(--bx-line);
+  --live-line-2: var(--bx-line-strong);
+  --live-wash: color-mix(in srgb, var(--bx-text) 7%, transparent);
+  --live-layer: var(--bx-layer);
+  --live-tile: var(--bx-layer-2);
+  --live-composer: var(--bx-layer);
+  --live-focus: var(--bx-line-strong);
+  --live-accent: var(--bx-accent-text);
+  --live-send-bg: var(--bx-text);
+  --live-send-ink: var(--bx-bg);
+  border: 1px solid var(--bx-line-strong);
+  box-shadow:
+    0 0 0 0.5px var(--bx-line),
+    0 16px 40px -16px rgb(0 0 0 / 0.25),
+    0 4px 12px rgb(0 0 0 / 0.08);
+  background: var(--live-bg);
+  color: var(--live-text);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+[data-page="box"] [data-component="console-live"] button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+[data-page="box"] [data-slot="live-head"] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-sizing: border-box;
+  height: var(--live-head-h);
+  padding: 0 16px;
+  border-bottom: 1px solid var(--live-line);
+  background: var(--live-layer);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+/* Address bar, not a caption: the console lives at a real URL, and the
+   path tracks the open chat the way the product does. */
+[data-page="box"] [data-slot="live-url"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 340px;
+  padding: 5px 10px;
+  border: 1px solid var(--live-line);
+  background: var(--live-bg);
+  color: var(--bx-faint);
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: none;
+}
+
+[data-page="box"] [data-slot="live-url"] img {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+}
+
+[data-page="box"] [data-slot="live-url"] > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="live-url"] b {
+  color: var(--live-text);
+  font-weight: 500;
+}
+
+/* Product mark inside the app, as the real console carries it. */
+[data-page="box"] [data-slot="live-brand"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px 12px;
+  font-family: var(--bx-sans);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+[data-page="box"] [data-slot="live-brand"] img {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+/* Carbon mark on a carbon surface: same inversion the site brand uses. */
+@media (prefers-color-scheme: dark) {
+  [data-page="box"] [data-slot="live-brand"] img,
+  [data-page="box"] [data-slot="live-url"] img {
+    filter: grayscale(1) invert(1);
+  }
+}
+
+[data-page="box"] [data-slot="live-head-right"] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+  text-transform: none;
+}
+
+[data-page="box"] [data-slot="live-badge"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--live-text);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+[data-page="box"] [data-slot="live-badge"]::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--bx-success);
+}
+
+[data-page="box"] [data-slot="live-head-right"] button,
+[data-page="box"] [data-slot="live-head-right"] a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 4px 6px;
+  color: var(--live-muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* Guided-tour readout. It lives in the head row on purpose: that row has
+   a fixed height, so turning the tour on never changes the console's
+   total height — the particle-reveal wrapper is a fixed calc(). */
+[data-page="box"] [data-slot="live-tour"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--live-text);
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: none;
+}
+
+/* The tour readout's flex row moved to the keyed inner span so the outer
+   element can stay mounted as a stable live region. */
+[data-page="box"] [data-slot="live-tour"] > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+[data-page="box"] [data-slot="live-tour"] b {
+  flex: 0 0 auto;
+  color: var(--live-muted);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-page="box"] [data-slot="live-tour"] em {
+  flex: 0 0 auto;
+  color: var(--bx-faint);
+  font-style: normal;
+}
+
+@media (max-width: 64rem) {
+  [data-page="box"] [data-slot="live-tour"] em {
+    display: none;
+  }
+}
+
+[data-page="box"] [data-slot="live-head-right"] button:hover,
+[data-page="box"] [data-slot="live-head-right"] a:hover {
+  color: var(--live-text);
+}
+
+[data-page="box"] [data-slot="live-head-right"] svg {
+  width: 13px;
+  height: 13px;
+}
+
+[data-page="box"] [data-component="live-grid"] {
+  display: grid;
+  grid-template-columns: 224px minmax(0, 1fr) 288px;
+  min-height: 0;
+}
+
+[data-page="box"] [data-slot="live-side"] {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-inline-end: 1px solid var(--live-line);
+  padding: 16px 12px;
+  gap: 4px;
+}
+
+[data-page="box"] [data-slot="live-ws"] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 4px 12px;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+[data-page="box"] [data-slot="live-ws"] > span:nth-child(2) {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="live-ws"] > span:nth-child(2) > span,
+[data-page="box"] [data-slot="live-chats"] button > span:nth-child(2) > span,
+[data-page="box"] [data-slot="live-user"] > span > span:nth-child(2) > span {
+  color: var(--bx-faint);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* Two-line stacked labels (workspace, chat row, user, conversation head).
+   text-overflow on the grid parent does nothing for its grid items, and a
+   bare text node becomes an anonymous item CSS cannot reach at all — so
+   each line is its own element and truncates itself. Without this, long
+   names hard-clip mid-glyph at the sidebar border. */
+[data-page="box"] [data-slot="live-ws"] > span:nth-child(2) > *,
+[data-page="box"] [data-slot="live-chats"] button > span:nth-child(2) > *,
+[data-page="box"] [data-slot="live-user"] > span > span:nth-child(2) > *,
+[data-page="box"] [data-slot="live-convo-head"] > span:nth-child(2) > * {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="live-ws"] > span:nth-child(2) > b,
+[data-page="box"] [data-slot="live-chats"] button > span:nth-child(2) > b,
+[data-page="box"] [data-slot="live-user"] > span > span:nth-child(2) > b,
+[data-page="box"] [data-slot="live-convo-head"] > span:nth-child(2) > b {
+  font-weight: inherit;
+}
+
+[data-page="box"] [data-slot="live-ws"] svg {
+  width: 14px;
+  height: 14px;
+  margin-inline-start: auto;
+  color: var(--bx-faint);
+  flex: 0 0 auto;
+}
+
+[data-page="box"] [data-slot="live-avatar"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+[data-page="box"] [data-slot="live-avatar"][data-tone="ember"] {
+  background: var(--live-ember);
+  color: #161616;
+}
+
+[data-page="box"] [data-slot="live-avatar"][data-tone="mint"] {
+  background: #9ae600;
+  color: #161616;
+}
+
+[data-page="box"] [data-slot="live-avatar"][data-tone="plain"] {
+  background: var(--live-tile);
+  color: var(--live-text);
+}
+
+[data-page="box"] [data-slot="live-nav"] {
+  display: grid;
+  gap: 2px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--live-line);
+}
+
+[data-page="box"] [data-slot="live-nav"] button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 0;
+  color: var(--live-muted);
+  font-size: 13px;
+  text-align: start;
+  transition-property: background-color, color;
+  transition-duration: var(--bx-dur-press);
+  transition-timing-function: ease;
+}
+
+[data-page="box"] [data-slot="live-nav"] button:hover {
+  background: var(--live-wash);
+  color: var(--live-text);
+}
+
+[data-page="box"] [data-slot="live-nav"] button[data-active="true"] {
+  background: var(--live-wash);
+  color: var(--live-text);
+}
+
+[data-page="box"] [data-slot="live-nav"] svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+
+[data-page="box"] [data-slot="live-tabs"] {
+  display: flex;
+  margin-top: 12px;
+  border-bottom: 1px solid var(--live-line);
+}
+
+[data-page="box"] [data-slot="live-tabs"] button {
+  flex: 1 1 0;
+  padding: 10px 4px;
+  color: var(--bx-faint);
+  font-size: 12px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+[data-page="box"] [data-slot="live-tabs"] button[data-active="true"] {
+  color: var(--live-text);
+  border-bottom-color: var(--live-text);
+}
+
+[data-page="box"] [data-slot="live-search"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 4px;
+  color: var(--bx-faint);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+[data-page="box"] [data-slot="live-search"]:focus-within {
+  border-bottom-color: var(--bx-accent);
+}
+
+[data-page="box"] [data-slot="live-search"] svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+
+[data-page="box"] [data-slot="live-search"] input {
+  min-width: 0;
+  flex: 1 1 auto;
+  background: transparent;
+  border: 0;
+  color: var(--live-text);
+  font: inherit;
+  font-size: 12px;
+}
+
+[data-page="box"] [data-slot="live-search"] input::placeholder {
+  color: var(--bx-faint);
+}
+
+[data-page="box"] [data-slot="live-search"] button,
+[data-page="box"] [data-slot="live-search"] a {
+  display: inline-flex;
+  color: var(--bx-faint);
+  padding: 5px;
+}
+
+[data-page="box"] [data-slot="live-search"] button:hover,
+[data-page="box"] [data-slot="live-search"] a:hover {
+  color: var(--live-text);
+}
+
+[data-page="box"] [data-slot="live-search"] button svg,
+[data-page="box"] [data-slot="live-search"] a svg {
+  width: 14px;
+  height: 14px;
+}
+
+[data-page="box"] [data-slot="live-group"] {
+  padding: 8px 4px 4px;
+  color: var(--bx-faint);
+  font-size: 11px;
+}
+
+[data-page="box"] [data-slot="live-chats"] {
+  display: grid;
+  gap: 2px;
+  overflow: auto;
+  min-height: 0;
+}
+
+[data-page="box"] [data-slot="live-chats"] button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+  text-align: start;
+  border: 1px solid transparent;
+  transition-property: background-color, border-color;
+  transition-duration: var(--bx-dur-press);
+  transition-timing-function: ease;
+}
+
+[data-page="box"] [data-slot="live-chats"] button:hover {
+  background: var(--live-wash);
+}
+
+[data-page="box"] [data-slot="live-chats"] button[data-active="true"] {
+  background: var(--live-ember-wash);
+  border-color: var(--live-ember-line);
+}
+
+[data-page="box"] [data-slot="live-chats"] button > span:nth-child(2) {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="live-mini"] {
+  margin-inline-start: auto;
+  color: var(--bx-faint);
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+
+[data-page="box"] [data-slot="live-empty"] {
+  padding: 8px;
+  color: var(--bx-faint);
+  font-size: 12px;
+}
+
+[data-page="box"] [data-slot="live-user"] {
+  display: grid;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--live-line);
+}
+
+[data-page="box"] [data-slot="live-user"] > button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px;
+  color: var(--live-muted);
+  font-size: 12px;
+}
+
+[data-page="box"] [data-slot="live-user"] > button:hover {
+  color: var(--live-text);
+}
+
+[data-page="box"] [data-slot="live-user"] > button svg {
+  width: 14px;
+  height: 14px;
+}
+
+[data-page="box"] [data-slot="live-user"] > span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+  font-size: 12px;
+}
+
+[data-page="box"] [data-slot="live-user"] > span > span:nth-child(2) {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="live-main"] {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-inline-end: 1px solid var(--live-line);
+}
+
+[data-page="box"] [data-slot="live-convo-head"] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--live-line);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+[data-page="box"] [data-slot="live-convo-head"] > span:nth-child(2) {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="live-convo-head"] > span:nth-child(2) > span {
+  color: var(--bx-faint);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+[data-page="box"] [data-slot="live-wb"] {
+  margin-inline-start: auto;
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border: 1px solid var(--live-line-2);
+  color: var(--live-soft);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+[data-page="box"] [data-slot="live-log"] {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 20px 16px;
+  min-height: 380px;
+  overflow: auto;
+  font-size: 13px;
+}
+
+[data-page="box"] [data-slot="live-log"] > p,
+[data-page="box"] [data-slot="live-log"] > h3 {
+  overflow-wrap: anywhere;
+}
+
+[data-page="box"] [data-slot="live-log"] h3 {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+[data-page="box"] [data-slot="live-log"] [data-line="ask"] {
+  width: fit-content;
+  max-width: 100%;
+  padding: 10px 14px;
+  background: var(--live-ember);
+  color: #161616;
+  font-weight: 500;
+}
+
+[data-page="box"] [data-slot="live-log"] [data-line="lead"] {
+  color: var(--live-soft);
+}
+
+[data-page="box"] [data-slot="live-log"] [data-line="fact"] {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-weight: 600;
+}
+
+[data-page="box"] [data-slot="live-log"] [data-line="fact"]::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 5px;
+  height: 5px;
+  align-self: center;
+  background: var(--bx-faint);
+}
+
+[data-page="box"] [data-slot="live-log"] [data-line="note"] {
+  color: var(--live-muted);
+}
+
+[data-page="box"] [data-slot="live-log"] [data-line="run"] {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  color: var(--live-soft);
+}
+
+[data-page="box"] [data-slot="live-log"] [data-line="run"] > span {
+  color: var(--live-accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-slot="live-log"] > p,
+  [data-page="box"] [data-slot="live-log"] > h3 {
+    animation: bx-live-in var(--bx-dur-fast) var(--bx-ease-out) both;
+  }
+}
+
+@keyframes bx-live-in {
+  from {
+    opacity: 0;
+  }
+}
+
+[data-page="box"] [data-slot="live-composer"] {
+  margin: 0 16px 16px;
+  border: 1px solid var(--live-line-2);
+  border-radius: 16px;
+  background: var(--live-composer);
+  transition-property: border-color;
+  transition-duration: var(--bx-dur-press);
+  transition-timing-function: ease;
+}
+
+[data-page="box"] [data-slot="live-composer"]:focus-within {
+  border-color: var(--live-focus);
+}
+
+[data-page="box"] [data-slot="live-composer"] input {
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  border: 0;
+  padding: 14px 16px 6px;
+  color: var(--live-text);
+  font: inherit;
+  font-size: 13px;
+}
+
+[data-page="box"] [data-slot="live-composer"] input::placeholder {
+  color: var(--bx-faint);
+}
+
+[data-page="box"] [data-slot="live-composer"] > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 8px 8px 16px;
+}
+
+[data-page="box"] [data-slot="live-composer"] > div > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--bx-faint);
+  font-size: 11px;
+}
+
+[data-page="box"] [data-slot="live-composer"] > div > span svg {
+  width: 14px;
+  height: 14px;
+}
+
+[data-page="box"] [data-slot="live-model"] {
+  padding: 3px 8px;
+  border: 1px solid var(--live-line);
+  color: var(--live-muted);
+}
+
+[data-page="box"] [data-slot="live-composer"] button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--live-send-bg);
+  color: var(--live-send-ink);
+  transition-property: transform, background-color, opacity;
+  transition-duration: 120ms;
+  transition-timing-function: ease-out;
+}
+
+[data-page="box"] [data-slot="live-composer"] button:hover:not(:disabled) {
+  opacity: 0.82;
+}
+
+[data-page="box"] [data-slot="live-composer"] button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+[data-page="box"] [data-slot="live-composer"] button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+[data-page="box"] [data-slot="live-composer"] button svg {
+  width: 14px;
+  height: 14px;
+}
+
+[data-page="box"] [data-slot="live-inspector"] {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+[data-page="box"] [data-slot="live-inspector-tabs"] {
+  display: flex;
+  border-bottom: 1px solid var(--live-line);
+}
+
+[data-page="box"] [data-slot="live-inspector-tabs"] button {
+  flex: 1 1 0;
+  padding: 12px 4px;
+  color: var(--bx-faint);
+  font-size: 12px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition-property: color;
+  transition-duration: var(--bx-dur-press);
+  transition-timing-function: ease;
+}
+
+[data-page="box"] [data-slot="live-inspector-tabs"] button:hover {
+  color: var(--live-soft);
+}
+
+[data-page="box"] [data-slot="live-inspector-tabs"] button[data-active="true"] {
+  color: var(--live-text);
+  border-bottom-color: var(--live-ember);
+}
+
+[data-page="box"] [data-slot="live-filegroup"] {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--live-line);
+  font-size: 12px;
+}
+
+[data-page="box"] [data-slot="live-filegroup"] > p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--live-text);
+  font-weight: 500;
+}
+
+[data-page="box"] [data-slot="live-filegroup"] > p > span {
+  margin-inline-start: auto;
+  color: var(--bx-faint);
+  font-size: 11px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-page="box"] [data-slot="live-filegroup"] > p svg {
+  width: 14px;
+  height: 14px;
+  color: var(--live-muted);
+}
+
+[data-page="box"] [data-slot="live-filegroup"] > span {
+  color: var(--bx-faint);
+  font-size: 12px;
+}
+
+[data-page="box"] [data-slot="live-sandbox-dot"] {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--bx-warn);
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+[data-page="box"] [data-slot="live-filegroup"] ul {
+  display: grid;
+  gap: 2px;
+}
+
+[data-page="box"] [data-slot="live-filegroup"] li button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 4px;
+  color: var(--live-soft);
+  font-size: 12px;
+  text-align: start;
+  transition-property: background-color, color;
+  transition-duration: var(--bx-dur-press);
+  transition-timing-function: ease;
+}
+
+[data-page="box"] [data-slot="live-filegroup"] li button:hover {
+  background: var(--live-wash);
+  color: var(--live-text);
+}
+
+[data-page="box"] [data-slot="live-filegroup"] li button svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  color: var(--bx-faint);
+}
+
+[data-page="box"] [data-slot="live-filegroup"] li button > span {
+  margin-inline-start: auto;
+  color: var(--bx-faint);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-page="box"] [data-slot="live-preview"] {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+[data-page="box"] [data-slot="live-preview"] > button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--live-line);
+  color: var(--live-text);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+[data-page="box"] [data-slot="live-preview"] > button:hover {
+  background: var(--live-wash);
+}
+
+[data-page="box"] [data-slot="live-preview"] > button svg {
+  width: 14px;
+  height: 14px;
+}
+
+[data-page="box"] [data-slot="live-preview"] pre {
+  margin: 0;
+  padding: 14px 16px;
+  overflow: auto;
+  color: var(--live-muted);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+[data-page="box"] [data-slot="live-term"] {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 14px 16px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--live-muted);
+  overflow-wrap: anywhere;
+}
+
+[data-page="box"] [data-slot="live-previews"] {
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+}
+
+[data-page="box"] [data-slot="live-previews"] li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--live-line);
+  font-size: 12px;
+}
+
+[data-page="box"] [data-slot="live-previews"] li:last-child {
+  border-bottom: 0;
+}
+
+[data-page="box"] [data-slot="live-previews"] span {
+  color: var(--bx-faint);
+}
+
+[data-page="box"] [data-slot="live-previews"] strong {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-page="box"] [data-slot="live-foot"] {
+  box-sizing: border-box;
+  min-height: var(--live-foot-h);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-top: 1px solid var(--live-line);
+  color: var(--bx-faint);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+[data-page="box"] [data-slot="live-foot"] a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--live-muted);
+}
+
+[data-page="box"] [data-slot="live-foot"] a:hover {
+  color: var(--live-text);
+}
+
+[data-page="box"] [data-slot="live-foot"] svg {
+  width: 11px;
+  height: 11px;
+}
+
+@media (min-width: 64.001rem) {
+  [data-page="box"] [data-component="live-grid"] {
+    height: clamp(560px, 72vh, 700px);
+  }
+  [data-page="box"] [data-slot="live-side"],
+  [data-page="box"] [data-slot="live-main"] {
+    min-height: 0;
+    overflow: hidden;
+  }
+  [data-page="box"] [data-slot="live-inspector"] {
+    min-height: 0;
+    overflow-y: auto;
+  }
+  [data-page="box"] [data-slot="live-log"] {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 64rem) {
+  [data-page="box"] [data-component="live-grid"] {
+    grid-template-columns: 1fr;
+  }
+  [data-page="box"] [data-slot="live-side"] {
+    border-inline-end: 0;
+    border-bottom: 1px solid var(--live-line);
+  }
+  [data-page="box"] [data-slot="live-main"] {
+    border-inline-end: 0;
+    border-bottom: 1px solid var(--live-line);
+  }
+}
+
+@media (max-width: 64rem) {
+  [data-page="box"] [data-slot="live-log"] {
+    max-height: 60vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-page="box"] [data-slot="live-log"] > p,
+  [data-page="box"] [data-slot="live-log"] > h3 {
+    animation: none;
+  }
+}
+
+/* polish pass: press, stroke, outline, motion -------------------------- */
+[data-page="box"] svg.lucide {
+  stroke-width: 1.5;
+}
+
+[data-page="box"] [data-slot="header-button"] {
+  transition-property: transform, background-color, border-color, color, box-shadow;
+  transition-duration: 120ms;
+  transition-timing-function: ease-out;
+}
+
+[data-page="box"] [data-slot="header-button"]:active {
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-entrance] {
+    opacity: 0;
+    animation: bx-rise var(--bx-dur-enter) var(--bx-ease-out) forwards;
+    animation-delay: var(--enter-delay, 0ms);
+  }
+  /* Travel uses `translate`, not `transform`: these elements also carry hover
+     lifts (leader-card), and a `transform` here would overwrite them. */
+  [data-page="box"] [data-reveal] {
+    opacity: 0;
+    translate: 0 8px;
+    transition:
+      opacity var(--bx-dur-enter) var(--bx-ease-out),
+      translate var(--bx-dur-enter) var(--bx-ease-out);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  [data-page="box"] [data-reveal].is-visible {
+    opacity: 1;
+    translate: none;
+  }
+  /* The reveal is opt-out polish, not a gate on the content: with scripting
+     off nothing ever adds .is-visible, which would leave every revealed
+     element — the whole blog — permanently invisible. */
+  @media (scripting: none) {
+    [data-page="box"] [data-reveal],
+    [data-page="box"] [data-entrance] {
+      opacity: 1;
+      translate: none;
+      animation: none;
+    }
+  }
+}
+
+@keyframes bx-rise {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+  to {
+    opacity: 1;
+    translate: none;
+  }
+}
+
+/* Scroll depth. [data-reveal] is a one-shot: an element arrives and is done, so
+   the page reads as one flat plane the whole way down. This puts the sections on
+   separate planes instead — whichever one the viewport is on sits at full
+   presence and its neighbours hold back, so scrolling feels like moving through
+   the page rather than past it. Continuous, reversible, and tied to scroll
+   position rather than to a threshold that fires once.
+
+   `animation-timeline: view()` drives it: no scroll listener, no rAF, no JS at
+   all, and it runs off the main thread, so it keeps its frames while the
+   console island and the shader canvases are still booting. Scroll position is
+   the clock, which is why the timing function is `linear` — the shaping lives
+   in the keyframe stops, not in a curve.
+
+   Travel and opacity only, no `scale`: the 22px dot grid behind every section
+   does not scale with it, and content zooming against a fixed grid reads as
+   wobble. It would also soften the console's mono text and the shader canvases
+   mid-scroll. Vertical drift against a pinned grid reads as parallax instead,
+   and it keeps the grid coordinate system this page is built on intact.
+
+   The stops are proportional to the timeline (entering → covering → leaving),
+   which varies with section height: a viewport-tall section finishes entering
+   at 50%, a two-viewport section at 33%. Holding full presence over 33%–72%
+   covers that whole range, so a section is never dimmed while it is the thing
+   being read — only while it is marginal at the top or bottom edge.
+
+   The @supports guard is load-bearing, not optimistic. Where
+   `animation-timeline` is unsupported the declaration is dropped but the
+   animation is not: it would run as a 0s time-based animation and `both` would
+   freeze every section at its final keyframe — the whole page stuck at half
+   opacity, shifted up. Unsupported has to mean no animation, not a broken one. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-page="box"] [data-section] {
+      animation: bx-section-depth linear both;
+      animation-timeline: view();
+    }
+    /* The hero is already on screen at first paint, so it has no arrival to
+       animate — a tall hero would otherwise render its own entry phase as a
+       dimmed above-the-fold first frame. It only recedes. */
+    [data-page="box"] [data-section="hero"] {
+      animation-name: bx-section-recede;
+    }
+  }
+}
+
+@keyframes bx-section-depth {
+  0% {
+    opacity: 0.5;
+    translate: 0 18px;
+  }
+  33%,
+  72% {
+    opacity: 1;
+    translate: none;
+  }
+  100% {
+    opacity: 0.5;
+    translate: 0 -18px;
+  }
+}
+
+@keyframes bx-section-recede {
+  0%,
+  72% {
+    opacity: 1;
+    translate: none;
+  }
+  100% {
+    opacity: 0.5;
+    translate: 0 -18px;
+  }
+}
+
+/* Selection readouts and inspector panels: the chrome around them
+   already animates on click, the payload used to hard-swap. 2–6px of
+   travel, not 8 — these sit right next to what was just clicked.
+   The live region stays mounted for the announcement; a keyed inner span
+   re-fires the animation. The inspector panels remount by themselves. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-slot="spec-foot"] > span,
+  [data-page="box"] [data-slot="lifecycle-foot"] > span,
+  [data-page="box"] [data-slot="live-tour"] > span,
+  [data-page="box"] [data-slot="live-term"],
+  [data-page="box"] [data-slot="live-previews"],
+  [data-page="box"] [data-slot="live-filegroup"] {
+    animation: bx-detail-in 160ms ease-out both;
+  }
+  /* Opening a file goes deeper, so it enters from the direction of travel. */
+  [data-page="box"] [data-slot="live-preview"] {
+    animation: bx-panel-in 160ms ease-out both;
+  }
+}
+
+@keyframes bx-detail-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+}
+
+@keyframes bx-panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(6px);
+  }
+}
+
+/* demo terminal ------------------------------------------------------ */
+[data-page="box"] [data-component="demo-controls"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+[data-page="box"] [data-component="scenario-pills"] {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  width: fit-content;
+  background: var(--bx-layer);
+  border: 1px solid var(--bx-line);
+}
+
+[data-page="box"] [data-component="scenario-pills"] button {
+  margin: 0;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 0;
+  appearance: none;
+  background: transparent;
+  color: var(--bx-muted);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition-property: background-color, color, transform;
+  transition-duration: 120ms;
+  transition-timing-function: ease-out;
+}
+
+[data-page="box"] [data-component="scenario-pills"] button:active,
+[data-page="box"] [data-component="spec-board"] li button:active,
+[data-page="box"] [data-slot="lifecycle-track"] button:active,
+[data-page="box"] [data-slot="live-tabs"] button:active,
+[data-page="box"] [data-slot="live-chats"] button:active,
+[data-page="box"] [data-slot="live-inspector-tabs"] button:active,
+[data-page="box"] [data-slot="live-nav"] button:active {
+  transform: scale(0.96);
+}
+
+[data-page="box"] [data-component="spec-board"] li button,
+[data-page="box"] [data-slot="lifecycle-track"] button,
+[data-page="box"] [data-slot="live-tabs"] button,
+[data-page="box"] [data-slot="live-chats"] button,
+[data-page="box"] [data-slot="live-inspector-tabs"] button,
+[data-page="box"] [data-slot="live-nav"] button {
+  transition-property: background-color, color, border-color, transform;
+  transition-duration: 120ms;
+  transition-timing-function: ease-out;
+}
+
+[data-page="box"] [data-component="scenario-pills"] button[data-active="true"] {
+  background: var(--bx-text);
+  color: var(--bx-bg);
+}
+
+[data-page="box"] [data-slot="demo-caret"] {
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  vertical-align: -2px;
+  background: var(--bx-success);
+}
+
+/* The caret only renders while a run is streaming, so it has to read as
+   busy. steps(1) — a hard on/off blink, not the eased fade the softer
+   ops dots use. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-slot="demo-caret"] {
+    animation: bx-caret 1s steps(1, end) infinite;
+  }
+}
+
+@keyframes bx-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+[data-page="box"] [data-slot="dot-drift"] {
+  display: block;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
+  margin-block-start: -6px;
+  margin-inline-start: -6px;
+}
+
+[data-page="box"] [data-slot="dot-drift"] > * {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-slot="dot-drift"] {
+    animation: bx-drift 14s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes bx-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-6px, -3px, 0);
+  }
+}
+
+/* compare table ------------------------------------------------------ */
+[data-page="box"] [data-component="compare-scroll"] {
+  overflow-x: auto;
+  border: 1px solid var(--bx-line);
+  /* Opaque: a dense comparison grid sitting on the page dot grid reads as two
+     competing rasters. Sparse row lists below stay transparent on purpose. */
+  background-color: var(--bx-bg);
+  scrollbar-width: thin;
+  /* Direction-neutral scroll shadows: edge cues appear only while
+     content hides past that edge. Pure CSS via background-attachment. */
+  background-image:
+    linear-gradient(to right, var(--bx-bg), var(--bx-bg)),
+    linear-gradient(to left, var(--bx-bg), var(--bx-bg)),
+    linear-gradient(to right, color-mix(in srgb, var(--bx-text) 22%, transparent), transparent),
+    linear-gradient(to left, color-mix(in srgb, var(--bx-text) 22%, transparent), transparent);
+  background-position:
+    left center,
+    right center,
+    left center,
+    right center;
+  background-repeat: no-repeat;
+  background-size:
+    24px 100%,
+    24px 100%,
+    12px 100%,
+    12px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+
+[data-page="box"] [data-component="compare-table"] {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+[data-page="box"] [data-component="compare-table"] th,
+[data-page="box"] [data-component="compare-table"] td {
+  padding: 16px;
+  border-bottom: 1px solid var(--bx-line);
+  text-align: start;
+  vertical-align: top;
+}
+
+[data-page="box"] [data-component="compare-table"] tr:last-child th,
+[data-page="box"] [data-component="compare-table"] tr:last-child td {
+  border-bottom: 0;
+}
+
+[data-page="box"] [data-component="compare-table"] thead th {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+[data-page="box"] [data-component="compare-table"] thead th[data-col="us"] {
+  color: var(--bx-text);
+}
+
+[data-page="box"] [data-component="compare-table"] thead th:not([data-col="us"]) {
+  color: var(--bx-faint);
+  font-weight: 500;
+}
+
+[data-page="box"] [data-component="compare-table"] tbody th {
+  color: var(--bx-muted);
+  font-weight: 400;
+  max-width: 220px;
+}
+
+[data-page="box"] [data-component="compare-table"] td {
+  color: var(--bx-muted);
+  font-size: 12px;
+}
+
+[data-page="box"] [data-component="compare-table"] td[data-col="us"],
+[data-page="box"] [data-component="compare-table"] th[data-col="us"] {
+  background: var(--bx-layer);
+  color: var(--bx-text);
+}
+
+[data-page="box"] [data-component="compare-table"] td svg {
+  width: 15px;
+  height: 15px;
+  vertical-align: -2px;
+}
+
+[data-page="box"] [data-component="compare-table"] td[data-state="yes"] {
+  color: var(--bx-success);
+}
+
+[data-page="box"] [data-component="compare-table"] td[data-state="no"] {
+  color: var(--bx-faint);
+}
+
+[data-page="box"] [data-slot="compare-note"] {
+  margin-top: 16px;
+  color: var(--bx-faint);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* opencode/data-style visuals -------------------------------------- */
+[data-page="box"] [data-component="metric-bar"] {
+  position: relative;
+  display: block;
+  height: 8px;
+  overflow: hidden;
+  background: var(--bx-layer-2);
+  border: 1px solid var(--bx-line);
+}
+[data-page="box"] [data-component="metric-bar"] > b {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transition: transform var(--bx-dur-bar) var(--bx-ease-out);
+}
+[data-page="box"] [data-component="metric-bar"] > em {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #ffffff2e 0%, #ffffff00 100%);
+  pointer-events: none;
+}
+[data-page="box"] [data-component="metric-bar"][data-active="true"] {
+  border-color: var(--bx-line-strong);
+}
+/* transform-origin has no logical keyword, so the three progress fills need
+   one explicit mirror: a bar has to grow from the reading edge. `[dir=rtl]`
+   rather than `:dir(rtl)` — the build downlevels `:dir()` into a `:lang()`
+   list, which would miss an explicit dir attribute. */
+[dir="rtl"] [data-component="metric-bar"] > b,
+[dir="rtl"] [data-slot="demo-meter"] b,
+[dir="rtl"] [data-slot="lc-bar"] b {
+  transform-origin: right center;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-page="box"] [data-component="metric-bar"] > b,
+  [data-page="box"] [data-slot="demo-meter"] b,
+  [data-page="box"] [data-slot="lc-bar"] b {
+    transition: none;
+  }
+}
+
+/* spec board */
+[data-page="box"] [data-slot="spec-legend"] {
+  display: flex;
+  gap: 12px;
+  color: var(--bx-faint);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+[data-page="box"] [data-slot="spec-legend"] span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+[data-page="box"] [data-component="spec-board"] {
+  border: 1px solid var(--bx-line);
+  background: var(--bx-bg);
+}
+[data-page="box"] [data-component="spec-board"] ol {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+[data-page="box"] [data-component="spec-board"] li {
+  border-bottom: 1px solid var(--bx-line);
+}
+[data-page="box"] [data-component="spec-board"] li:nth-child(3n + 2),
+[data-page="box"] [data-component="spec-board"] li:nth-child(3n + 3) {
+  border-inline-start: 1px solid var(--bx-line);
+}
+/* Only the final row drops its bottom rule — spec-foot's border-top supplies
+   that line. `nth-child(n + 4)` assumed two full rows of three; with seven
+   specs it also stripped row 2's divider, leaving row 3 unseparated. */
+[data-page="box"] [data-component="spec-board"] li:last-child {
+  border-bottom: 0;
+}
+
+/* Seven specs in three columns orphan the last card at 1/3 width with 2/3
+   blank board. Span it full-width as a closing rule: horizontal layout so
+   it reads as a footnote, not a broken row. */
+[data-page="box"] [data-component="spec-board"] li:last-child {
+  grid-column: 1 / -1;
+}
+[data-page="box"] [data-component="spec-board"] li:last-child button {
+  grid-template-columns: auto auto 1fr;
+  align-items: baseline;
+  column-gap: 12px;
+}
+[data-page="box"] [data-component="spec-board"] li:last-child [data-slot="spec-label"] {
+  min-height: 0;
+  grid-column: 3;
+}
+@media (max-width: 60rem) {
+  [data-page="box"] [data-component="spec-board"] li:last-child {
+    grid-column: 1 / -1;
+  }
+}
+[data-page="box"] [data-component="spec-board"] li button {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  padding: 16px;
+  border: 0;
+  background: transparent;
+  color: var(--bx-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+[data-page="box"] [data-component="spec-board"] li button:hover {
+  background: var(--bx-layer);
+}
+[data-page="box"] [data-component="spec-board"] li button[data-active="true"] {
+  background: var(--bx-layer);
+}
+[data-page="box"] [data-slot="spec-rank"] {
+  color: var(--bx-faint);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+[data-page="box"] [data-slot="spec-term"] {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--bx-muted);
+}
+[data-page="box"] [data-slot="spec-value"] {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+[data-page="box"] [data-slot="spec-label"] {
+  color: var(--bx-muted);
+  font-size: 11px;
+  min-height: 28px;
+}
+[data-page="box"] [data-slot="spec-foot"] {
+  padding: 12px 16px;
+  border-top: 1px solid var(--bx-line);
+  color: var(--bx-muted);
+  font-size: 12px;
+}
+[data-page="box"] [data-slot="spec-foot"] strong {
+  color: var(--bx-text);
+}
+@media (max-width: 60rem) {
+  [data-page="box"] [data-component="spec-board"] ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  [data-page="box"] [data-component="spec-board"] li:nth-child(3n + 2),
+  [data-page="box"] [data-component="spec-board"] li:nth-child(3n + 3) {
+    border-inline-start: 0;
+  }
+  [data-page="box"] [data-component="spec-board"] li:nth-child(2n) {
+    border-inline-start: 1px solid var(--bx-line);
+  }
+}
+@media (max-width: 36rem) {
+  [data-page="box"] [data-component="spec-board"] ol {
+    grid-template-columns: 1fr;
+  }
+  [data-page="box"] [data-component="spec-board"] li:nth-child(2n) {
+    border-inline-start: 0;
+  }
+}
+
+/* platform mini visuals */
+[data-page="box"] [data-component="mini-visual"] {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-layer);
+}
+[data-page="box"] [data-slot="mv-row"] {
+  display: grid;
+  grid-template-columns: 1fr 16px 1fr 16px 1fr;
+  align-items: center;
+  gap: 4px;
+}
+[data-page="box"] [data-slot="mv-box"] {
+  padding: 10px 4px;
+  border: 1px solid var(--bx-line-strong);
+  background: var(--bx-bg);
+  color: var(--bx-muted);
+  font-size: 11px;
+  text-align: center;
+}
+[data-page="box"] [data-slot="mv-box"][data-active="true"] {
+  border-color: #9ae600;
+  background: color-mix(in srgb, #9ae600 18%, var(--bx-bg));
+  color: var(--bx-text);
+  font-weight: 600;
+}
+[data-page="box"] [data-slot="mv-gap"] {
+  height: 1px;
+  background: repeating-linear-gradient(90deg, var(--bx-faint) 0 3px, transparent 3px 6px);
+}
+[data-page="box"] [data-slot="mv-cap"] {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--bx-faint);
+  font-size: 11px;
+}
+[data-page="box"] [data-slot="mv-cap"] i {
+  width: 8px;
+  height: 8px;
+  display: inline-block;
+}
+[data-page="box"] [data-slot="mv-timeline"] {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 1.2fr 0.8fr;
+  gap: 4px;
+}
+[data-page="box"] [data-slot="mv-seg"] {
+  padding: 10px 4px;
+  font-size: 11px;
+  text-align: center;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-bg);
+  color: var(--bx-muted);
+}
+[data-page="box"] [data-slot="mv-seg"][data-state="run"] {
+  border-color: var(--seg, #51a2ff);
+  background: color-mix(in srgb, var(--seg, #51a2ff) 16%, var(--bx-bg));
+  color: var(--bx-text);
+}
+[data-page="box"] [data-slot="mv-ops"] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--bx-line-strong);
+  background: var(--bx-bg);
+  color: var(--bx-text);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+[data-page="box"] [data-slot="mv-dots"] {
+  display: inline-flex;
+  gap: 3px;
+}
+[data-page="box"] [data-slot="mv-dots"] i {
+  width: 5px;
+  height: 5px;
+  background: #ffb900;
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-slot="mv-dots"] i {
+    animation: bx-blink 1.2s ease-in-out infinite;
+  }
+  [data-page="box"] [data-slot="mv-dots"] i:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  [data-page="box"] [data-slot="mv-dots"] i:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+  [data-page="box"] [data-slot="mv-ops"][data-dropped="true"] [data-slot="mv-dots"]:first-of-type i {
+    background: #ff8904;
+  }
+}
+@keyframes bx-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* lifecycle flow */
+[data-page="box"] [data-component="lifecycle"] {
+  margin-top: 16px;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-bg);
+}
+[data-page="box"] [data-slot="lifecycle-track"] {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+[data-page="box"] [data-slot="lifecycle-track"] li {
+  position: relative;
+  min-width: 0;
+}
+[data-page="box"] [data-slot="lifecycle-track"] li + li {
+  border-inline-start: 1px solid var(--bx-line);
+}
+[data-page="box"] [data-slot="lifecycle-track"] button {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 14px 12px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--bx-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+[data-page="box"] [data-slot="lifecycle-track"] button:hover {
+  background: var(--bx-layer);
+}
+[data-page="box"] [data-slot="lifecycle-track"] button[data-active="true"] {
+  background: var(--bx-layer);
+}
+[data-page="box"] [data-slot="lc-n"] {
+  color: var(--bx-faint);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+[data-page="box"] [data-slot="lc-title"] {
+  font-size: 13px;
+  font-weight: 600;
+}
+[data-page="box"] [data-slot="lc-state"] {
+  color: var(--bx-muted);
+  font-size: 11px;
+  min-height: 28px;
+}
+[data-page="box"] [data-slot="lc-bar"] {
+  display: block;
+  height: 6px;
+  margin-top: 6px;
+  background: var(--bx-layer-2);
+  border: 1px solid var(--bx-line);
+  overflow: hidden;
+}
+[data-page="box"] [data-slot="lc-bar"] b {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: var(--stage-color, var(--bx-accent));
+  transition: transform var(--bx-dur-bar) var(--bx-ease-out);
+}
+[data-page="box"] [data-slot="lifecycle-track"] button[data-active="true"] [data-slot="lc-bar"] b,
+[data-page="box"] [data-slot="lifecycle-track"] button[data-active="done"] [data-slot="lc-bar"] b {
+  transform: scaleX(1);
+}
+[data-page="box"] [data-slot="lifecycle-foot"] {
+  padding: 12px 16px;
+  border-top: 1px solid var(--bx-line);
+  color: var(--bx-muted);
+  font-size: 12px;
+}
+[data-page="box"] [data-slot="lifecycle-foot"] strong {
+  font-weight: 600;
+}
+@media (max-width: 60rem) {
+  [data-page="box"] [data-slot="lifecycle-track"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  [data-page="box"] [data-slot="lifecycle-track"] li:nth-child(4) {
+    border-inline-start: 0;
+  }
+  [data-page="box"] [data-slot="lifecycle-track"] li:nth-child(n + 4) {
+    border-top: 1px solid var(--bx-line);
+  }
+}
+@media (max-width: 36rem) {
+  [data-page="box"] [data-slot="lifecycle-track"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* Two columns: the leading column is 1, 3, 5. `3n + 1` selected 1 and 4, so
+     it stripped the divider off a second-column cell and left stray leading
+     rules on 3 and 5. Row starts move to n + 3 for the same reason — item 3
+     begins row 2 here, not item 4. */
+  [data-page="box"] [data-slot="lifecycle-track"] li:nth-child(2n + 1) {
+    border-inline-start: 0;
+  }
+  [data-page="box"] [data-slot="lifecycle-track"] li:nth-child(n + 3) {
+    border-top: 1px solid var(--bx-line);
+  }
+}
+
+/* compare focus + dots */
+[data-page="box"] [data-slot="row-dot"] {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-inline-end: 8px;
+  vertical-align: 0;
+}
+[data-page="box"] [data-component="compare-table"] [data-dim="true"] {
+  color: var(--bx-faint);
+}
+
+/* Dimmed cells keep 4.5:1: the "us" column is --bx-text on --bx-layer,
+   so its dimmed state uses --bx-muted instead of opacity, which dropped it
+   to ~1.8:1. */
+[data-page="box"] [data-component="compare-table"] td[data-col="us"][data-dim="true"],
+[data-page="box"] [data-component="compare-table"] th[data-col="us"][data-dim="true"] {
+  color: var(--bx-muted);
+}
+[data-page="box"] [data-component="compare-table"] th,
+[data-page="box"] [data-component="compare-table"] td {
+  transition: color 200ms ease-out, background-color 200ms ease-out;
+}
+[data-page="box"] [data-component="compare-table"] tbody tr:hover th,
+[data-page="box"] [data-component="compare-table"] tbody tr:hover td {
+  background-color: color-mix(in srgb, var(--bx-text) 3%, transparent);
+}
+[data-page="box"] [data-component="compare-table"] tbody tr:hover td[data-col="us"] {
+  background-color: color-mix(in srgb, var(--bx-text) 6%, var(--bx-layer));
+}
+
+/* canvas-ui brand adaptation: interactive sandbox field (hero) -------- */
+/* The CSS dot mask stays as the base grid; the canvas only paints
+   activated cells over it, so static / no-JS / reduced-motion states
+   are identical to the rest of the system. Square cells only. */
+[data-page="box"] [data-component="sandbox-field"] {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+[data-page="box"] [data-component="sandbox-field"] canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 47.999rem) {
+  [data-page="box"] [data-slot="hero-pattern"] {
+    position: relative;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-page="box"] [data-component="sandbox-field"] {
+    display: none;
+  }
+}
+
+/* console stage ------------------------------------------------------- */
+/* The recreation reads as an artifact on a recessed shelf instead of a
+   second app filling the viewport: tinted surface, mesh-gradient glow
+   behind, and a width cap so the console never crowds the section edges. */
+[data-page="box"] [data-slot="console-stage"] {
+  position: relative;
+  isolation: isolate;
+  padding: clamp(20px, 3vw, 48px) clamp(16px, 5vw, 80px);
+  background: var(--bx-layer);
+}
+
+[data-page="box"] [data-slot="stage-pattern"] {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+/* Static mesh backdrop: fills the stage, no drift — it renders once. */
+[data-page="box"] [data-slot="stage-mesh"] {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+[data-page="box"] [data-slot="stage-mesh"] > * {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+[data-page="box"] [data-slot="console-stage"] > [data-component="console-live"],
+[data-page="box"] [data-slot="console-stage"] > [data-component="console-reveal"] {
+  width: 100%;
+  max-width: 1040px;
+  margin-inline: auto;
+}
+
+@media (max-width: 47.999rem) {
+  [data-page="box"] [data-slot="console-stage"] {
+    padding: 16px 12px;
+  }
+}
+
+/* canvas-ui particle reveal: console wrapper -------------------------- */
+/* Native mode needs an explicit height (the effect canvas cannot size to
+   flow content). The live-grid desktop rule fixes the grid at
+   clamp(560px, 72vh, 700px); the console-live chrome around it is the
+   head row, the foot row and the two 1px frame borders. Below the
+   breakpoint the gate renders the plain console with natural height.
+   Square only: the upstream component sets no border-radius; keep it. */
+@media (min-width: 64.001rem) {
+  [data-page="box"] [data-component="console-reveal"] {
+    height: calc(
+      clamp(560px, 72vh, 700px) + var(--live-head-h) + var(--live-foot-h) + 2px
+    );
+  }
+}
+
+/* touch targets: 44px minimum on coarse pointers / small screens -------- */
+@media (pointer: coarse), (max-width: 47.999rem) {
+  /* 44px controls + 40px block padding grow the bar to 84px. The mobile
+     overlay was pinned at a hardcoded 72px, so the header painted over the
+     top 12px of it — hiding its divider and the top of the first item. */
+  [data-page="box"] {
+    --bx-bar-h: 84px;
+  }
+  [data-page="box"] [data-slot="header-button"] {
+    min-height: 44px;
+  }
+  [data-page="box"] [data-slot="menu-button"] {
+    width: 44px;
+    height: 44px;
+  }
+  [data-page="box"] [data-component="scenario-pills"] button {
+    padding: 15px 16px;
+  }
+  [data-page="box"] [data-slot="live-tabs"] button,
+  [data-page="box"] [data-slot="live-inspector-tabs"] button {
+    padding: 14px 8px;
+  }
+  [data-page="box"] [data-slot="live-composer"] button {
+    width: 44px;
+    height: 44px;
+  }
+  [data-page="box"] [data-component="faq-list"] summary {
+    padding: 22px 0;
+  }
+  [data-page="box"] [data-slot="post-back"] a {
+    min-height: 44px;
+  }
+}
+
+/* blog ------------------------------------------------------------ */
+/* Two views of the same archive: a lead tile plus two stacked tiles for what
+   we want read now, then a dense hairline table for everything. The post page
+   puts a sticky label in a left rail beside a single reading column, so the
+   reader keeps their place in the site while the article scrolls. */
+[data-page="box"] [data-slot="blog-intro"] {
+  /* Same right edge as the cards below — 720 vs 760 reads as a misalignment
+     rather than a distinction. */
+  max-width: 760px;
+  margin-bottom: 56px;
+}
+
+[data-page="box"] [data-slot="eyebrow"] {
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+[data-page="box"] [data-slot="blog-intro"] h1 {
+  margin-top: 20px;
+  color: var(--bx-text);
+  font-size: clamp(28px, 7vw, 40px);
+  font-weight: 500;
+  /* 1.05 is a one-line display value; these headings wrap to 2–3 lines at
+     the small end of the clamp, where it reads as cramped. */
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+[data-page="box"] [data-slot="blog-intro"] > p:last-child {
+  margin-top: 20px;
+  /* The lede and the card excerpts are the same role (muted summary prose),
+     so they get the same measure instead of 580px vs 62ch. */
+  max-width: 62ch;
+  color: var(--bx-muted);
+  font-size: 16px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+/* featured tiles --------------------------------------------------- */
+/* 2fr/1fr, and the lead spans both rows so the two small tiles stack beside
+   it at exactly its height — no fixed heights to keep in sync. */
+[data-page="box"] [data-component="post-featured"] {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+  margin-bottom: 72px;
+}
+
+[data-page="box"] [data-slot="post-tile"] {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-layer);
+  color: inherit;
+  text-decoration: none;
+}
+
+[data-page="box"] [data-slot="post-tile"][data-size="lead"] {
+  grid-row: span 2;
+}
+
+[data-page="box"] [data-slot="post-tile"]:hover {
+  border-color: var(--bx-line-strong);
+}
+
+/* The plate is the frame the cover renders into, and the CSS dot field is its
+   fallback: wherever WebGL is missing the card still reads as a card. The
+   shader canvas is absolutely positioned over it by ShaderMount.
+
+   Fixed 16:9, matching the cover's world box, so no figure crops or stretches.
+   The lead card spans two grid rows and has more height than its content needs;
+   tile-body takes that slack (below) rather than the plate, because a plate
+   grown to ~790x794 renders the cover as one giant near-square figure. */
+[data-page="box"] [data-slot="tile-plate"] {
+  position: relative;
+  flex: 0 0 auto;
+  aspect-ratio: 16 / 9;
+  border-bottom: 1px solid var(--bx-line);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 1px 1px, var(--bx-grid-dot) 1px, transparent 0) 0 0 / 22px 22px,
+    var(--bx-layer-2);
+}
+
+[data-page="box"] [data-slot="tile-plate"] canvas {
+  display: block;
+}
+
+/* A CMS cover replaces the plate and holds the same crop role, so the card
+   keeps its proportions whichever one renders. */
+[data-page="box"] [data-slot="tile-image"] {
+  width: 100%;
+  flex: 0 0 auto;
+  aspect-ratio: 16 / 9;
+  border-bottom: 1px solid var(--bx-line);
+  object-fit: cover;
+}
+
+/* The body, not the plate, absorbs a card's leftover height: the lead card
+   spans two grid rows, and without this its text sat in a short block with
+   ~350px of empty card under it. */
+[data-page="box"] [data-slot="tile-body"] {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px 20px;
+}
+
+[data-page="box"] [data-slot="tile-title"] {
+  font-family: var(--bx-sans);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+[data-page="box"] [data-slot="post-tile"][data-size="lead"] [data-slot="tile-title"] {
+  font-size: 26px;
+}
+
+[data-page="box"] [data-slot="tile-excerpt"] {
+  max-width: 62ch;
+  color: var(--bx-muted);
+  font-size: 15px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+/* The trailing byline sits at the bottom of the card whatever the excerpt
+   length, so a row of tiles lines its metadata up. */
+[data-page="box"] [data-slot="tile-body"] [data-slot="post-meta"]:last-child {
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+/* archive table ---------------------------------------------------- */
+[data-page="box"] [data-component="post-archive"] [data-slot="archive-label"],
+[data-page="box"] [data-slot="rail-label"] {
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+[data-page="box"] [data-component="post-archive"] ul,
+[data-page="box"] [data-slot="post-related"] ul {
+  margin-top: 20px;
+  border-top: 1px solid var(--bx-line);
+  list-style: none;
+  padding: 0;
+}
+
+/* One row: when · title · author · read time. `minmax(0, 1fr)` on the title
+   is what lets a long CMS title truncate instead of pushing the columns. */
+[data-page="box"] [data-slot="archive-row"] {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr) 10rem 3rem 14px;
+  align-items: baseline;
+  gap: 20px;
+  padding: 16px 4px;
+  border-bottom: 1px solid var(--bx-line);
+  color: inherit;
+  text-decoration: none;
+}
+
+[data-page="box"] [data-slot="post-related"] [data-slot="archive-row"] {
+  grid-template-columns: 11rem minmax(0, 1fr) 3rem 14px;
+}
+
+[data-page="box"] [data-slot="archive-row"]:hover {
+  background: var(--bx-layer);
+}
+
+[data-page="box"] [data-slot="row-when"],
+[data-page="box"] [data-slot="row-author"],
+[data-page="box"] [data-slot="row-time"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-page="box"] [data-slot="row-time"] {
+  justify-content: end;
+}
+
+/* Truncation, not wrapping: the value of this view is that every row is one
+   line tall, so 40 rows scan as a table. */
+[data-page="box"] [data-slot="row-title"],
+[data-page="box"] [data-slot="row-author"] {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="row-title"] {
+  font-size: 16px;
+}
+
+[data-page="box"] [data-slot="archive-row"] svg {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  color: var(--bx-faint);
+  opacity: 0;
+}
+
+[data-page="box"] [data-slot="archive-row"]:hover svg {
+  opacity: 1;
+}
+
+[data-page="box"] [data-slot="related-more"] {
+  margin-top: 20px;
+  font-family: var(--bx-mono);
+  font-size: 13px;
+}
+
+[data-page="box"] [data-slot="related-more"] a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--bx-accent-text);
+  text-decoration: none;
+}
+
+[data-page="box"] [data-slot="related-more"] svg {
+  width: 12px;
+  height: 12px;
+}
+
+[data-page="box"] [data-slot="post-meta"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-page="box"] [data-slot="blog-empty"],
+[data-page="box"] [data-slot="post-empty"] {
+  padding: 32px 0;
+  border-top: 1px solid var(--bx-line);
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 13px;
+}
+
+/* Both empty states point somewhere; the site reset strips link underlines,
+   which would leave the only next action looking like plain text. */
+[data-page="box"] [data-slot="blog-empty"] a,
+[data-page="box"] [data-slot="post-empty"] a {
+  color: var(--bx-accent-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Arrows travel on hover; `translate` keeps clear of the reveal's own
+   translate on the card. Motion-safe only. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-slot="post-tile"] {
+    transition: border-color var(--bx-dur-fast) ease;
+  }
+  [data-page="box"] [data-slot="archive-row"] {
+    transition: background var(--bx-dur-fast) ease;
+  }
+  [data-page="box"] [data-slot="archive-row"] svg,
+  [data-page="box"] [data-slot="post-back"] svg,
+  [data-page="box"] [data-slot="related-more"] svg {
+    transition:
+      opacity var(--bx-dur-fast) ease,
+      translate var(--bx-dur-fast) var(--bx-ease-out);
+  }
+  [data-page="box"] [data-slot="post-back"] a:hover svg {
+    translate: -3px 0;
+  }
+  [data-page="box"] [data-slot="related-more"] a:hover svg {
+    translate: 2px -2px;
+  }
+}
+
+/* post page ------------------------------------------------------- */
+/* 24 columns like the reference grid: rail 1–6, reading column 7–19. The
+   article stays off-centre on purpose — a centred column with an empty left
+   rail reads as a layout bug. */
+[data-page="box"] [data-component="post-layout"] {
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  column-gap: 10px;
+}
+
+[data-page="box"] [data-component="post-layout"] > [data-slot="post-rail"] {
+  grid-column: 1 / 7;
+}
+
+[data-page="box"] [data-component="post-layout"] > [data-slot="post-column"] {
+  grid-column: 7 / 20;
+  min-width: 0;
+}
+
+[data-page="box"] [data-slot="post-related"] {
+  margin-top: 96px;
+  padding-top: 40px;
+  border-top: 1px solid var(--bx-line);
+}
+
+/* The rail label follows the reader down the article, and stops clear of the
+   sticky bar. */
+[data-page="box"] [data-slot="post-rail"] > * {
+  position: sticky;
+  top: calc(var(--bx-bar-h) + 24px);
+}
+
+[data-page="box"] [data-slot="post-back"],
+[data-page="box"] [data-slot="post-preview"] {
+  font-family: var(--bx-mono);
+  font-size: 13px;
+}
+
+[data-page="box"] [data-slot="post-back"] a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--bx-faint);
+  text-decoration: none;
+  transition: color var(--bx-dur-fast) ease;
+}
+
+[data-page="box"] [data-slot="post-back"] a:hover {
+  color: var(--bx-text);
+}
+
+[data-page="box"] [data-slot="post-back"] svg {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+}
+
+[data-page="box"] [data-slot="post-preview"] {
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  border: 1px solid var(--bx-line-strong);
+  color: var(--bx-text);
+}
+
+[data-page="box"] [data-slot="post-header"] {
+  margin: 0 0 48px;
+}
+
+/* The article's own cover, on the same 16:9 plate as the lead tile so the post
+   opens on the picture the reader just clicked. */
+[data-page="box"] [data-slot="post-hero"] {
+  margin-bottom: 48px;
+  aspect-ratio: 16 / 9;
+}
+
+[data-page="box"] [data-slot="post-hero"] > * {
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--bx-line);
+  border-radius: 0;
+}
+
+[data-page="box"] [data-slot="post-hero"] img {
+  object-fit: cover;
+}
+
+[data-page="box"] [data-slot="post-header"] h1 {
+  margin-top: 12px;
+  font-family: var(--bx-sans);
+  font-size: clamp(28px, 5vw, 38px);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+[data-page="box"] [data-slot="post-header"] > p:not([data-slot]) {
+  margin-top: 16px;
+  color: var(--bx-muted);
+  font-size: 18px;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+/* Author initials in place of an avatar: the CMS byline has no image, and a
+   generic placeholder photo is worse than a mono monogram. */
+[data-page="box"] [data-slot="post-byline"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 12px;
+}
+
+[data-page="box"] [data-slot="byline-mark"] {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-layer-2);
+  color: var(--bx-muted);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+[data-page="box"] [data-slot="post-tags"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 20px;
+}
+
+/* beta-pill is built for the one-word "Beta" badge and sets `nowrap`, which
+   makes the overflow-wrap below it inert. CMS tags are real phrases, so they
+   need to wrap, and 10px is too small for a phrase. */
+[data-page="box"] [data-slot="post-tags"] [data-slot="beta-pill"] {
+  white-space: normal;
+  font-size: 11px;
+}
+
+/* Engineered post figures: one glanceable diagram per article, same voice
+   as the terminal code blocks — square, hairline, mono caption. */
+[data-page="box"] [data-component="post-visual"] {
+  margin: 0 0 48px;
+  border: 1px solid var(--bx-line-strong);
+  background: var(--bx-bg);
+  box-shadow:
+    0 0 0 0.5px var(--bx-line),
+    0 16px 40px -16px rgb(0 0 0 / 0.25);
+}
+
+[data-page="box"] [data-component="post-visual"] svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+[data-page="box"] [data-slot="post-visual-caption"] {
+  padding: 12px 16px;
+  border-top: 1px solid var(--bx-line);
+  color: var(--bx-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+[data-page="box"] [data-slot="post-visual-caption"] span {
+  color: var(--bx-accent-text);
+  font-family: var(--bx-mono);
+  font-size: 12px;
+}
+
+/* Reading progress: a 2px ember bar pinned under the sticky header. The
+   width is the feedback, so there is no transition to honour. */
+[data-page="box"] [data-slot="post-progress"] {
+  position: fixed;
+  top: var(--bx-bar-h);
+  inset-inline: 0;
+  z-index: 9;
+  height: 2px;
+  pointer-events: none;
+}
+
+[data-page="box"] [data-slot="post-progress"] span {
+  display: block;
+  height: 100%;
+  background: var(--bx-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+/* transform-origin has no logical keyword, so the fill needs the same
+   explicit mirror the other progress fills use. */
+[dir="rtl"] [data-page="box"] [data-slot="post-progress"] span {
+  transform-origin: right;
+}
+
+/* Rail contents: the back link plus the auto-built section list. The
+   sticky rule above targets the wrapper, so both travel as one. */
+[data-page="box"] [data-slot="post-toc"] {
+  margin-top: 28px;
+}
+
+[data-page="box"] [data-slot="post-toc"][hidden] {
+  display: none;
+}
+
+[data-page="box"] [data-slot="post-toc"] > p {
+  margin: 0 0 8px;
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+[data-page="box"] [data-slot="post-toc-list"] {
+  display: grid;
+  gap: 2px;
+}
+
+[data-page="box"] [data-slot="post-toc-list"] a {
+  display: block;
+  padding: 6px 12px;
+  border-inline-start: 1px solid var(--bx-line);
+  color: var(--bx-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+[data-page="box"] [data-slot="post-toc-list"] a:hover {
+  color: var(--bx-text);
+  background: var(--bx-layer);
+}
+
+[data-page="box"] [data-slot="post-toc-list"] a[data-current] {
+  border-inline-start: 2px solid var(--bx-accent);
+  color: var(--bx-text);
+  font-weight: 500;
+}
+
+/* Anchored headings clear the sticky bar, same as docs sections. */
+[data-page="box"] [data-slot="post-column"] [data-component="prose"] h2[id] {
+  scroll-margin-top: calc(var(--bx-bar-h) + 16px);
+}
+
+/* CMS titles can carry an unbreakable token (a URL, a flag, an image name).
+   Without this the header scrolls the page sideways at 320px. */
+[data-page="box"] [data-slot="post-header"] h1,
+[data-page="box"] [data-slot="tile-title"],
+[data-page="box"] [data-slot="tile-excerpt"],
+[data-page="box"] [data-slot="beta-pill"] {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* One breakpoint collapses both rails: below this the reading column would be
+   too narrow to hold a line of prose. */
+@media (max-width: 64rem) {
+  [data-page="box"] [data-component="post-layout"] {
+    display: block;
+  }
+  [data-page="box"] [data-slot="post-rail"] > * {
+    position: static;
+  }
+  [data-page="box"] [data-slot="post-rail"] {
+    margin-bottom: 28px;
+  }
+  [data-page="box"] [data-component="post-featured"] {
+    grid-template-columns: 1fr;
+  }
+  [data-page="box"] [data-slot="post-tile"][data-size="lead"] {
+    grid-row: auto;
+  }
+  [data-page="box"] [data-slot="archive-row"] {
+    grid-template-columns: minmax(0, 1fr) 3rem;
+  }
+  [data-page="box"] [data-slot="row-when"] {
+    grid-row: 1;
+    grid-column: 1 / 3;
+  }
+  [data-page="box"] [data-slot="row-title"] {
+    grid-column: 1 / 3;
+    white-space: normal;
+  }
+  /* The author has no column of its own once the row wraps, and the arrow is
+     a hover affordance a touch screen never shows. */
+  [data-page="box"] [data-slot="row-author"],
+  [data-page="box"] [data-slot="archive-row"] svg {
+    display: none;
+  }
+  [data-page="box"] [data-slot="row-time"] {
+    grid-row: 1;
+    grid-column: 2;
+  }
+}
+
+[data-page="box"] [data-component="prose"] {
+  max-width: 68ch;
+  font-size: 16px;
+  line-height: 1.7;
+  /* CMS prose carries long URLs and identifiers the base reset never sees;
+     without this they push the 24px-padded mobile column sideways. */
+  overflow-wrap: break-word;
+}
+
+[data-page="box"] [data-component="prose"] > * + * {
+  margin-top: 1.2em;
+}
+
+[data-page="box"] [data-component="prose"] h2,
+[data-page="box"] [data-component="prose"] h3 {
+  margin-top: 2em;
+  font-family: var(--bx-sans);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+[data-page="box"] [data-component="prose"] h2 {
+  font-size: 26px;
+}
+
+/* 18px against 16px body is a step you cannot see; 20px keeps the scale
+   readable at 16 → 20 → 26 without colliding with the 18px lede. */
+[data-page="box"] [data-component="prose"] h3 {
+  font-size: 20px;
+}
+
+/* Every other `strong` in the system is 500 or 600; only prose fell through
+   to the browser's 700, and these posts bold whole sentences. */
+[data-page="box"] [data-component="prose"] strong {
+  color: var(--bx-text);
+  font-weight: 600;
+}
+
+[data-page="box"] [data-component="prose"] p,
+[data-page="box"] [data-component="prose"] li {
+  text-wrap: pretty;
+}
+
+/* The site reset strips underlines and list markers for the landing page's
+   nav-style links and lists. Body prose needs both back: colour alone is not
+   enough to mark a link, and unmarked <li> reads as stray paragraphs. */
+[data-page="box"] [data-component="prose"] a {
+  color: var(--bx-accent-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+[data-page="box"] [data-component="prose"] ul,
+[data-page="box"] [data-component="prose"] ol {
+  padding-inline-start: 1.4em;
+}
+
+[data-page="box"] [data-component="prose"] ul {
+  list-style: disc;
+}
+
+[data-page="box"] [data-component="prose"] ol {
+  list-style: decimal;
+}
+
+[data-page="box"] [data-component="prose"] li + li {
+  margin-top: 0.4em;
+}
+
+[data-page="box"] [data-component="prose"] blockquote {
+  padding-inline-start: 20px;
+  border-inline-start: 1px solid var(--bx-line-strong);
+  color: var(--bx-muted);
+}
+
+[data-page="box"] [data-component="prose"] pre,
+[data-page="box"] [data-component="prose"] code {
+  font-family: var(--bx-mono);
+  font-size: 13px;
+}
+
+/* Inline code sat at a flat 13px — mono x-height makes that read smaller
+   than the 16px body around it, and nothing marked it as code. `em` keeps it
+   proportional wherever it lands (body, heading, list). */
+[data-page="box"] [data-component="prose"] :not(pre) > code {
+  padding: 0.1em 0.32em;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-layer);
+  font-size: 0.875em;
+}
+
+[data-page="box"] [data-component="prose"] pre {
+  padding: 16px;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-layer);
+  overflow-x: auto;
+}
+
+/* emdash ships its code block with scoped styles (#1e1e1e, 8px radius, Fira
+   Code) that outspecify the rules above and land in a later stylesheet, so a
+   published post renders off-system. `pre[class]` / `.emdash-code[class]`
+   match the language class emdash already emits and only add the one step of
+   specificity needed to win. */
+[data-page="box"] [data-component="prose"] .emdash-code pre[class] {
+  border: 1px solid var(--bx-line);
+  border-radius: 0;
+  background: var(--bx-layer);
+  padding: 16px;
+}
+
+[data-page="box"] [data-component="prose"] .emdash-code pre[class] code,
+[data-page="box"] [data-component="prose"] .emdash-code[class] .emdash-code-filename {
+  color: var(--bx-text);
+  font-family: var(--bx-mono);
+  font-size: 13px;
+}
+
+[data-page="box"] [data-component="prose"] .emdash-code[class] .emdash-code-filename {
+  border: 1px solid var(--bx-line);
+  border-bottom: 0;
+  border-radius: 0;
+  background: var(--bx-layer-2);
+  color: var(--bx-faint);
+  padding: 8px 16px;
+}
+
+[data-page="box"] [data-component="prose"] img {
+  max-width: 100%;
+  height: auto;
+}
+
+[data-page="box"] [data-component="prose"] table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+[data-page="box"] [data-component="prose"] th,
+[data-page="box"] [data-component="prose"] td {
+  padding: 10px 12px;
+  border: 1px solid var(--bx-line);
+  text-align: start;
+  vertical-align: top;
+}
+
+@media (max-width: 48rem) {
+  [data-page="box"] [data-slot="blog-intro"] {
+    margin-bottom: 36px;
+  }
+  [data-page="box"] [data-component="post-featured"] {
+    margin-bottom: 48px;
+  }
+  /* ponytail: display:block turns the table into its own scroller instead of
+     adding a wrapper element PortableText does not emit. Narrow screens only,
+     so wide-screen tables keep table layout and full width. */
+  [data-page="box"] [data-component="prose"] table {
+    display: block;
+    overflow-x: auto;
+  }
+  /* Code lines are the one thing that cannot reflow, so let the block use the
+     section's 24px side pad too — the scroll area gains 48px on a phone. */
+  [data-page="box"] [data-component="prose"] pre,
+  [data-page="box"] [data-component="prose"] .emdash-code {
+    margin-inline: -24px;
+  }
+  [data-page="box"] [data-component="prose"] pre,
+  [data-page="box"] [data-component="prose"] .emdash-code pre[class] {
+    border-inline: 0;
+  }
+}
+
+/* quickstart ------------------------------------------------------------ */
+[data-page="box"] [data-slot="qs-title"] {
+  max-width: 20ch;
+  color: var(--bx-muted);
+  font-size: clamp(32px, 4.6vw, 56px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+[data-page="box"] [data-slot="qs-title"] strong {
+  color: var(--bx-text);
+  font-weight: 500;
+}
+
+[data-page="box"] [data-slot="qs-lede"] {
+  max-width: 62ch;
+  margin-top: 18px;
+  color: var(--bx-muted);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+[data-page="box"] [data-slot="qs-meta"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 0;
+  list-style: none;
+}
+
+[data-page="box"] [data-slot="qs-meta"] li {
+  padding: 6px 12px;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-layer);
+  color: var(--bx-muted);
+  font-family: var(--bx-mono);
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+[data-page="box"] [data-section="qs-hero"] [data-slot="hero-actions"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+[data-page="box"] [data-component="qs-toc"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 20px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--bx-line);
+  font-family: var(--bx-mono);
+  font-size: 13px;
+}
+
+[data-page="box"] [data-component="qs-toc"] > span {
+  color: var(--bx-faint);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+[data-page="box"] [data-component="qs-toc"] a {
+  color: var(--bx-muted);
+  padding-block: 6px;
+}
+
+[data-page="box"] [data-component="qs-toc"] a:hover {
+  color: var(--bx-accent-text);
+}
+
+[data-page="box"] [data-component="qs-callout"] {
+  display: block;
+  margin-top: 20px;
+  padding: 16px 20px;
+  border: 1px solid var(--bx-line);
+  border-inline-start: 2px solid var(--bx-accent);
+  background: var(--bx-layer);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--bx-muted);
+}
+
+[data-page="box"] [data-component="qs-callout"] strong {
+  color: var(--bx-text);
+  font-weight: 600;
+}
+
+[data-page="box"] [data-component="qs-callout"] a {
+  color: var(--bx-accent-text);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+[data-page="box"] [data-component="qs-callout"] a svg {
+  width: 12px;
+  height: 12px;
+  vertical-align: -1px;
+}
+
+[data-page="box"] [data-component="qs-callout"][data-tone="warn"] {
+  border-inline-start-color: #d69a00;
+}
+
+[data-page="box"] [data-slot="qs-step-tag"] {
+  flex: 0 0 auto;
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-page="box"] [data-slot="qs-scopes"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 20px 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-page="box"] [data-slot="qs-scopes"] code {
+  display: inline-block;
+  padding: 7px 12px;
+  border: 1px solid var(--bx-line-strong);
+  background: var(--bx-layer);
+  color: var(--bx-text);
+  font-family: var(--bx-mono);
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+[data-page="box"] [data-slot="qs-body"] {
+  max-width: 68ch;
+  margin-top: 20px;
+  color: var(--bx-muted);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+[data-page="box"] [data-slot="qs-body"] a,
+[data-page="box"] [data-section="qs-step"] [data-component="qs-callout"] a,
+[data-page="box"] [data-slot="qs-alt"] a {
+  color: var(--bx-accent-text);
+}
+
+[data-page="box"] [data-slot="qs-body"] a svg,
+[data-page="box"] [data-slot="qs-alt"] a svg {
+  width: 12px;
+  height: 12px;
+  vertical-align: -1px;
+}
+
+[data-page="box"] [data-slot="qs-body"] code,
+[data-page="box"] [data-section="qs-step"] [data-component="qs-callout"] code {
+  padding: 0.1em 0.32em;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-bg);
+  font-family: var(--bx-mono);
+  font-size: 0.875em;
+}
+
+/* Code figure: dark terminal on both themes, same voice as the demo run. */
+[data-page="box"] [data-component="qs-code"] {
+  margin: 20px 0 0;
+  border: 1px solid var(--bx-line-strong);
+  background: #161616;
+  color: #e8e8e8;
+  box-shadow:
+    0 0 0 0.5px var(--bx-line),
+    0 16px 40px -16px rgb(0 0 0 / 0.25),
+    0 4px 12px rgb(0 0 0 / 0.08);
+}
+
+[data-page="box"] [data-slot="qs-code-head"] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px 10px 16px;
+  border-bottom: 1px solid #ffffff1a;
+  font-family: var(--bx-mono);
+  font-size: 12px;
+}
+
+[data-page="box"] [data-slot="qs-code-file"] {
+  color: #ffffff;
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="qs-code-caption"] {
+  color: #a3a3a3;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="qs-code-lang"] {
+  margin-inline-start: auto;
+  padding: 4px 8px;
+  border: 1px solid #ffffff1a;
+  color: #a3a3a3;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+[data-page="box"] [data-slot="qs-code-head"] [data-slot="qs-code-lang"] + [data-slot="qs-copy"] {
+  margin-inline-start: -4px;
+}
+
+[data-page="box"] [data-slot="qs-copy"] {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  margin-inline-start: auto;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 0;
+  appearance: none;
+  background: transparent;
+  color: #a3a3a3;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+[data-page="box"] [data-slot="qs-copy"]:hover {
+  background: #ffffff14;
+  color: #ffffff;
+}
+
+[data-page="box"] [data-slot="qs-copy"] svg {
+  width: 13px;
+  height: 13px;
+}
+
+[data-page="box"] [data-component="qs-code"] pre {
+  margin: 0;
+  padding: 18px 16px;
+  overflow-x: auto;
+  font-family: var(--bx-mono);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+[data-page="box"] [data-component="qs-code"] code {
+  font-family: inherit;
+  white-space: pre;
+}
+
+[data-page="box"] [data-component="qs-grid"] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-page="box"] [data-component="qs-grid"] [data-component="leader-card"] h3 {
+  font-size: 14px;
+}
+
+[data-page="box"] [data-component="qs-grid"] [data-component="leader-card"] svg {
+  color: var(--bx-faint);
+}
+
+[data-page="box"] [data-slot="qs-card-link"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+[data-page="box"] [data-slot="qs-alt"] {
+  margin-top: 24px;
+  color: var(--bx-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 47.999rem) {
+  [data-page="box"] [data-slot="qs-step-tag"] {
+    display: none;
+  }
+  [data-page="box"] [data-slot="qs-code-caption"] {
+    display: none;
+  }
+}
+
+/* docs hub ------------------------------------------------------------ */
+[data-page="box"] [data-component="qs-groups"] {
+  display: grid;
+  gap: 48px;
+}
+
+[data-page="box"] [data-slot="qs-group"] > [data-slot="section-title"] {
+  margin-block: 0 20px;
+}
+
+[data-page="box"] [data-slot="qs-group"] > [data-slot="section-eyebrow"] {
+  margin-block: 0 12px;
+}
+
+/* docs pages ------------------------------------------------------------ */
+[data-page="box"] [data-component="docs-layout"] {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 48px;
+  align-items: start;
+  box-sizing: border-box;
+  padding: var(--bx-section-pad);
+  box-shadow: inset 0 -1px var(--bx-line);
+}
+
+[data-page="box"] [data-component="docs-side"] {
+  position: sticky;
+  top: calc(var(--bx-bar-h) + 24px);
+  max-height: calc(100vh - var(--bx-bar-h) - 48px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+[data-page="box"] [data-slot="docs-group"] + [data-slot="docs-group"] {
+  margin-top: 24px;
+}
+
+[data-page="box"] [data-slot="docs-group-label"] {
+  margin: 0 0 8px;
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+[data-page="box"] [data-component="docs-side"] ul,
+[data-page="box"] [data-component="docs-toc"] ul {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-page="box"] [data-component="docs-side"] a {
+  display: block;
+  padding: 7px 12px;
+  border-inline-start: 1px solid var(--bx-line);
+  color: var(--bx-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+[data-page="box"] [data-component="docs-side"] a:hover {
+  color: var(--bx-text);
+  background: var(--bx-layer);
+}
+
+[data-page="box"] [data-component="docs-side"] a[data-current] {
+  border-inline-start: 2px solid var(--bx-accent);
+  color: var(--bx-text);
+  font-weight: 500;
+}
+
+[data-page="box"] [data-component="docs-toc"] {
+  display: none;
+  margin-bottom: 24px;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-layer);
+  font-size: 13px;
+}
+
+[data-page="box"] [data-component="docs-toc"] summary {
+  padding: 12px 16px;
+  color: var(--bx-text);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+[data-page="box"] [data-component="docs-toc"] nav {
+  padding: 0 16px 16px;
+}
+
+[data-page="box"] [data-component="docs-toc"] [data-slot="docs-group-label"] {
+  margin-top: 16px;
+}
+
+[data-page="box"] [data-component="docs-toc"] a {
+  display: block;
+  padding: 6px 0;
+  color: var(--bx-muted);
+}
+
+[data-page="box"] [data-slot="docs-back"] {
+  margin: 0 0 16px;
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 13px;
+}
+
+[data-page="box"] [data-slot="docs-back"] a {
+  color: var(--bx-accent-text);
+}
+
+/* Docs prose builds on the shared prose rules and adds the doc voice:
+   a set title, ruled section breaks, and the dark terminal code blocks
+   the quickstart page uses. */
+[data-page="box"] [data-component="prose"][data-docs] {
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+[data-page="box"] [data-component="prose"][data-docs] h1 {
+  max-width: 22ch;
+  color: var(--bx-text);
+  font-family: var(--bx-sans);
+  font-size: clamp(30px, 3.6vw, 44px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+[data-page="box"] [data-component="prose"][data-docs] h2 {
+  margin-block: 48px 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--bx-line);
+  color: var(--bx-text);
+  font-family: var(--bx-sans);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+[data-page="box"] [data-component="prose"][data-docs] h3 {
+  margin-block: 32px 12px;
+  color: var(--bx-text);
+  font-family: var(--bx-sans);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+[data-page="box"] [data-component="prose"][data-docs] h4 {
+  margin-block: 24px 8px;
+  color: var(--bx-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+[data-page="box"] [data-component="prose"][data-docs] :is(h1, h2, h3, h4) {
+  scroll-margin-top: calc(var(--bx-bar-h) + 16px);
+  overflow-wrap: anywhere;
+}
+
+[data-page="box"] [data-component="prose"][data-docs] pre {
+  padding: 16px;
+  border: 1px solid var(--bx-line-strong);
+  background: #161616;
+  color: #e8e8e8;
+  overflow-x: auto;
+  box-shadow:
+    0 0 0 0.5px var(--bx-line),
+    0 16px 40px -16px rgb(0 0 0 / 0.25);
+}
+
+[data-page="box"] [data-component="prose"][data-docs] pre code {
+  color: inherit;
+  white-space: pre;
+}
+
+/* Docs code chrome ---------------------------------------------------
+   Shiki colours the tokens at build time (github-dark-dimmed); the plate
+   stays on the design tokens: square corners, hairline border, dark #161616
+   on both themes, mono. The <figure> wrapper + header row are added by the
+   DocsLayout enhancement script, so markdown stays plain fenced blocks and
+   no-JS readers still get the bare <pre> styled by the rule above. */
+[data-page="box"] [data-component="docs-code"] {
+  margin: 0;
+  border: 1px solid var(--bx-line-strong);
+  background: #161616;
+  color: #e8e8e8;
+  box-shadow:
+    0 0 0 0.5px var(--bx-line),
+    0 16px 40px -16px rgb(0 0 0 / 0.25);
+}
+
+[data-page="box"] [data-slot="docs-code-head"] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 8px 8px 16px;
+  border-bottom: 1px solid #ffffff1a;
+  font-family: var(--bx-mono);
+  font-size: 12px;
+  line-height: 1;
+}
+
+[data-page="box"] [data-slot="docs-code-lang"] {
+  color: #ffffff;
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-page="box"] [data-slot="docs-copy"] {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  margin-inline-start: auto;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 0;
+  appearance: none;
+  background: transparent;
+  color: #a3a3a3;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+[data-page="box"] [data-slot="docs-copy"]:hover {
+  background: #ffffff14;
+  color: #ffffff;
+}
+
+[data-page="box"] [data-slot="docs-copy"][data-copied="true"] {
+  color: #ffffff;
+}
+
+[data-page="box"] [data-slot="docs-copy"] svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* Inside the chrome the <pre> is just the scroll area: no second border,
+   no second shadow. Shiki's inline plate colour is dropped so the figure's
+   #161616 shows through; token <span> colours are inline and untouched. */
+[data-page="box"] [data-component="docs-code"] pre,
+[data-page="box"] [data-component="docs-code"] pre.astro-code {
+  margin: 0;
+  padding: 16px;
+  border: 0;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none;
+  color: inherit;
+  overflow-x: auto;
+  font-family: var(--bx-mono);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+[data-page="box"] [data-component="docs-code"] pre code {
+  background: transparent;
+  font-family: inherit;
+  white-space: pre;
+}
+
+/* SDK tabs: one switcher per TypeScript/Python pair, same pill voice as
+   the quickstart language toggle so the two surfaces match. */
+[data-page="box"] [data-component="docs-tabs"] {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+[data-page="box"] [data-slot="docs-tablist"] {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  width: fit-content;
+  max-width: 100%;
+  background: var(--bx-layer);
+  border: 1px solid var(--bx-line);
+}
+
+[data-page="box"] [data-slot="docs-tablist"] button {
+  margin: 0;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 0;
+  appearance: none;
+  background: transparent;
+  color: var(--bx-muted);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition-property: background-color, color;
+  transition-duration: 120ms;
+  transition-timing-function: ease-out;
+}
+
+[data-page="box"] [data-slot="docs-tablist"] button[data-active="true"] {
+  background: var(--bx-text);
+  color: var(--bx-bg);
+}
+
+[data-page="box"] [data-component="docs-tabs"] [data-panel][hidden] {
+  display: none;
+}
+
+@media (max-width: 48rem) {
+  /* Full-bleed terminal on phones, same as the bare-pre rule above. The
+     inner <pre> must not also bleed — it would escape the figure. */
+  [data-page="box"] [data-component="prose"] [data-component="docs-code"] {
+    margin-inline: -24px;
+    border-inline: 0;
+  }
+  [data-page="box"] [data-component="prose"] [data-component="docs-code"] pre {
+    margin-inline: 0;
+    border-inline: 0;
+  }
+}
+
+[data-page="box"] [data-component="docs-layout"] [data-component="prose"][data-docs] blockquote {
+  border: 1px solid var(--bx-line);
+  border-inline-start: 2px solid var(--bx-accent);
+  background: var(--bx-layer);
+  padding: 12px 16px;
+  color: var(--bx-muted);
+  font-size: 14px;
+}
+
+[data-page="box"] [data-component="docs-layout"] [data-component="prose"][data-docs] blockquote strong {
+  color: var(--bx-text);
+}
+
+[data-page="box"] [data-component="docs-pager"] {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--bx-line);
+}
+
+[data-page="box"] [data-component="docs-pager"] a {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  border: 1px solid var(--bx-line);
+  background: var(--bx-bg);
+}
+
+[data-page="box"] [data-component="docs-pager"] a:hover {
+  border-color: var(--bx-line-strong);
+}
+
+[data-page="box"] [data-component="docs-pager"] a:last-child {
+  text-align: end;
+}
+
+[data-page="box"] [data-component="docs-pager"] span {
+  color: var(--bx-faint);
+  font-family: var(--bx-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+[data-page="box"] [data-component="docs-pager"] strong {
+  color: var(--bx-text);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+@media (max-width: 64rem) {
+  [data-page="box"] [data-component="docs-layout"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  [data-page="box"] [data-component="docs-side"] {
+    display: none;
+  }
+  [data-page="box"] [data-component="docs-toc"] {
+    display: block;
+  }
+}

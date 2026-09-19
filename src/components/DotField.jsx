@@ -1,9 +1,7 @@
-import { useEffect, useRef, useState } from "react"
 import { DotGrid } from "@paper-design/shaders-react"
 
 import { useSystemTheme } from "../theme.js"
-import { onVisible } from "../lib/visible.js"
-import { prefersReducedMotion } from "../lib/reduced-motion.js"
+import { useInView } from "../lib/use-in-view.js"
 
 const DOTS = {
   light: { back: "#ffffff", fill: "#d2d2d2" },
@@ -13,23 +11,11 @@ const DOTS = {
 // Shader dot-field painted inside the existing pattern bands.
 // Same 2px squares on a 6px grid as the CSS mask it layers over —
 // the mask stays as the no-WebGL fallback underneath.
-// Lazy-mounted via onVisible so the three WebGL contexts only spin up
+// Lazy-mounted via useInView so the three WebGL contexts only spin up
 // when their band scrolls into view.
 export default function DotField() {
   const theme = useSystemTheme()
-  const ref = useRef(null)
-  const [show, setShow] = useState(false)
-
-  useEffect(() => {
-    if (show) return
-    const el = ref.current
-    if (!el) return
-    if (prefersReducedMotion()) {
-      setShow(true)
-      return
-    }
-    return onVisible(el, () => setShow(true), 0.05)
-  }, [theme, show])
+  const [ref, show] = useInView(0.05)
 
   const colors = DOTS[theme] ?? DOTS.light
 

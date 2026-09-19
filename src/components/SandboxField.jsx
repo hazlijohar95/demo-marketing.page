@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react"
 
 import { useSystemTheme } from "../theme.js"
 import { prefersReducedMotion } from "../lib/reduced-motion.js"
+import { hexToRgb, rgba as css } from "../lib/color.js"
 
 // CanvasUI Grid / Ripple / Magnify, translated into the BoxCompute system.
 // The canonical dot grid stays in CSS (square 2px cells on a 6px grid);
@@ -36,15 +37,6 @@ const BAND = 0.42
 const BAND_POWER = 1.4
 const PULSE_LIFE = 1400
 const PULSE_REACH = 190
-
-function hexToRgb(hex) {
-  const n = parseInt(hex.slice(1), 16)
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
-}
-
-function css(rgb, alpha) {
-  return `rgba(${Math.round(rgb[0])}, ${Math.round(rgb[1])}, ${Math.round(rgb[2])}, ${alpha.toFixed(3)})`
-}
 
 export default function SandboxField() {
   const theme = useSystemTheme()

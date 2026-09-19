@@ -1,9 +1,7 @@
-import { useState } from "react"
-
 import ConsoleDemo from "./ConsoleDemo.jsx"
 import { ParticleReveal } from "./canvasui/ParticleReveal.jsx"
 import { useSystemTheme } from "../theme.js"
-import { useIsomorphicLayoutEffect } from "../lib/isomorphic-layout.js"
+import { useMediaQuery } from "../lib/use-media-query.js"
 
 // True Canvas UI Particle Reveal over the live console recreation:
 // the console renders as grayscale dust until the cursor approaches,
@@ -26,26 +24,10 @@ import { useIsomorphicLayoutEffect } from "../lib/isomorphic-layout.js"
 const BG = { light: "#ffffff", dark: "#161616" }
 
 function useRevealEnabled() {
-  const [enabled, setEnabled] = useState(false)
-
-  useIsomorphicLayoutEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return
-    const wide = window.matchMedia("(min-width: 64.001rem)")
-    const fine = window.matchMedia("(pointer: fine)")
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const update = () => setEnabled(wide.matches && fine.matches && !motion.matches)
-    update()
-    wide.addEventListener("change", update)
-    fine.addEventListener("change", update)
-    motion.addEventListener("change", update)
-    return () => {
-      wide.removeEventListener("change", update)
-      fine.removeEventListener("change", update)
-      motion.removeEventListener("change", update)
-    }
-  }, [])
-
-  return enabled
+  const wide = useMediaQuery("(min-width: 64.001rem)")
+  const fine = useMediaQuery("(pointer: fine)")
+  const reduced = useMediaQuery("(prefers-reduced-motion: reduce)")
+  return wide && fine && !reduced
 }
 
 export default function ConsoleReveal() {

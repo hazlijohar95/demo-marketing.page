@@ -1,10 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react"
-
-export const ThemeContext = createContext("light")
-
-export function useResolvedTheme() {
-  return useContext(ThemeContext)
-}
+import { useEffect, useState } from "react"
 
 function getSystemTheme() {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
