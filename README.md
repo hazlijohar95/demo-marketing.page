@@ -178,7 +178,7 @@ mutual.
 So I did the thing you should absolutely not do: redesigned a friend's landing
 page on stage with no plan and no way to back out.
 
-This repo is what came out of it. sorry farhan. you're welcome farhan.
+This repo is what came out of it.
 
 ## License
 
