@@ -1,6 +1,50 @@
 import { defineMiddleware } from "astro:middleware"
 
-const homeMd = "# BoxCompute\n\nIsolated Linux VM Sandboxes grouped by persistent workspaces, for AI agents\nthat build, test, and explore.\n\n- **One Sandbox per task.** A full Linux VM with its own kernel. Your laptop\n  and prod stay out of the way.\n- **Stays until you delete it.** No automatic expiry. Files under `/workspace`\n  live as long as the Sandbox does.\n- **Survives disconnects.** Durable operations with polling, 24h of retained\n  output, and explicit cancel. Close your laptop mid-run; the job won't notice.\n\n## Start\n\n- Product docs: https://boxcompute.ai/docs\n- HTTP API reference: https://boxcompute.ai/docs/http-api/\n- SDK quickstart: https://boxcompute.ai/quickstart/\n- CLI quickstart: https://boxcompute.ai/docs/cli/quickstart/\n- Connect a coding agent: https://boxcompute.ai/docs/cli/agents/\n\n## Authenticate (agents)\n\nHosted BoxCompute is invite-only. Request access, create an account, then mint\na scoped API key (`bc_live_...`) and send it as a Bearer token:\n\n```http\nAuthorization: Bearer bc_live_REDACTED\n```\n\nMachine-readable registration guide: https://boxcompute.ai/auth.md\n\n## Discover\n\n- API catalog (RFC 9727): https://boxcompute.ai/.well-known/api-catalog\n- OpenAPI 3.1: https://api.boxcompute.ai/api/v2/openapi.json\n- Capability manifest (ARD): https://boxcompute.ai/.well-known/ai-catalog.json\n- Agent skills index: https://boxcompute.ai/.well-known/agent-skills/index.json\n\nHosted is invite-only \u2014 a 15-minute call requests your invite:\nhttps://cal.com/muhammad-farhan-helmy-bin-roslan-d7spi3/15min\n"
+import { DEMO_URL } from "./content.js"
+
+// The markdown representation of the homepage, served to agents that ask for
+// text/markdown. Kept as readable markdown so it can be edited directly.
+const homeMd = `# BoxCompute
+
+Isolated Linux VM Sandboxes grouped by persistent workspaces, for AI agents
+that build, test, and explore.
+
+- **One Sandbox per task.** A full Linux VM with its own kernel. Your laptop
+  and prod stay out of the way.
+- **Stays until you delete it.** No automatic expiry. Files under \`/workspace\`
+  live as long as the Sandbox does.
+- **Survives disconnects.** Durable operations with polling, 24h of retained
+  output, and explicit cancel. Close your laptop mid-run; the job won't notice.
+
+## Start
+
+- Product docs: https://boxcompute.ai/docs
+- HTTP API reference: https://boxcompute.ai/docs/http-api/
+- SDK quickstart: https://boxcompute.ai/quickstart/
+- CLI quickstart: https://boxcompute.ai/docs/cli/quickstart/
+- Connect a coding agent: https://boxcompute.ai/docs/cli/agents/
+
+## Authenticate (agents)
+
+Hosted BoxCompute is invite-only. Request access, create an account, then mint
+a scoped API key (\`bc_live_...\`) and send it as a Bearer token:
+
+\`\`\`http
+Authorization: Bearer bc_live_REDACTED
+\`\`\`
+
+Machine-readable registration guide: https://boxcompute.ai/auth.md
+
+## Discover
+
+- API catalog (RFC 9727): https://boxcompute.ai/.well-known/api-catalog
+- OpenAPI 3.1: https://api.boxcompute.ai/api/v2/openapi.json
+- Capability manifest (ARD): https://boxcompute.ai/.well-known/ai-catalog.json
+- Agent skills index: https://boxcompute.ai/.well-known/agent-skills/index.json
+
+Hosted is invite-only — a 15-minute call requests your invite:
+${DEMO_URL}
+`
 
 // Machine-readable discovery pointers (RFC 8288). Same-origin targets stay
 // relative so the headers are correct on every deployment; the API contract

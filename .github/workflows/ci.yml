@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A new push to the same branch makes the in-flight run irrelevant.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      # Bun runs the scripts; Node runs the test suites (`node:test`).
+      # setup-bun takes the exact Bun version from package.json
+      # `packageManager`, so CI and local machines agree.
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - run: bun install --frozen-lockfile
+
+      # Builds, then runs the unit and served-page suites. No secrets needed:
+      # wrangler dev serves the real worker locally through workerd.
+      - run: bun check

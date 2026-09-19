@@ -1,175 +1,218 @@
-# boxcompute (local)
+<div align="center">
 
-BoxCompute landing page, rebuilt on the `opencode.ai/data` design system
-(`packages/stats/app` in the opencode repo) — not a copy of its content,
-but its whole visual language and thought process, applied to our sections.
+<img src="public/brand/boxcompute-symbol.svg" alt="BoxCompute" width="56" height="56">
+
+# BoxCompute
+
+**The marketing site, docs, and blog for BoxCompute** — isolated Linux VM
+sandboxes for AI agents.
+
+Astro islands on Cloudflare Workers, with a square-cornered, hairline design
+system and an interactive recreation of the product console.
+
+[![CI](https://github.com/hazlijohar95/boxcompute-marketing.page/actions/workflows/ci.yml/badge.svg)](https://github.com/hazlijohar95/boxcompute-marketing.page/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-black?style=flat-square)](LICENSE)
+[![Astro](https://img.shields.io/badge/astro-7.3-black?style=flat-square&logo=astro)](https://astro.build)
+[![Bun](https://img.shields.io/badge/bun-1.3-black?style=flat-square&logo=bun)](https://bun.sh)
+[![Cloudflare Workers](https://img.shields.io/badge/cloudflare-workers-black?style=flat-square&logo=cloudflare)](https://workers.cloudflare.com)
+
+[Live site](https://boxcompute.ai) · [Docs](https://boxcompute.ai/docs) · [Quick start](#quick-start) · [Architecture](#architecture)
+
+</div>
+
+---
+
+## Quick start
+
+Requires [Bun](https://bun.sh) (`curl -fsSL https://bun.sh/install | bash`) and
+Node 20+ on `PATH` — Bun runs the scripts, Node runs the tests. The exact Bun
+version is pinned in `package.json`.
 
 ```bash
-npm install
-npm run dev     # http://localhost:5180
-npm run build
-npm run preview
-npm run deploy  # astro build && wrangler deploy
+git clone https://github.com/hazlijohar95/boxcompute-marketing.page.git
+cd boxcompute-marketing.page
+bun install
+bun dev              # http://localhost:5180
 ```
 
-## The blog (EmDash on Cloudflare)
+That's it — the landing page, docs, and quickstart all render without any
+configuration. Only the `/blog/` routes need a database, and they degrade to
+an empty list until you add one.
 
-`/blog/` is an [EmDash](https://emdashcms.com) CMS, not files in the repo.
-Posts live in D1, media in R2, and the two routes render on the Worker;
-`src/pages/index.astro` stays `prerender = true`.
+<details>
+<summary><strong>Enabling the blog locally</strong> (optional)</summary>
 
-- `astro.config.mjs` — `output: "server"`, `@astrojs/cloudflare`,
-  `emdash({ database: d1("DB"), storage: r2("MEDIA") })`
-- `wrangler.jsonc` — `DB` (D1 `boxcompute-cms`), `MEDIA` (R2
-  `boxcompute-media`), a minute cron for scheduled publishing
-- `src/worker.ts` — Astro handler + EmDash scheduled handler
-- `src/live.config.ts` — the `_emdash` live collection
-- `src/pages/blog/index.astro` + `[slug].astro` — published posts only,
-  styled with the same `[data-page="box"]` tokens (`post-list`, `prose`)
-- `.env` holds `EMDASH_ENCRYPTION_KEY` (gitignored, `npx emdash secrets
-  generate`). Losing it makes stored plugin secrets unreadable.
+The blog is an [EmDash](https://emdashcms.com) CMS backed by Cloudflare D1 and
+R2, not markdown files in the repo. To run it:
 
-Write posts at `/_emdash/admin`; locally use the dev-bypass link the dev
-server prints. First `wrangler deploy` creates the named D1 + R2
-resources. No sandboxed plugins, so no `LOADER` binding.
+```bash
+cp .env.example .env
+bunx emdash secrets generate     # paste the value into .env
+bun dev
+```
 
+Write posts at `/_emdash/admin` — the dev server prints a bypass link. To
+seed the four sample posts in `content/blog/`:
 
-## The system (Astro 7)
+```bash
+bun scripts/import-blog.mjs
+```
 
-- Astro `7.3.3` + `@astrojs/react` `6.0.6` (Vite 8 / Rolldown underneath).
-- `src/layouts/Layout.astro` — document shell: SEO/OG/Twitter meta,
-  JSON-LD, fonts (Inter + IBM Plex Mono), favicons. Imports `src/styles.css`.
-- `src/pages/index.astro` — page composition. React sections are islands:
-  `SiteHeader` + `Hero` use `client:load` (above the fold), everything
-  else uses `client:visible`.
-- `src/styles.css` — the entire design system, scoped under `[data-page="box"]`
-- `src/components/SectionHeading.jsx` — shared section titles with `#` anchors
+`EMDASH_ENCRYPTION_KEY` encrypts stored plugin secrets. Lose it and those
+secrets become unreadable.
 
-## Rules (from opencode.ai/data)
+</details>
 
-- **IBM Plex Mono everywhere**, `font-synthesis: none`, `letter-spacing: 0`
-  (only headings ever go negative; we use none at all).
-- **Square corners.** `border-radius: 0` on everything except 4px icon
-  tiles and the 6px control tray.
-- **Hairlines, not boxes.** Sections are drawn with `inset` box-shadows
-  (`inset 0 -1px / inset 1px 0 / inset -1px 0` in `--bx-line`), so stacked
-  sections share single 1px dividers. Cards use 1px borders that promote to
-  `--bx-line-strong` on hover, plus the shadow lift scale.
-- **Dot pattern.** 6px masked dot grid (`--bx-pattern`) behind the hero,
-  closing band, footer band, and the hero meta chip.
-- **Section titles** are 28px/400 muted sentences with a 500 strong lead
-  (`<strong>Your agent does the work.</strong> We give it the space.`),
-  16px on mobile — never centered, never eyebrow-led.
-- **Hero** is a 232px canvas ≥768px: pattern centered behind, h1 knocked
-  out top-left and copy knocked out bottom-right on `--bx-bg`.
-- **Header** is sticky, 72px, 13px mono; inline section nav ≥768px,
-  full overlay menu below; neutral button hidden on small screens.
-- **Footer** is 11px throughout: mark tile + link columns, pattern band,
-  bottom row with status square (`Isolated by default`).
-- **Numbers are tabular** (`font-variant-numeric: tabular-nums`) on ranks,
-  steps, counts. Focus is always a 2px `--bx-accent` outline.
-- **Theme** flips a small token set (`--bx-bg/layer/line/text/muted/faint/
-  pattern/logo-bg`); accent stays `#3b5cf6`, accent text goes `#8190ff`
-  in dark. `system` follows `prefers-color-scheme`.
+## Commands
 
-## Layout
+| Command | What it does |
+| :--- | :--- |
+| `bun dev` | Dev server on port 5180 |
+| `bun run build` | Production build to `dist/` |
+| `bun run preview` | Serve the build locally |
+| `bun check` | Build, then unit + accessibility suites (32 tests) |
+| `bun check:unit` | Unit tests only, no build — fast inner loop |
+| `bun run deploy` | Build and `wrangler deploy` |
 
-- `src/content.js` — shared external URLs
-- `src/lib/visible.js` — `onVisible` helper: IntersectionObserver primary,
-  rect-check fallback (mount, scroll, resize, hashchange, load,
-  visibilitychange, timed taper) so reveals and the demo also trigger in
-  backgrounded tabs where IO never delivers
-- `src/components/` — one file per section: `SiteHeader`, `Hero`,
-  `ConsoleSection` + `ConsoleDemo` (a working recreation of the real
-  console from the product screenshot: workspace sidebar with nav,
-  Chats/Agents tabs, searchable chat list, user card; center conversation
-  with replayable staged run, working composer with send flow, model
-  badge; right workbench with Files/Terminal/Previews tabs, file
-  previews, run log, metric cards), `PlatformSection` (ranked leader-cards), `CompareSection`
-  (honest pattern comparison table), `SpecSection` (plain spec rows),
-  `HowItWorks` (hairline step rows), `FaqSection` (accordion rows),
-  `ClosingSection`, `SiteFooter`, plus `SectionHeading`, `Reveal`,
-  `DotField` primitives
-- `src/theme.js` — `ThemeContext` (legacy provider compat) + SSR-safe
-  `useSystemTheme()` (follows the OS setting; `"light"` on the server).
-  `DotField` uses the hook directly so it works as a standalone island.
-- `public/` — brand mark, console screenshots, favicons, social card
+> Two Bun names to know: `bun run build`, not `bun build` (the bare form is
+> Bun's own bundler). And the test script is `check`, not `test` — see
+> [Testing](#testing) for why.
 
-## Why islands this way
+## Architecture
 
-All 18 React components are kept 1:1 — no visual rewrites. Each
-top-level section is its own island so Astro code-splits JS per section
-and SSRs the HTML (11 islands, 9 sections). `Reveal`/`MetricBar` stay
-inside their parent islands (they need `IntersectionObserver`, so their
-parents must hydrate). `FaqSection` uses native `<details>` but stays an
-island so its `Reveal` wrappers can add `.is-visible`.
+Astro 7 in `output: "server"` mode on the Cloudflare adapter. Every page is
+server-rendered HTML; interactivity ships as separately hydrated React
+islands rather than one bundle.
 
-## Pattern fields
+```
+src/
+├── pages/              routes
+│   ├── index.astro         landing page (prerendered)
+│   ├── docs/[...slug]      docs from src/content/docs/*.md
+│   ├── blog/               posts from D1 via EmDash (server-rendered)
+│   ├── sitemap.xml.ts      static routes + docs glob + D1 posts
+│   └── skills/…/SKILL.md   agent skill, hashed into .well-known
+├── components/         one file per section, plus console/ and BlogVisual/
+├── layouts/            Layout.astro (shell, SEO, fonts) · DocsLayout.astro
+├── lib/                framework-free helpers, each with a *.test.mjs
+├── content/            docs markdown + staged console demo data
+├── styles/             tokens.css → base.css → sections.css
+├── middleware.js       Link headers + text/markdown content negotiation
+└── worker.ts           Astro handler + EmDash cron handler
+```
 
-The hero, closing, and footer dot bands render Paper Shaders
-(`@paper-design/shaders-react` 0.0.80, pinned, Apache-2.0) `DotGrid` —
-same 2px squares on a 6px grid as the system language, with delicate
-size/opacity variation, static (no motion by design). Colors follow the
-resolved theme via `useSystemTheme()` (`#fff`/`#eee` light,
-`#161616`/`#303030` dark). The CSS dot mask stays underneath as the
-no-WebGL fallback. SSR renders an empty band; the shader hydrates on
-the client.
-- Dot fields drift ±6px on a 14s alternate loop (GPU-composited,
-  auto-pauses in background tabs, off under reduced-motion).
+**Islands.** The homepage mounts 10. `SiteHeader` and `Hero` use
+`client:load` because they are above the fold; the other eight use
+`client:visible`, so Astro code-splits their JS per section and nothing below
+the fold costs anything until it scrolls in.
 
-## Canvas UI (brand adaptation)
+**Cloudflare bindings** (`wrangler.jsonc`) — fork-friendly once you swap
+`account_id`:
 
-Full CanvasUI components are deliberately **not** installed via the
-shadcn registry: they are built on the `html-in-canvas` API
-(Chrome-only, behind `chrome://flags/#canvas-draw-element` or an
-origin-trial token), so most visitors would only ever see the
-plain-HTML fallback — while paying for heavy WebGL loops over live DOM
-that fight this system's square, hairline, static-by-design language.
+| Binding | Resource | Purpose |
+| :--- | :--- | :--- |
+| `DB` | D1 `boxcompute-cms` | Blog posts |
+| `MEDIA` | R2 `boxcompute-media` | Post media |
+| `SESSION` | KV | Astro sessions |
+| `triggers.crons` | `* * * * *` | Scheduled publishing |
 
-Instead, two CanvasUI concepts are re-implemented brand-natively as
-dependency-free 2D canvas, working in every browser, plus one true
-vendored component behind strict progressive-enhancement gates:
+The first `wrangler deploy` provisions the named D1 and R2 resources.
 
-- `src/components/SandboxField.jsx` (Grid / Ripple / Magnify → hero
-  band). The CSS dot mask stays the base grid; the canvas only paints
-  *activated* cells above it. Hover inspects in accent (`#3b5cf6` light
-  / `#8190ff` dark), pointer-down spawns a sandbox ripple (mint ring
-  `#9ae600`, blue trail `#51a2ff`). Static state is identical to the
-  rest of the system. Idle loop stops when settled, pauses offscreen,
-  DPR capped at 2, hidden entirely under `prefers-reduced-motion`.
-- `src/components/DecryptText.jsx` (Decrypt Reveal → demo terminal).
-  Each staged log line descrambles left-to-right from product glyphs
-  (`[]{}<>/\|—·:+$#01`, spaces never scrambled), ~540ms so it resolves
-  inside the 750ms line cadence. Instant under reduced-motion;
-  `role="log"` stays `aria-live="off"` so scrambles never announce.
-- `src/components/canvasui/ParticleReveal.jsx` + `rect-cache.js` —
-  the genuine Canvas UI Particle Reveal (WebGL build, no dependencies),
-  ported from TSX to JSX with shaders and engine unchanged (one noted
-  divergence: GL setup runs in an isomorphic layout effect so the first
-  frame paints pre-paint on hydration). `ConsoleReveal.jsx` wraps the
-  live console: dust until the cursor approaches, crisp UI inside a
-  tight reveal (radius 260, aberration 6, bend 10 — tuned down from
-  upstream defaults for dense UI text). Gates: html-in-canvas support,
-  desktop widths (the wrapper sums the live-grid clamp + a constant
-  84px of console chrome), fine pointers, no reduced-motion. Content
-  stays live DOM — tabs, search, and composer remain clickable inside
-  the field. License: MIT + Commons Clause, David Haz 2026 — keep the
-  attribution header on the vendored files; do not redistribute them as
-  a library.
-- Closing and footer bands keep the existing `DotField` shader.
+**Agent-readable by design.** `middleware.js` serves a markdown
+representation of the homepage to clients sending `Accept: text/markdown`,
+and attaches RFC 8288 `Link` headers pointing at the API catalog and OpenAPI
+spec. `src/lib/skillSource.js` is the single source for the published agent
+skill, so the digest in `/.well-known/agent-skills/index.json` can never
+drift from the bytes served at `/skills/boxcompute-sandbox/SKILL.md`.
 
-To preview the particle field locally: enable
-`chrome://flags/#canvas-draw-element` and restart Chrome. For
-production Chrome visitors without the flag, register the domain for
-the [origin trial](https://developer.chrome.com/blog/html-in-canvas-origin-trial)
-and serve the token; everyone else gets the identical plain console.
+## Design system
 
-## Motion (better-ui pass)
+Adapted from the [`opencode.ai/data`](https://opencode.ai/data) visual
+language. All of it lives under `[data-page="box"]` in `src/styles/`, layered
+`tokens → base → sections` so the cascade order is explicit.
 
-- Hero entrance staggers 0/100/200/300ms, once, `ease-out`.
-- Sections reveal on scroll via `Reveal` (cards stagger 100ms).
-- Buttons press to `scale(0.96)`; transitions name exact properties only.
-- Lucide strokes set to 1.5px to match 400/500 text; states via
-  `currentColor`, never separate assets.
-- Everything off under `prefers-reduced-motion` (demo renders full
-  transcript instantly, no blink, no reveals).
+- **Mono everywhere.** IBM Plex Mono, `font-synthesis: none`,
+  `letter-spacing: 0`. Inter is present for prose only.
+- **Square corners.** `border-radius: 0`, except 4px icon tiles and the 6px
+  control tray.
+- **Hairlines, not boxes.** Sections are drawn with `inset` box-shadows so
+  stacked sections share a single 1px divider instead of doubling up.
+- **A 6px dot grid** behind the hero, closing band, and footer — rendered as
+  a WebGL `DotGrid`, with the CSS dot mask underneath as the no-WebGL
+  fallback.
+- **Tabular numbers** on every rank, step, and count. Focus is always a 2px
+  accent outline.
+- **Theme** flips a small token set via `html[data-theme]`, set pre-paint to
+  avoid a flash. Accent stays `#3b5cf6`. `system` follows the OS.
+- **Motion is restrained and optional.** Hero staggers once at
+  0/100/200/300ms; buttons press to `scale(0.96)`; transitions name exact
+  properties. Everything is disabled under `prefers-reduced-motion`, where
+  the console demo renders its full transcript instantly.
+
+## Vocabulary
+
+The domain terms the code uses. Worth skimming before changing the console
+demo or the blog pipeline.
+
+| Term | Meaning |
+| :--- | :--- |
+| **Sandbox** | An isolated full Linux VM for one task. Deleted with its filesystem. |
+| **Workspace** | The durable parent holding many Sandboxes. Never deleted. |
+| **Console demo** | The interactive recreation of the real console, driven by staged data in `src/content/console-data.js` — never by the live product. The screenshot it was built from is `public/product/console-desktop.png`. |
+| **Demo playback** | The beat-clocked message stream plus guided tour. Autoruns on scroll-in and loops; Pause stops it, and any click inside hands control to the visitor for good. |
+| **Prose enhancement** | The JS upgrading CMS and docs pages: code chrome, progress, TOC, language tabs. |
+| **Code chrome** | The bordered figure, language badge, and copy button wrapped around every bare `<pre>`. |
+| **Cover art** | Per-post shader art derived only from slug and topic, so a post's tile and hero are always the same picture. |
+| **Contour field** | The hero canvas painting activated dot-grid cells as distance iso-contours. |
+| **Environment** | SSR-safe browser reads shared by all islands: media queries, OS theme, motion preference, in-view observation. |
+| **Reveal** | Scroll-triggered `.is-visible`; instant under reduced-motion. |
+| **SDK language** | The persisted TypeScript/Python choice shared by Quickstart and docs (`bx-sdk-lang`). |
+
+## Testing
+
+```bash
+bun check:unit    # pure helpers, milliseconds
+bun check         # the above plus the served-page suite
+```
+
+`src/lib/` holds framework-free logic, each module paired with a
+`*.test.mjs` using the built-in `node:test` runner — no test framework
+dependency. `scripts/a11y-check.mjs` boots `wrangler dev` against the real
+build and asserts the accessibility, layout, and agent-discovery invariants
+of the actual HTTP responses, including headers.
+
+> **Why `check` and not `test`?** Bun's `bun test` always runs Bun's own
+> runner and ignores a `test` script. That runner does not collect
+> `node:test` registrations, so it reports `0 pass, 0 fail` and still exits
+> `0` — a green check having tested nothing. Naming the script `check`
+> means there is no builtin to shadow it and no way to get that false
+> green by accident. Node runs the suites, which is why it stays a
+> prerequisite alongside Bun.
+
+## Contributing
+
+Issues and pull requests are welcome.
+
+- Run `bun check` before opening a PR. It builds, so it catches both unit
+  regressions and broken pages — and it is exactly what CI runs, so a green
+  local run means a green PR.
+- Match the surrounding style: no formatter is enforced, so mirror the file
+  you are editing.
+- Keep new logic in `src/lib/` framework-free and add a `*.test.mjs` beside
+  it.
+- Accessibility and reduced-motion behaviour are requirements, not polish.
+  `scripts/a11y-check.mjs` will tell you if you broke them.
+
+CI (`.github/workflows/ci.yml`) runs `bun check` on every push to `main` and
+every pull request. It needs no secrets — `wrangler dev` serves the real
+worker locally through workerd — so it passes on forks too.
+
+## License
+
+[MIT](LICENSE), with one exception: `src/components/canvasui/` is vendored
+from [Canvas UI](https://github.com/DavidHDev/canvas-ui) under **MIT +
+Commons Clause**, which is not an OSI-approved license and forbids selling
+that code. Keep its attribution headers intact. Deleting those two files and
+the `ConsoleReveal.jsx` wrapper leaves a fully MIT tree — the console then
+renders as plain live DOM, which is already what visitors without Chrome's
+`html-in-canvas` flag see. Details in [LICENSE](LICENSE).

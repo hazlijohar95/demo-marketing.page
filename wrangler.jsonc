@@ -1,8 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "boxcompute",
-  // hazli.johar@cynco.io's account — two accounts are on this login, so an
-  // explicit id keeps deploys non-interactive.
+  // Replace with your own Cloudflare account id when deploying a fork.
+  // An explicit id keeps deploys non-interactive when a login has more than
+  // one account; `CLOUDFLARE_ACCOUNT_ID` in the environment also works.
   "account_id": "9c006d850453ab5c068f5688d138521b",
   "main": "./src/worker.ts",
   "compatibility_date": "2026-02-24",

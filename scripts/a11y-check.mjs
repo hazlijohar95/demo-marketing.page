@@ -4,7 +4,7 @@
 // static assets, SSR routes through the Astro app + edge middleware), so the
 // checks cover the real response headers as well as the markup.
 //
-//   npm run build && node --test scripts/a11y-check.mjs
+//   bun run build && node --test scripts/a11y-check.mjs
 import assert from "node:assert/strict"
 import { spawn } from "node:child_process"
 import { createHash } from "node:crypto"
@@ -31,8 +31,8 @@ async function waitForOk(url, tries = 90) {
 }
 
 before(async () => {
-  dev = spawn("npx", ["wrangler", "dev", "--port", String(PORT)], {
-    // Detached process group so teardown kills workerd too, not just npx —
+  dev = spawn("bunx", ["wrangler", "dev", "--port", String(PORT)], {
+    // Detached process group so teardown kills workerd too, not just bunx —
     // otherwise the orphan keeps the port and the next run fails to boot.
     detached: true,
     cwd: new URL("..", import.meta.url),

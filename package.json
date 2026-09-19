@@ -1,15 +1,28 @@
 {
   "name": "boxcompute",
   "version": "0.1.0",
+  "description": "BoxCompute landing page, docs, and blog — Astro on Cloudflare Workers.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hazlijohar95/boxcompute-marketing.page.git"
+  },
+  "homepage": "https://boxcompute.ai",
+  "private": true,
   "scripts": {
     "dev": "astro dev --port 5180",
     "build": "astro build",
     "preview": "astro preview --port 5180",
     "deploy": "astro build && wrangler deploy",
-    "test": "node --test src/lib/*.test.mjs scripts/a11y-check.mjs"
+    "check": "bun run build && node --test src/lib/*.test.mjs scripts/a11y-check.mjs",
+    "check:unit": "node --test src/lib/*.test.mjs"
   },
-  "private": true,
   "type": "module",
+  "packageManager": "bun@1.4.0",
+  "engines": {
+    "bun": ">=1.2.0",
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.2",
     "@astrojs/react": "6.0.6",
@@ -28,6 +41,5 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "wrangler": "^4.134.0"
-  },
-  "description": "BoxCompute landing page — opencode.ai/data design system, interactive console recreation, playable demo."
+  }
 }
