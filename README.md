@@ -146,23 +146,19 @@ rather than remember.
 
 ## Design system
 
-All of it lives under `[data-page="box"]` in `src/styles/`, layered
+Everything lives under `[data-page="box"]` in `src/styles/`, layered
 `tokens → base → sections` so cascade order is explicit and not vibes.
 
-- **Mono everywhere.** IBM Plex Mono, `font-synthesis: none`. Inter for prose.
-- **Square corners.** `border-radius: 0`, except the live composer shell and
-  its round send button and status dot.
-- **Hairlines, not boxes.** Sections draw with `inset` box-shadows so stacked
-  sections share one 1px divider instead of quietly rendering two.
-- **A 6px dot grid** behind the hero, closing band, and footer. WebGL
-  `DotField`, lazy-mounted on view, with a CSS mask underneath as fallback.
-- **Tabular numbers** on every rank, step, and count, because numbers that
-  shift horizontally while they animate are a crime.
-- **Theme** flips a token set via `html[data-theme]`, set pre-paint so there's
-  no flash. Accent `#c2410c`, lifting to `#f97316` in dark.
-- **Motion is restrained and optional.** Everything is off under
-  `prefers-reduced-motion`, where the console demo prints its full transcript
-  immediately.
+| Rule | In practice |
+| :--- | :--- |
+| **Mono everywhere** | IBM Plex Mono, `font-synthesis: none`. Inter for prose |
+| **Square corners** | `border-radius: 0`. Only the console demo rounds anything |
+| **Hairlines, not boxes** | `inset` box-shadows, so stacked sections share one 1px divider instead of quietly rendering two |
+| **6px dot grid** | WebGL `DotField`, lazy-mounted on view, CSS mask underneath as fallback |
+| **Tabular numbers** | Every rank, step, and count. Digits that slide sideways mid-animation are a crime |
+| **Motion is optional** | All of it off under `prefers-reduced-motion`, where the console demo just prints its transcript |
+
+**Accent** &nbsp;![](https://img.shields.io/badge/-c2410c-c2410c?style=flat-square) `#c2410c` light &nbsp;·&nbsp; ![](https://img.shields.io/badge/-f97316-f97316?style=flat-square) `#f97316` dark &nbsp;— theme flips a token set on `html[data-theme]`, set pre-paint so there's no flash.
 
 ## Testing
 
