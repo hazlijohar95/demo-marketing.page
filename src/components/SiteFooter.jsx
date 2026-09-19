@@ -1,6 +1,7 @@
 import { ArrowUpRight } from "lucide-react"
 
 import { APP_URL, DEMO_URL, REPO_URL } from "../content.js"
+import ThemeToggle from "./ThemeToggle.jsx"
 
 const COLUMNS = [
   {
@@ -17,6 +18,8 @@ const COLUMNS = [
     links: [
       { href: "/blog/", label: "Blog" },
       { href: "/docs", label: "Docs" },
+      { href: "/quickstart/", label: "SDK quickstart" },
+      { href: "/docs/http-api/", label: "HTTP API" },
       { href: REPO_URL, label: "GitHub", external: true },
     ],
   },
@@ -65,6 +68,7 @@ export default function SiteFooter() {
           <span>© {new Date().getFullYear()} BoxCompute</span>
         </div>
         <div data-slot="footer-controls">
+          <ThemeToggle />
           <span data-slot="status">Isolated by default</span>
         </div>
       </div>

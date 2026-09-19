@@ -10,6 +10,7 @@ export default function ConsoleHeader({
   TOUR,
   onToggleTour,
   onReplayStop,
+  progress,
 }) {
   const touringActive = tourStep !== null
   return (
@@ -34,10 +35,12 @@ export default function ConsoleHeader({
         )}
       </span>
       <span data-slot="live-head-right">
+        {progress ? <span data-slot="live-progress" aria-hidden="true">{progress}</span> : null}
         <span data-slot="live-badge" role="status">{done ? "Done" : "Working"}</span>
         <button
           type="button"
           onClick={onToggleTour}
+          title="Guided tour (T)"
           aria-label={touringActive ? "Stop the tour" : "Play a guided tour"}
         >
           {touringActive ? (
@@ -50,7 +53,12 @@ export default function ConsoleHeader({
             </>
           )}
         </button>
-        <button type="button" onClick={onReplayStop} aria-label={working ? "Stop this run" : "Replay this run"}>
+        <button
+          type="button"
+          onClick={onReplayStop}
+          title={working ? "Stop this run (R)" : "Replay this run (R)"}
+          aria-label={working ? "Stop this run" : "Replay this run"}
+        >
           {working ? (
             <>
               <Square aria-hidden="true" /> Stop

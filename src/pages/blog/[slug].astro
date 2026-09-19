@@ -65,18 +65,25 @@ const hasContent = Array.isArray(post.data.content)
   ? post.data.content.length > 0
   : Boolean(post.data.content)
 
-// Related posts: newest three, minus this one, so the tail of a post always
-// offers a next read. A failure here must not take the post down with it —
-// the article is the page, related posts are decoration.
+// Related posts: shared tags first, then recency, so the tail of a post
+// offers a next read in the same topic. A failure here must not take the
+// post down with it — the article is the page, related posts are decoration.
 const { entries: recent } = await getEmDashCollection("posts", {
   orderBy: { published_at: "desc" },
-  limit: 4,
+  limit: 8,
 }).catch(() => ({ entries: [] }))
 
+const tagSet = new Set(tags.map((t) => t.label))
 const related = (recent ?? [])
   .filter((entry) => entry.id !== post.id)
+  .map((entry) => {
+    const entryTags = entry.data.terms?.tag?.map((t) => t.label) ?? []
+    const shared = entryTags.filter((t) => tagSet.has(t)).length
+    return { entry, shared }
+  })
+  .sort((a, b) => b.shared - a.shared)
   .slice(0, 3)
-  .map((entry) => ({
+  .map(({ entry }) => ({
     href: `/blog/${entry.id}/`,
     title: entry.data.title,
     topic: entry.data.terms?.tag?.[0]?.label ?? null,
@@ -86,6 +93,9 @@ const related = (recent ?? [])
     date: entry.data.publishedAt ? formatDate(entry.data.publishedAt) : null,
     iso: entry.data.publishedAt?.toISOString().slice(0, 10) ?? undefined,
   }))
+
+const pageUrl = new URL(Astro.url.pathname, Astro.url.origin).href
+const shareText = encodeURIComponent(post.data.title)
 ---
 
 <Layout title={seo.title} description={seo.description}>
@@ -190,6 +200,26 @@ const related = (recent ?? [])
                 )
               }
             </div>
+            <div data-component="post-share">
+              <span aria-hidden="true">Share</span>
+              <a
+                href={`https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(pageUrl)}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                X
+              </a>
+              <a
+                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                LinkedIn
+              </a>
+              <button type="button" data-slot="post-copy-link" data-url={pageUrl}>
+                Copy link
+              </button>
+            </div>
           </div>
         </article>
 
@@ -229,6 +259,20 @@ const related = (recent ?? [])
   </div>
   <script>
     import { initPostEnhance } from "../../lib/prose-enhance.js"
+    import { COPY_RESET_MS, copyText } from "../../lib/clipboard.js"
     initPostEnhance()
+    const copyButton = document.querySelector('[data-slot="post-copy-link"]')
+    if (copyButton) {
+      // Label read once, so a second click inside the reset window can't
+      // leave the button stuck on "Copied".
+      const label = copyButton.textContent
+      copyButton.addEventListener("click", async () => {
+        await copyText(copyButton.getAttribute("data-url") ?? window.location.href)
+        copyButton.textContent = "Copied"
+        window.setTimeout(() => {
+          copyButton.textContent = label
+        }, COPY_RESET_MS)
+      })
+    }
   </script>
 </Layout>

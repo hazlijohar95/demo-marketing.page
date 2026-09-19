@@ -4,31 +4,76 @@ import SectionHeading from "./SectionHeading.jsx"
 import Reveal from "./Reveal.jsx"
 import CodeBlock from "./CodeBlock.jsx"
 import { useSdkLanguage } from "../lib/sdk-language.js"
+import { useLocalStorage } from "../lib/use-local-storage.js"
 import { APP_URL, DEMO_URL } from "../content.js"
 import { DOCS, NEXT_STEPS, SCOPES, SNIPPETS } from "../content/quickstart-snippets.js"
 
-function LanguageToggle({ lang, onChange, label }) {
-  const isTs = lang === "ts"
+const INSTALL = {
+  npm: SNIPPETS.installTs,
+  pnpm: `pnpm add @boxcompute/sdk\npnpm add -D tsx`,
+  yarn: `yarn add @boxcompute/sdk\nyarn add --dev tsx`,
+}
+
+// Derived from INSTALL so a new manager can't ship a pill without a snippet.
+const PMS = Object.keys(INSTALL).map((value) => ({ value, label: value }))
+
+function PillGroup({ label, options, value, onChange }) {
   return (
     <div data-component="scenario-pills" role="group" aria-label={label}>
-      <button type="button" data-active={isTs} aria-pressed={isTs} onClick={() => onChange("ts")}>
-        TypeScript
-      </button>
-      <button
-        type="button"
-        data-active={!isTs}
-        aria-pressed={!isTs}
-        onClick={() => onChange("py")}
-      >
-        Python
-      </button>
+      {options.map((option) => {
+        const current = value === option.value
+        return (
+          <button
+            key={option.value}
+            type="button"
+            data-active={current}
+            aria-pressed={current}
+            onClick={() => onChange(option.value)}
+          >
+            {option.label}
+          </button>
+        )
+      })}
     </div>
+  )
+}
+
+function LanguageToggle({ lang, onChange, label }) {
+  return (
+    <PillGroup
+      label={label}
+      value={lang}
+      onChange={onChange}
+      options={[
+        { value: "ts", label: "TypeScript" },
+        { value: "py", label: "Python" },
+      ]}
+    />
   )
 }
 
 export default function Quickstart() {
   const [lang, setLang] = useSdkLanguage()
+  const [pm, setPm] = useLocalStorage("bx-pm", "npm")
+  const [checked, setChecked] = useLocalStorage("bx-qs-scopes", "[]")
   const isTs = lang === "ts"
+  // Stored values predate the toggle (or were hand-edited); fall back to npm
+  // for the caption and the snippet together so the two can't disagree.
+  const pmSafe = INSTALL[pm] ? pm : "npm"
+  const installTs = INSTALL[pmSafe]
+
+  let doneScopes = []
+  try {
+    doneScopes = JSON.parse(checked || "[]")
+  } catch {
+    // Corrupt or hand-edited storage: start from an empty checklist.
+  }
+  const toggleScope = (scope) => {
+    const next = doneScopes.includes(scope)
+      ? doneScopes.filter((s) => s !== scope)
+      : [...doneScopes, scope]
+    setChecked(JSON.stringify(next))
+  }
 
   return (
     <>
@@ -104,12 +149,26 @@ export default function Quickstart() {
           </Reveal>
         </div>
         <Reveal>
+          <p data-slot="qs-progress" aria-live="polite">
+            {doneScopes.length}/{SCOPES.length} scopes checked
+          </p>
           <ul data-slot="qs-scopes" aria-label="Required API key scopes">
-            {SCOPES.map((scope) => (
-              <li key={scope}>
-                <code>{scope}</code>
-              </li>
-            ))}
+            {SCOPES.map((scope) => {
+              const done = doneScopes.includes(scope)
+              return (
+                <li key={scope} data-done={done ? "true" : undefined}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={done}
+                      onChange={() => toggleScope(scope)}
+                      aria-label={`Scope ${scope} created`}
+                    />
+                    <code>{scope}</code>
+                  </label>
+                </li>
+              )
+            })}
           </ul>
           <p data-slot="qs-body">
             Open{" "}
@@ -144,15 +203,18 @@ export default function Quickstart() {
           </Reveal>
           <Reveal delay={100} data-component="demo-controls">
             <LanguageToggle lang={lang} onChange={setLang} label="SDK language" />
+            {isTs ? (
+              <PillGroup label="Package manager" options={PMS} value={pm} onChange={setPm} />
+            ) : null}
           </Reveal>
         </div>
         <Reveal>
           {isTs ? (
             <CodeBlock
               filename="terminal"
-              caption="Node 18+"
+              caption={`Node 18+ · ${pmSafe}`}
               langLabel="bash"
-              code={SNIPPETS.installTs}
+              code={installTs}
             />
           ) : (
             <CodeBlock filename="terminal" caption="Python 3.9+" langLabel="bash" code={SNIPPETS.installPy} />

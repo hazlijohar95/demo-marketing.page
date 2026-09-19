@@ -1,5 +1,11 @@
 ---
 import "../styles.css"
+import "@fontsource/inter/400.css"
+import "@fontsource/inter/500.css"
+import "@fontsource/inter/600.css"
+import "@fontsource/ibm-plex-mono/400.css"
+import "@fontsource/ibm-plex-mono/500.css"
+import "@fontsource/ibm-plex-mono/600.css"
 
 import WebMcpTools from "../components/WebMcpTools.jsx"
 
@@ -33,6 +39,7 @@ const {
     {/* Self-referential: boxcompute.ai serves different content, so the
         canonical must be this deployment, not the brand domain. */}
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.url.origin).href} />
+    <link rel="alternate" type="application/rss+xml" title="BoxCompute blog" href="/blog/rss.xml" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="ai-catalog" href="/.well-known/ai-catalog.json" />
     <meta property="og:type" content="website" />
@@ -61,23 +68,21 @@ const {
         "description": "Isolated Linux VM Sandboxes grouped by persistent workspaces for AI agents."
       }
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    {/* Preload the render-blocking font CSS so first paint doesn't wait on
-        discovery from the stylesheet late in <head>. */}
-    <link
-      rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    {/* Manual theme override applied before paint: light/dark set
+        html[data-theme], system removes it and falls back to the OS query. */}
+    <script is:inline>
+      try {
+        var t = localStorage.getItem("bx-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+        else document.documentElement.removeAttribute("data-theme");
+      } catch (e) {}
+    </script>
+    {/* Fonts are self-hosted via @fontsource (bundled, no render-blocking
+        third-party CSS). System fallbacks in --bx-sans/--bx-mono cover FOUT. */}
   </head>
   <body>
     <slot />
-    <WebMcpTools client:load />
+    <WebMcpTools client:idle />
     <noscript>JavaScript enables the mobile navigation menu. You can also use the links in the footer.</noscript>
   </body>
 </html>

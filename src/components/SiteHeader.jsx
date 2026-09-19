@@ -4,26 +4,37 @@ import { ArrowUpRight, Menu, X } from "lucide-react"
 import { APP_URL } from "../content.js"
 
 // Root-relative so the nav also works from /blog/*; on the landing page these
-// still resolve to same-document fragment scrolls.
+// still resolve to same-document fragment scrolls. `page` marks cross-page
+// links so the bar can show where the reader is outside the landing page.
 const NAV_LINKS = [
-  { href: "/#console", label: "Console" },
-  { href: "/#platform", label: "Platform" },
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#faq", label: "FAQ" },
-  { href: "/blog/", label: "Blog" },
+  { href: "/blog/", label: "Blog", page: "blog" },
+  { href: "/quickstart/", label: "Quickstart", page: "quickstart" },
 ]
 
-const MOBILE_LINKS = [...NAV_LINKS, { href: "/docs", label: "Docs", external: true }]
+const MOBILE_LINKS = [...NAV_LINKS, { href: "/docs", label: "Docs", page: "docs", external: true }]
+
+// Cross-page markers, matched against the path prefix.
+const PAGES = ["blog", "quickstart", "docs"]
+
+function isCurrentLink(link, active, page) {
+  const id = link.href.split("#")[1]
+  return (Boolean(id) && id === active) || (link.page && link.page === page)
+}
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState("")
+  const [page, setPage] = useState("")
   const [scrolled, setScrolled] = useState(false)
   const menuButtonRef = useRef(null)
   const firstLinkRef = useRef(null)
 
   // Which section the reader is in. Drives the nav's current-item mark, so the
   // sticky bar answers "where am I" instead of only "where can I go".
+  // `page` covers cross-page links (/blog, /docs, /quickstart) that have no
+  // fragment on this document.
   useEffect(() => {
     const ids = NAV_LINKS.map((link) => link.href.split("#")[1]).filter(Boolean)
     const sections = ids
@@ -33,6 +44,8 @@ export default function SiteHeader() {
     // the scrolled hairline.
     const read = () => {
       setScrolled(window.scrollY > 8)
+      const path = window.location.pathname || "/"
+      setPage(PAGES.find((name) => path.startsWith(`/${name}`)) ?? "")
       // Nearest section whose top has passed just under the sticky bar.
       let current = ""
       for (const section of sections) {
@@ -83,8 +96,7 @@ export default function SiteHeader() {
           <nav data-component="section-nav" aria-label="Sections">
             <ul>
               {NAV_LINKS.map((link) => {
-                const id = link.href.split("#")[1]
-                const current = Boolean(id) && id === active
+                const current = isCurrentLink(link, active, page)
                 return (
                   <li key={link.href}>
                     <a
@@ -100,7 +112,13 @@ export default function SiteHeader() {
             </ul>
           </nav>
           <div data-slot="header-actions">
-            <a data-slot="header-button" data-variant="neutral" href="/docs">
+            <a
+              data-slot="header-button"
+              data-variant="neutral"
+              href="/docs"
+              data-current={page === "docs" ? "true" : undefined}
+              aria-current={page === "docs" ? "page" : undefined}
+            >
               <strong>Docs</strong>
             </a>
             <a data-slot="header-button" data-variant="contrast" href={APP_URL}>
@@ -123,18 +141,23 @@ export default function SiteHeader() {
         </div>
       </div>
       <nav data-slot="mobile-menu" aria-label="Mobile navigation" hidden={!open}>
-        {MOBILE_LINKS.map((link, i) => (
-          <a
-            key={link.href}
-            ref={i === 0 ? firstLinkRef : undefined}
-            data-slot="mobile-menu-item"
-            href={link.href}
-            onClick={() => setOpen(false)}
-          >
-            <strong>{link.label}</strong>
-            {link.external ? <ArrowUpRight aria-hidden="true" /> : null}
-          </a>
-        ))}
+        {MOBILE_LINKS.map((link, i) => {
+          const current = isCurrentLink(link, active, page)
+          return (
+            <a
+              key={link.href}
+              ref={i === 0 ? firstLinkRef : undefined}
+              data-slot="mobile-menu-item"
+              href={link.href}
+              data-current={current ? "true" : undefined}
+              aria-current={current ? "true" : undefined}
+              onClick={() => setOpen(false)}
+            >
+              <strong>{link.label}</strong>
+              {link.external ? <ArrowUpRight aria-hidden="true" /> : null}
+            </a>
+          )
+        })}
         <a data-slot="mobile-menu-item" href={APP_URL} onClick={() => setOpen(false)}>
           <strong>Open BoxCompute</strong> <ArrowUpRight aria-hidden="true" />
         </a>

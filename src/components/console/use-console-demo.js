@@ -25,11 +25,26 @@ import { CHATS, FOLLOW_UP, FOLLOW_UP_STEPS, TYPE_MS } from "../../content/consol
 
 export function useConsoleDemo() {
   // --- Session selection (was ConsoleDemo.jsx useState fan-out) ---
-  const [chatId, setChatId] = useState(CHATS[0].id)
+  // Deep-linkable: ?chat=<id> selects the session, ?tour=1 auto-starts
+  // the guided tour. SSR-safe: no window on the server means defaults.
+  const [chatId, setChatIdState] = useState(() => {
+    if (typeof window === "undefined") return CHATS[0].id
+    const requested = new URLSearchParams(window.location.search).get("chat")
+    return CHATS.some((c) => c.id === requested) ? requested : CHATS[0].id
+  })
   const [sideTab, setSideTab] = useState("chats")
   const [rightTab, setRightTab] = useState("terminal")
   const [activeNav, setActiveNav] = useState("chats")
   const [query, setQuery] = useState("")
+
+  const setChatId = useCallback((id) => {
+    setChatIdState(id)
+    if (typeof window !== "undefined" && window.history?.replaceState) {
+      const url = new URL(window.location.href)
+      url.searchParams.set("chat", id)
+      window.history.replaceState(null, "", url)
+    }
+  }, [])
 
   const chat = CHATS.find((c) => c.id === chatId)
   const fileCount = chat.files.sandbox.length + chat.files.local.length
@@ -226,6 +241,18 @@ export function useConsoleDemo() {
     // TOUR closes over the latest actions via `latest`, so only the beat
     // clock values belong in deps (`schedule` is stable).
   }, [beats.steps, beats.end, stopTour, tour.schedule])
+
+  // Opt-in deep link: ?tour=1 starts the guided tour once on mount.
+  // Runs after startTour stabilizes; reduced-motion visitors get the
+  // instant end-state via the existing tour/typeInto guards.
+  const autoToured = useRef(false)
+  useEffect(() => {
+    if (autoToured.current || typeof window === "undefined") return
+    autoToured.current = true
+    if (new URLSearchParams(window.location.search).get("tour") === "1") {
+      startTour()
+    }
+  }, [startTour])
 
   return {
     // Session

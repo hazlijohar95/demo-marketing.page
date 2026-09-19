@@ -83,6 +83,15 @@ const tiles = [
               How we build agent workspaces: virtualization, infrastructure, and the boundaries that
               make them work.
             </p>
+            <div data-component="docs-filter">
+              <label for="blog-filter-input">Filter posts</label>
+              <input
+                id="blog-filter-input"
+                type="search"
+                placeholder="Filter posts…"
+                autocomplete="off"
+              />
+            </div>
           </Reveal>
 
           {
@@ -147,4 +156,18 @@ const tiles = [
       <SiteFooter client:visible />
     </div>
   </div>
+  <script>
+    // Filters archive rows and cover tiles together: both carry the post
+    // title, so one text match covers the whole index.
+    const input = document.getElementById("blog-filter-input");
+    if (input) {
+      const items = '[data-component="post-archive"] li, [data-slot="post-tile"]';
+      input.addEventListener("input", () => {
+        const q = input.value.trim().toLowerCase();
+        document.querySelectorAll(items).forEach((item) => {
+          item.hidden = q ? !(item.textContent || "").toLowerCase().includes(q) : false;
+        });
+      });
+    }
+  </script>
 </Layout>

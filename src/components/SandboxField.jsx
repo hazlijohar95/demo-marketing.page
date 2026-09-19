@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react"
 
-import { useSystemTheme } from "../lib/environment.js"
+import { useMediaQuery } from "../lib/environment.js"
+import { useResolvedTheme } from "../lib/theme.js"
 import { hexToRgb, rgba as css } from "../lib/color.js"
 import { CONTOUR_STEP, HOVER_RADIUS, PULSE_REACH, fieldStrength, scanBounds } from "../lib/field-contour.js"
 
@@ -30,7 +31,13 @@ const STEP = CONTOUR_STEP
 const PULSE_LIFE = 1400
 
 export default function SandboxField() {
-  const theme = useSystemTheme()
+  const [theme] = useResolvedTheme()
+  // Fine pointers only: the field is hover-driven, and on touch the pattern
+  // strip is 16px tall — the effect is near-invisible there while the island
+  // still costs a canvas, rAF loop, and observers. The CSS dot mask stays as
+  // the static field underneath. SSR-safe: the fallback (false) matches the
+  // server render, then hydrates up on desktop.
+  const finePointer = useMediaQuery("(pointer: fine)", false)
   const themeRef = useRef(theme)
   themeRef.current = theme
   const canvasRef = useRef(null)
@@ -208,8 +215,9 @@ export default function SandboxField() {
       scope?.removeEventListener("pointerleave", onLeave)
       scope?.removeEventListener("pointerdown", onDown)
     }
-  }, [])
+  }, [finePointer])
 
+  if (!finePointer) return null
   return (
     <span data-component="sandbox-field" aria-hidden="true">
       <canvas ref={canvasRef} />

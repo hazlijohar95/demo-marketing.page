@@ -40,6 +40,21 @@ const FAQS = [
     answer:
       "We can't legally promise that. We can promise it a quiet room — its own machine, its files left alone, no eviction mid-thought. Honestly, that's most of it.",
   },
+  {
+    question: "How do billing and deletion work?",
+    answer:
+      "A Sandbox bills until you delete it — there is no auto-expiry. Download what you need first: delete removes its filesystem. Workspaces persist and are free to keep.",
+  },
+  {
+    question: "Is my code safe in a Sandbox?",
+    answer:
+      "Each task runs isolated with its own kernel and bounded commands. For work that can't leave your network, point the CLI at your own host with --url.",
+  },
+  {
+    question: "Where can I get help?",
+    answer:
+      "Start with the docs and SDK quickstart — both are open to read now. For access or specific questions, book a 15-minute call and we'll walk through it.",
+  },
 ]
 
 export default function FaqSection() {

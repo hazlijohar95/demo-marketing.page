@@ -28,6 +28,8 @@ Hosted BoxCompute is invite-only. A 15-minute call requests your invite.
 - [API catalog (RFC 9727)](/.well-known/api-catalog)
 - [Capability manifest (ARD)](/.well-known/ai-catalog.json)
 - [Agent skills index](/.well-known/agent-skills/index.json)
+- [Sitemap](/sitemap.xml)
+- [Blog RSS](/blog/rss.xml)
 
 ## API
 

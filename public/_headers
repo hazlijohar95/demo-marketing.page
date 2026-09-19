@@ -24,3 +24,5 @@
   Link: </.well-known/api-catalog>; rel="api-catalog", </docs/http-api/>; rel="service-doc", <https://api.boxcompute.ai/api/v2/openapi.json>; rel="service-desc", </.well-known/ai-catalog.json>; rel="describedby"
 /quickstart
   Link: </.well-known/api-catalog>; rel="api-catalog", </docs/http-api/>; rel="service-doc", <https://api.boxcompute.ai/api/v2/openapi.json>; rel="service-desc", </.well-known/ai-catalog.json>; rel="describedby"
+/quickstart/
+  Link: </.well-known/api-catalog>; rel="api-catalog", </docs/http-api/>; rel="service-doc", <https://api.boxcompute.ai/api/v2/openapi.json>; rel="service-desc", </.well-known/ai-catalog.json>; rel="describedby"

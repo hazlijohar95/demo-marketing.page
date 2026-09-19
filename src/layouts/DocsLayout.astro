@@ -100,11 +100,20 @@ const next = at >= 0 && at < flat.length - 1 ? flat[at + 1] : null
                   <div data-slot="docs-group">
                     <p data-slot="docs-group-label">{group.label}</p>
                     <ul>
-                      {group.links.map((link) => (
-                        <li>
-                          <a href={link.href}>{link.label}</a>
-                        </li>
-                      ))}
+                      {group.links.map((link) => {
+                        const current = link.href.replace(/\/$/, "") === here
+                        return (
+                          <li>
+                            <a
+                              href={link.href}
+                              data-current={current ? "true" : undefined}
+                              aria-current={current ? "page" : undefined}
+                            >
+                              {link.label}
+                            </a>
+                          </li>
+                        )
+                      })}
                     </ul>
                   </div>
                 ))
@@ -114,6 +123,10 @@ const next = at >= 0 && at < flat.length - 1 ? flat[at + 1] : null
           <p data-slot="docs-back">
             <a href="/docs/">Docs</a> <span aria-hidden="true">/</span> {title}
           </p>
+          <nav data-component="docs-inpage" aria-label="On this page" hidden>
+            <p>On this page</p>
+            <ol data-slot="docs-inpage-list"></ol>
+          </nav>
           <div data-component="prose" data-docs="true">
             <slot />
           </div>
@@ -137,6 +150,17 @@ const next = at >= 0 && at < flat.length - 1 ? flat[at + 1] : null
               </nav>
             ) : null
           }
+          <p data-slot="docs-feedback">
+            Found a mistake?{" "}
+            <a
+              href={`https://github.com/boxcompute/sandbox/issues/new?title=Docs%3A%20${encodeURIComponent(title)}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Report it
+            </a>{" "}
+            · <a href="/quickstart/">Start the quickstart</a>
+          </p>
         </main>
       </div>
       <SiteFooter client:visible />

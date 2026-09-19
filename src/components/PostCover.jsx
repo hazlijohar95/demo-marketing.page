@@ -1,6 +1,7 @@
 import { Dithering } from "@paper-design/shaders-react"
 
-import { useInView, useSystemTheme } from "../lib/environment.js"
+import { useInView } from "../lib/environment.js"
+import { useResolvedTheme } from "../lib/theme.js"
 import { postCover } from "../lib/post-cover.js"
 
 // Generated cover art for a post — see lib/post-cover.js for how a slug and a
@@ -12,7 +13,7 @@ import { postCover } from "../lib/post-cover.js"
 // card is in view so the WebGL contexts aren't all created on load, and the
 // CSS dot plate underneath stays visible wherever WebGL isn't available.
 export default function PostCover({ slug, topic, slot = "tile" }) {
-  const theme = useSystemTheme()
+  const [theme] = useResolvedTheme()
   const [ref, show] = useInView(0.05)
 
   const cover = postCover(slug, topic, slot, theme)

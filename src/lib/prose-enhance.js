@@ -53,12 +53,7 @@ function initProgress(article) {
   setProgress()
 }
 
-function initToc(prose) {
-  const toc = document.querySelector('[data-slot="post-toc"]')
-  const tocList = document.querySelector('[data-slot="post-toc-list"]')
-  if (!prose || !toc || !tocList) return
-  const heads = [...prose.querySelectorAll("h2")]
-  if (heads.length < 2) return
+function assignHeadIds(heads) {
   const used = new Set()
   heads.forEach((h) => {
     const base = slugify(h.textContent || "section") || "section"
@@ -67,17 +62,13 @@ function initToc(prose) {
     while (used.has(id)) id = `${base}-${n++}`
     used.add(id)
     h.id = id
-    const li = document.createElement("li")
-    const a = document.createElement("a")
-    a.href = `#${id}`
-    a.textContent = (h.textContent || "").trim()
-    li.append(a)
-    tocList.append(li)
   })
-  toc.hidden = false
+}
+
+function spyToc(heads, list) {
   if (!("IntersectionObserver" in window)) return
   const links = new Map(
-    [...tocList.querySelectorAll("a")].map((a) => [a.getAttribute("href").slice(1), a]),
+    [...list.querySelectorAll("a")].map((a) => [a.getAttribute("href").slice(1), a]),
   )
   const spy = new IntersectionObserver(
     (entries) => {
@@ -91,6 +82,25 @@ function initToc(prose) {
     { rootMargin: "-20% 0px -70% 0px" },
   )
   heads.forEach((h) => spy.observe(h))
+}
+
+function initToc(prose) {
+  const toc = document.querySelector('[data-slot="post-toc"]')
+  const tocList = document.querySelector('[data-slot="post-toc-list"]')
+  if (!prose || !toc || !tocList) return
+  const heads = [...prose.querySelectorAll("h2")]
+  if (heads.length < 2) return
+  assignHeadIds(heads)
+  heads.forEach((h) => {
+    const li = document.createElement("li")
+    const a = document.createElement("a")
+    a.href = `#${h.id}`
+    a.textContent = (h.textContent || "").trim()
+    li.append(a)
+    tocList.append(li)
+  })
+  toc.hidden = false
+  spyToc(heads, tocList)
 }
 
 export function initPostEnhance() {
@@ -144,6 +154,7 @@ export function initDocsEnhance() {
   const prose = document.querySelector('[data-component="prose"][data-docs]')
   if (!prose) return
   enhanceCodeBlocks(prose, docsBadge)
+  initDocsInpage(prose)
 
   const groups = []
   let primed = false
@@ -208,4 +219,43 @@ export function initDocsEnhance() {
   })
 
   if (groups.length) apply(readLang())
+}
+
+function initDocsInpage(prose) {
+  const nav = document.querySelector('[data-component="docs-inpage"]')
+  const list = document.querySelector('[data-slot="docs-inpage-list"]')
+  if (!nav || !list) return
+  const heads = [...prose.querySelectorAll("h2")]
+  if (heads.length < 2) return
+  assignHeadIds(heads)
+  heads.forEach((h) => {
+    const id = h.id
+    // Trailing "#" stripped so a second run reads the heading, not the anchor
+    // it appended last time. One read, used for the anchor and the nav entry.
+    const label = (h.textContent || "").trim().replace(/\s#$/, "")
+    // Anchor link on the heading for copy-paste deep links.
+    if (!h.querySelector('[data-slot="docs-anchor"]')) {
+      const anchor = document.createElement("a")
+      anchor.href = `#${id}`
+      anchor.setAttribute("data-slot", "docs-anchor")
+      anchor.setAttribute("aria-label", `Link to ${label}`)
+      anchor.textContent = "#"
+      anchor.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(new URL(`#${id}`, window.location.href).href)
+        } catch {
+          // Navigation still works; copy is best-effort.
+        }
+      })
+      h.append(" ", anchor)
+    }
+    const li = document.createElement("li")
+    const a = document.createElement("a")
+    a.href = `#${id}`
+    a.textContent = label
+    li.append(a)
+    list.append(li)
+  })
+  nav.hidden = false
+  spyToc(heads, list)
 }

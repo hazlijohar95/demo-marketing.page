@@ -1,6 +1,7 @@
 import { DotGrid } from "@paper-design/shaders-react"
 
-import { useInView, useSystemTheme } from "../lib/environment.js"
+import { useInView } from "../lib/environment.js"
+import { useResolvedTheme } from "../lib/theme.js"
 
 const DOTS = {
   light: { back: "#ffffff", fill: "#d2d2d2" },
@@ -13,7 +14,7 @@ const DOTS = {
 // Lazy-mounted via useInView so the three WebGL contexts only spin up
 // when their band scrolls into view.
 export default function DotField() {
-  const theme = useSystemTheme()
+  const [theme] = useResolvedTheme()
   const [ref, show] = useInView(0.05)
 
   const colors = DOTS[theme] ?? DOTS.light

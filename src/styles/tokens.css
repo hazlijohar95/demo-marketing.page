@@ -111,6 +111,69 @@
   }
 }
 
+/* Manual override: html[data-theme] wins over the OS media query above.
+   `system` (default) removes the attribute and falls back to the query.
+   Specificity (html attr + scope) beats the bare scope + media rule. */
+html[data-theme="light"] [data-page="box"] {
+  color-scheme: light;
+  --bx-bg: #ffffff;
+  --bx-layer: #fafafa;
+  --bx-layer-2: #eeeeee;
+  --bx-line: #0000001a;
+  --bx-line-strong: #00000033;
+  --bx-text: #161616;
+  --bx-muted: #5c5c5c;
+  --bx-faint: #707070;
+  --bx-accent: #c2410c;
+  --bx-accent-text: #c2410c;
+  --bx-pattern: #dcdcdc;
+  --bx-grid-dot: #0000001f;
+}
+
+html[data-theme="dark"] [data-page="box"] {
+  color-scheme: dark;
+  --bx-bg: #161616;
+  --bx-layer: #242424;
+  --bx-layer-2: #303030;
+  --bx-line: #ffffff1a;
+  --bx-line-strong: #ffffff33;
+  --bx-text: #ffffff;
+  --bx-muted: #d4d4d4;
+  --bx-faint: #a3a3a3;
+  --bx-accent: #f97316;
+  --bx-accent-text: #f97316;
+  --bx-pattern: #303030;
+  --bx-grid-dot: #ffffff1f;
+}
+
+html[data-theme="light"] [data-page="box"] [data-slot="brand"] img,
+html[data-theme="light"] [data-page="box"] [data-slot="footer-mark"] img {
+  filter: none;
+}
+
+html[data-theme="dark"] [data-page="box"] [data-slot="brand"] img,
+html[data-theme="dark"] [data-page="box"] [data-slot="footer-mark"] img {
+  filter: grayscale(1) invert(1);
+}
+
+html[data-theme="light"] [data-page="box"] [data-slot="header-button"][data-variant="contrast"] {
+  background: #242424;
+}
+
+html[data-theme="dark"] [data-page="box"] [data-slot="header-button"][data-variant="contrast"] {
+  background: #5c5c5c;
+}
+
+html[data-theme="light"] [data-page="box"] [data-slot="menu-button"] {
+  color: #3a3a3a;
+  background: #ffffff;
+}
+
+html[data-theme="dark"] [data-page="box"] [data-slot="menu-button"] {
+  color: #fafafa;
+  background: #ffffff0f;
+}
+
 /* Elegant system-theme transition: themed surfaces cross-fade instead of
    flashing when the OS switches. Motion-safe only; cheap properties. */
 @media (prefers-reduced-motion: no-preference) {

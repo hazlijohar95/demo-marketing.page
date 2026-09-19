@@ -249,3 +249,53 @@ test("well-known discovery documents resolve with the right types", async () => 
   assert.equal(robots.status, 200)
   assert.match(await robots.text(), /Content-Signal:\s*ai-train=no,\s*search=yes,\s*ai-input=no/)
 })
+
+test("missing pages fall back to a branded 404 with onward links", async () => {
+  const res = await fetch(`${BASE}/does-not-exist/`)
+  assert.equal(res.status, 404)
+  const body = await res.text()
+  assert.ok(body.includes('id="notfound-title"'), "404 page lost its copy")
+  for (const href of ['href="/docs"', 'href="/quickstart/"', 'href="/blog/"']) {
+    assert.ok(body.includes(href), `404 page missing ${href}`)
+  }
+})
+
+test("sitemap and RSS resolve with the right types", async () => {
+  const sitemap = await fetch(`${BASE}/sitemap.xml`)
+  assert.equal(sitemap.status, 200)
+  assert.ok(
+    (sitemap.headers.get("content-type") ?? "").includes("application/xml"),
+    "sitemap is not xml",
+  )
+  const xml = await sitemap.text()
+  assert.ok(xml.includes("<urlset"), "sitemap has no urlset")
+  for (const path of ["/docs", "/quickstart/"]) {
+    assert.ok(xml.includes(path), `sitemap missing ${path}`)
+  }
+  const rss = await fetch(`${BASE}/blog/rss.xml`)
+  assert.equal(rss.status, 200)
+  assert.ok(
+    (rss.headers.get("content-type") ?? "").includes("application/rss+xml"),
+    "blog rss is not rss+xml",
+  )
+  assert.ok((await rss.text()).includes("<channel>"), "rss has no channel")
+})
+
+test("landing advertises theme, rss, and quickstart wayfinding", () => {
+  assert.ok(html.includes('href="/blog/rss.xml"'), "rss autodiscovery link missing")
+  assert.ok(html.includes("bx-theme"), "theme pre-paint script missing")
+  assert.ok(html.includes('data-component="theme-toggle"'), "theme toggle missing")
+  assert.ok(html.includes('href="/quickstart/"'), "quickstart wayfinding missing")
+  assert.ok(html.includes("T tour"), "demo shortcut hint missing")
+})
+
+test("docs index filters and guides carry inpage nav + feedback", async () => {
+  const docs = await (await fetch(`${BASE}/docs`)).text()
+  assert.ok(docs.includes('id="docs-filter-input"'), "docs filter input missing")
+  const guide = await (await fetch(`${BASE}/docs/execute/`)).text()
+  assert.ok(guide.includes('data-component="docs-inpage"'), "docs inpage nav missing")
+  assert.ok(guide.includes('data-slot="docs-feedback"'), "docs feedback row missing")
+  const qs = await (await fetch(`${BASE}/quickstart/`)).text()
+  assert.ok(qs.includes('aria-label="Package manager"'), "quickstart pm toggle missing")
+  assert.ok(qs.includes("scopes checked"), "quickstart scope checklist missing")
+})

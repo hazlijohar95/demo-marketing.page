@@ -109,9 +109,21 @@ const GROUPS = [
               The SDK quickstart is a guided, interactive page. The rest live here too, as
               focused guides and references — every card below takes you to the right page.
             </p>
+            <div data-component="docs-filter">
+              <label for="docs-filter-input">Filter guides</label>
+              <input
+                id="docs-filter-input"
+                type="search"
+                placeholder="Filter guides…"
+                autocomplete="off"
+              />
+            </div>
           </div>
         </section>
         <section data-section="qs-docs" aria-label="Documentation index">
+          <p data-slot="docs-filter-empty" hidden>
+            No guides match that filter. Try “sandbox”, “keys”, or “CLI”.
+          </p>
           <div data-component="qs-groups">
             {
               GROUPS.map((group) => (
@@ -147,4 +159,27 @@ const GROUPS = [
       <SiteFooter client:visible />
     </div>
   </div>
+  <script>
+    // Client-side guide filter: hides non-matching cards and empty groups.
+    // Vanilla (no island) so the docs index stays static HTML + 1 script.
+    const input = document.getElementById("docs-filter-input");
+    const empty = document.querySelector('[data-slot="docs-filter-empty"]');
+    if (input) {
+      input.addEventListener("input", () => {
+        const q = input.value.trim().toLowerCase();
+        let visible = 0;
+        document.querySelectorAll('[data-slot="qs-group"]').forEach((group) => {
+          let groupVisible = 0;
+          group.querySelectorAll('[data-component="leader-card"]').forEach((card) => {
+            const hit = !q || (card.textContent || "").toLowerCase().includes(q);
+            card.hidden = !hit;
+            if (hit) groupVisible += 1;
+          });
+          group.hidden = groupVisible === 0;
+          visible += groupVisible;
+        });
+        if (empty) empty.hidden = visible !== 0;
+      });
+    }
+  </script>
 </Layout>
