@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react"
 
-import { prefersReducedMotion, useSystemTheme } from "../lib/environment.js"
+import { useSystemTheme } from "../lib/environment.js"
 import { hexToRgb, rgba as css } from "../lib/color.js"
 import { CONTOUR_STEP, HOVER_RADIUS, PULSE_REACH, fieldStrength, scanBounds } from "../lib/field-contour.js"
 
@@ -38,9 +38,10 @@ export default function SandboxField() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    if (prefersReducedMotion()) return
     const ctx = canvas.getContext("2d")
     if (!ctx) return
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
+    let reducedMotion = motionQuery.matches
 
     const pointer = { x: 0, y: 0, tx: 0, ty: 0, inside: false }
     let pulses = []
@@ -123,7 +124,7 @@ export default function SandboxField() {
     }
 
     function start() {
-      if (running || !visible) return
+      if (running || !visible || reducedMotion) return
       running = true
       frame.last = undefined
       raf = requestAnimationFrame(frame)
@@ -185,11 +186,24 @@ export default function SandboxField() {
     scope?.addEventListener("pointerleave", onLeave, { passive: true })
     scope?.addEventListener("pointerdown", onDown, { passive: true })
 
+    function onMotionChange() {
+      reducedMotion = motionQuery.matches
+      if (reducedMotion) {
+        running = false
+        cancelAnimationFrame(raf)
+        pulses = []
+        pointer.inside = false
+        ctx.clearRect(0, 0, w, h)
+      }
+    }
+    motionQuery.addEventListener("change", onMotionChange)
+
     return () => {
       running = false
       cancelAnimationFrame(raf)
       ro.disconnect()
       io.disconnect()
+      motionQuery.removeEventListener("change", onMotionChange)
       scope?.removeEventListener("pointermove", onMove)
       scope?.removeEventListener("pointerleave", onLeave)
       scope?.removeEventListener("pointerdown", onDown)

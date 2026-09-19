@@ -65,7 +65,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   [data-page="box"] [data-component="top"] {
-    transition: box-shadow var(--bx-dur-ui) ease;
+    transition: none;
   }
 }
 
@@ -332,7 +332,7 @@
 [data-page="box"] [data-slot="menu-icons"][data-open="false"] svg:last-child,
 [data-page="box"] [data-slot="menu-icons"][data-open="true"] svg:first-child {
   opacity: 0;
-  transform: scale(0.25);
+  transform: scale(0.7);
   filter: blur(4px);
   pointer-events: none;
 }
@@ -375,8 +375,8 @@
 @media (prefers-reduced-motion: no-preference) {
   [data-page="box"] [data-slot="mobile-menu"] {
     transition:
-      opacity 180ms ease-out,
-      translate 180ms ease-out;
+      opacity 180ms var(--bx-ease-out),
+      translate 180ms var(--bx-ease-out);
     transition-behavior: allow-discrete;
   }
   [data-page="box"] [data-menu-open="false"] [data-slot="mobile-menu"],
@@ -774,7 +774,6 @@
   transition:
     transform 220ms ease-out,
     border-color 220ms ease-out,
-    box-shadow 220ms ease-out,
     background-color 480ms ease;
 }
 
@@ -1841,7 +1840,7 @@
   color: var(--live-send-ink);
   transition-property: transform, background-color, opacity;
   transition-duration: 120ms;
-  transition-timing-function: ease-out;
+  transition-timing-function: ease-out, ease, ease-out;
 }
 
 [data-page="box"] [data-slot="live-composer"] button:hover:not(:disabled) {
@@ -2135,7 +2134,7 @@
 [data-page="box"] [data-slot="header-button"] {
   transition-property: transform, background-color, border-color, color, box-shadow;
   transition-duration: 120ms;
-  transition-timing-function: ease-out;
+  transition-timing-function: ease-out, ease, ease, ease, ease-out;
 }
 
 [data-page="box"] [data-slot="header-button"]:active {
@@ -2268,14 +2267,17 @@
   [data-page="box"] [data-slot="spec-foot"] > span,
   [data-page="box"] [data-slot="lifecycle-foot"] > span,
   [data-page="box"] [data-slot="live-tour"] > span,
+  [data-page="box"] [data-slot="live-convo-head"],
+  [data-page="box"] [data-slot="live-url"] > span,
+  [data-page="box"] [data-slot="live-chats"],
   [data-page="box"] [data-slot="live-term"],
   [data-page="box"] [data-slot="live-previews"],
   [data-page="box"] [data-slot="live-filegroup"] {
-    animation: bx-detail-in 160ms ease-out both;
+    animation: bx-detail-in 160ms var(--bx-ease-out) both;
   }
   /* Opening a file goes deeper, so it enters from the direction of travel. */
   [data-page="box"] [data-slot="live-preview"] {
-    animation: bx-panel-in 160ms ease-out both;
+    animation: bx-panel-in 160ms var(--bx-ease-out) both;
   }
 }
 
@@ -2326,7 +2328,7 @@
   cursor: pointer;
   transition-property: background-color, color, transform;
   transition-duration: 120ms;
-  transition-timing-function: ease-out;
+  transition-timing-function: ease, ease, ease-out;
 }
 
 [data-page="box"] [data-component="scenario-pills"] button:active,
@@ -2347,7 +2349,7 @@
 [data-page="box"] [data-slot="live-nav"] button {
   transition-property: background-color, color, border-color, transform;
   transition-duration: 120ms;
-  transition-timing-function: ease-out;
+  transition-timing-function: ease, ease, ease, ease-out;
 }
 
 [data-page="box"] [data-component="scenario-pills"] button[data-active="true"] {
@@ -2913,7 +2915,7 @@
 }
 [data-page="box"] [data-component="compare-table"] th,
 [data-page="box"] [data-component="compare-table"] td {
-  transition: color 200ms ease-out, background-color 200ms ease-out;
+  transition: color 200ms ease, background-color 200ms ease;
 }
 [data-page="box"] [data-component="compare-table"] tbody tr:hover th,
 [data-page="box"] [data-component="compare-table"] tbody tr:hover td {
@@ -3322,7 +3324,7 @@
     transition: border-color var(--bx-dur-fast) ease;
   }
   [data-page="box"] [data-slot="archive-row"] {
-    transition: background var(--bx-dur-fast) ease;
+    transition: background-color var(--bx-dur-fast) ease;
   }
   [data-page="box"] [data-slot="archive-row"] svg,
   [data-page="box"] [data-slot="post-back"] svg,
@@ -3336,6 +3338,17 @@
   }
   [data-page="box"] [data-slot="related-more"] a:hover svg {
     translate: 2px -2px;
+  }
+}
+
+/* Swapped payloads acknowledge the control just clicked: docs language
+   panels (class re-triggered in prose-enhance.js, hidden-toggle has no
+   remount) and quickstart code figures (conditional render remounts).
+   Motion-safe only; reduced-motion keeps the instant swap. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"] [data-component="docs-tabs"] [data-panel].is-swapped,
+  [data-page="box"] [data-component="qs-code"] {
+    animation: bx-detail-in 160ms var(--bx-ease-out) both;
   }
 }
 
@@ -4427,7 +4440,7 @@
   cursor: pointer;
   transition-property: background-color, color;
   transition-duration: 120ms;
-  transition-timing-function: ease-out;
+  transition-timing-function: ease;
 }
 
 [data-page="box"] [data-slot="docs-tablist"] button[data-active="true"] {

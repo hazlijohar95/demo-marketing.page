@@ -65,7 +65,6 @@ export default function CompareSection() {
             strong="Why not just spin up a container?"
             rest="You could. Here is what changes."
           />
-          <p>Snippet-runners execute and die. BoxCompute gives the job a machine.</p>
         </Reveal>
         <Reveal delay={100} data-component="demo-controls">
           {/* Toggle buttons, not radios: nothing here implements arrow-key
@@ -143,9 +142,6 @@ export default function CompareSection() {
             </tbody>
           </table>
         </div>
-        <p data-slot="compare-note">
-          Patterns, not vendors. Does your agent run a snippet, or a job that continues?
-        </p>
       </Reveal>
     </section>
   )

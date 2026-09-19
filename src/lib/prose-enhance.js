@@ -146,6 +146,7 @@ export function initDocsEnhance() {
   enhanceCodeBlocks(prose, docsBadge)
 
   const groups = []
+  let primed = false
   const apply = (lang) => {
     groups.forEach(({ btnTs, btnPy, panelTs, panelPy }) => {
       const isTs = lang === "ts"
@@ -153,9 +154,17 @@ export function initDocsEnhance() {
       btnTs.dataset.active = String(isTs)
       btnPy.setAttribute("aria-pressed", String(!isTs))
       btnPy.dataset.active = String(!isTs)
+      const show = isTs ? panelTs : panelPy
+      const wasHidden = show.hidden
       panelTs.hidden = !isTs
       panelPy.hidden = isTs
+      if (primed && wasHidden) {
+        show.classList.remove("is-swapped")
+        void show.offsetWidth
+        show.classList.add("is-swapped")
+      }
     })
+    primed = true
   }
 
   prose.querySelectorAll("h3").forEach((h3) => {

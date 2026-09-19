@@ -16,7 +16,7 @@ export default function ConsoleHeader({
     <div data-slot="live-head">
       <span data-slot="live-url">
         <img src="/brand/boxcompute-symbol.svg" width="14" height="14" alt="" />
-        <span>
+        <span key={chat.id}>
           app.boxcompute.ai<b>/c/{chat.id}</b>
         </span>
       </span>

@@ -83,7 +83,6 @@ export default function SpecSection() {
       <div data-slot="section-header">
         <Reveal>
           <SectionHeading id="spec" eyebrow="the limits" strong="Bounds, not promises." rest="Public v2 API." />
-          <p>Defaults you set per call, ceilings you can&rsquo;t. Select a row for the rule behind it.</p>
         </Reveal>
         <Reveal delay={100}>
           <div data-slot="spec-legend" aria-hidden="true">

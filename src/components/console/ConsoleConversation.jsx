@@ -27,7 +27,7 @@ export default function ConsoleConversation({
 }) {
   return (
     <div data-slot="live-main">
-      <div data-slot="live-convo-head">
+      <div data-slot="live-convo-head" key={chat.id}>
         <span data-slot="live-avatar" data-tone="mint">
           BC
         </span>

@@ -112,7 +112,6 @@ export default function PlatformSection() {
             strong="Your agent does the work."
             rest="We give it the space."
           />
-          <p>No local setup. A Sandbox in its own workspace, with commands that know their place.</p>
         </Reveal>
       </div>
       <div data-component="card-grid">
