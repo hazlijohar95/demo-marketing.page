@@ -32,6 +32,11 @@ export default defineConfig({
     port: 5180,
   },
   vite: {
+    // Vite, not Astro, owns port selection, and its default is to drift to the
+    // next free port. scripts/import-blog.mjs posts to a fixed 5180, so a
+    // silent drift means it writes into whatever else is listening there.
+    // Fail loudly instead.
+    server: { strictPort: true },
     // lucide-react + paper shaders benefit from explicit dep handling
     // on Vite 8 / Rolldown (Astro 7 default bundler).
     optimizeDeps: {

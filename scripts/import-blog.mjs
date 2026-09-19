@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Import content/blog/*.md into EmDash. Re-runnable: existing slugs are updated.
 //
-//   node scripts/import-blog.mjs                          # localhost:5180 (dev bypass)
-//   EMDASH_TOKEN=... node scripts/import-blog.mjs --url https://boxcompute.ai
+//   bun scripts/import-blog.mjs                           # localhost:5180 (dev bypass)
+//   EMDASH_TOKEN=... bun scripts/import-blog.mjs --url https://boxcompute.ai
 //
 // Markdown is converted to Portable Text here; the HTTP API only takes blocks.
 

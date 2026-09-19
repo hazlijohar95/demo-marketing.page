@@ -55,6 +55,11 @@ the four sample posts in `content/blog/`:
 bun scripts/import-blog.mjs
 ```
 
+It posts to `localhost:5180`, so run it against a dev server on that port.
+
+On first boot EmDash logs `No user seed found … falling back to the built-in
+default seed`. That's expected on a fresh clone, not a misconfiguration.
+
 `EMDASH_ENCRYPTION_KEY` encrypts stored plugin secrets. Lose it and those
 secrets are unreadable forever. There is no recovery flow. There is no support
 line. There is just you and your entropy.
