@@ -1,0 +1,38 @@
+# BoxCompute
+
+> Isolated Linux VM Sandboxes grouped by persistent workspaces, for AI agents
+> that build, test, and explore.
+
+Hosted BoxCompute is invite-only. A 15-minute call requests your invite.
+
+## Docs
+
+- [Docs index](/docs)
+- [SDK quickstart](/quickstart/)
+- [API keys: create, scope, use, revoke](/docs/api-keys/)
+- [BoxCompute CLI](/docs/cli/quickstart/)
+- [Connect coding agents (Codex, Claude, Pi)](/docs/cli/agents/)
+- [Manage Sandboxes](/docs/sandboxes/)
+- [Execute commands](/docs/execute/)
+- [Manage files](/docs/files/)
+- [Read Sandbox logs](/docs/logs/)
+- [VM Sandboxes (Beta)](/docs/vm-sandbox-beta/)
+- [Integration guides](/docs/integrations/)
+- [HTTP API reference](/docs/http-api/)
+- [Limits, errors, and unsupported features](/docs/limits-and-errors/)
+
+## Machine-readable
+
+- [Agent authentication guide](/auth.md)
+- [Agent skill: boxcompute-sandbox](/skills/boxcompute-sandbox/SKILL.md)
+- [API catalog (RFC 9727)](/.well-known/api-catalog)
+- [Capability manifest (ARD)](/.well-known/ai-catalog.json)
+- [Agent skills index](/.well-known/agent-skills/index.json)
+- [Sitemap](/sitemap.xml)
+- [Blog RSS](/blog/rss.xml)
+
+## API
+
+- Base URL: `https://api.boxcompute.ai` (public v2 routes under `/api/v2`)
+- OpenAPI 3.1: `https://api.boxcompute.ai/api/v2/openapi.json`
+- Auth: `Authorization: Bearer bc_live_...` (scoped keys, see `/auth.md`)

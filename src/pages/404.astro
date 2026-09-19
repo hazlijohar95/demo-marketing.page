@@ -1,0 +1,46 @@
+---
+import Layout from "../layouts/Layout.astro"
+import SiteHeader from "../components/SiteHeader.jsx"
+import SiteFooter from "../components/SiteFooter.jsx"
+
+export const prerender = true
+---
+
+<Layout
+  title="Page not found — BoxCompute"
+  description="That page doesn't exist. Find the console demo, docs, quickstart, or blog instead."
+>
+  <div data-page="box" id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader client:load />
+    <div data-component="container">
+      <main id="main" tabindex="-1">
+        <section data-section="notfound" aria-labelledby="notfound-title">
+          <p data-slot="section-eyebrow"><span aria-hidden="true">#</span> 404</p>
+          <h1 id="notfound-title" data-slot="qs-title">
+            That page <strong>doesn't exist.</strong>
+          </h1>
+          <p data-slot="qs-lede">
+            It may have moved, or the link has a typo. The console demo,
+            docs, and quickstart are good places to continue.
+          </p>
+          <div data-slot="hero-actions">
+            <a data-slot="header-button" data-variant="contrast" href="/">
+              <strong>Back to home</strong>
+            </a>
+            <a data-slot="header-button" data-variant="neutral" href="/docs">
+              <strong>Read the docs</strong>
+            </a>
+            <a data-slot="header-button" data-variant="neutral" href="/quickstart/">
+              <strong>SDK quickstart</strong>
+            </a>
+            <a data-slot="header-button" data-variant="neutral" href="/blog/">
+              <strong>Blog</strong>
+            </a>
+          </div>
+        </section>
+      </main>
+      <SiteFooter client:visible />
+    </div>
+  </div>
+</Layout>

@@ -1,0 +1,278 @@
+---
+import { decodeSlug, getEmDashCollection, getEmDashEntry, getSeoMeta } from "emdash"
+import { PortableText } from "emdash/ui"
+
+import ArrowLeft from "../../components/ArrowLeft.astro"
+import ArrowUpRight from "../../components/ArrowUpRight.astro"
+import BlogVisual from "../../components/BlogVisual.jsx"
+import Layout from "../../layouts/Layout.astro"
+import PostCover from "../../components/PostCover.jsx"
+import Reveal from "../../components/Reveal.jsx"
+import SiteHeader from "../../components/SiteHeader.jsx"
+import SiteFooter from "../../components/SiteFooter.jsx"
+import { readingMinutes } from "../../lib/reading-time.js"
+
+const slug = decodeSlug(Astro.params.slug)
+if (!slug) return Astro.redirect("/blog/")
+
+const { entry: post, error, isPreview, cacheHint } = await getEmDashEntry("posts", slug)
+
+// A slug that matches nothing arrives as a LiveEntryNotFoundError in `error`,
+// not as `entry: null` — so it has to be answered with 404, not 500.
+if (error) {
+  if (error.name === "LiveEntryNotFoundError") {
+    return new Response("That post doesn't exist. Browse every post at /blog/", { status: 404 })
+  }
+  console.error("Failed to load post:", error)
+  return new Response("We couldn't load this post just now. Refresh to try again.", { status: 500 })
+}
+
+if (!post) return new Response("That post doesn't exist. Browse every post at /blog/", { status: 404 })
+if (Astro.cache?.enabled) Astro.cache.set(cacheHint)
+
+const seo = getSeoMeta(post, {
+  siteTitle: "BoxCompute",
+  siteUrl: Astro.url.origin,
+  path: Astro.url.pathname.replace(/\/$/, ""),
+})
+
+const formatDate = (date: Date, long = false) =>
+  Number.isNaN(date.getTime())
+    ? null
+    : date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: long ? "long" : "short",
+        day: "numeric",
+      })
+
+// A bad `published_at` would otherwise render as the string "Invalid Date".
+const publishedAt = post.data.publishedAt ? formatDate(post.data.publishedAt, true) : null
+const publishedIso = post.data.publishedAt?.toISOString().slice(0, 10) ?? undefined
+
+const author = post.data.byline?.displayName ?? null
+const tags = post.data.terms?.tag ?? []
+const topic = tags[0]?.label ?? null
+const minutes = readingMinutes(post.data.content)
+// Same fallback as the index tiles: a CMS cover wins, otherwise the post gets
+// its generated one, so the hero always matches the tile the reader clicked.
+const coverImage =
+  typeof post.data.featured_image === "string"
+    ? post.data.featured_image
+    : (post.data.featured_image?.url ?? null)
+// PortableText renders nothing for empty content, which would leave a header
+// floating over a blank page with no explanation.
+const hasContent = Array.isArray(post.data.content)
+  ? post.data.content.length > 0
+  : Boolean(post.data.content)
+
+// Related posts: shared tags first, then recency, so the tail of a post
+// offers a next read in the same topic. A failure here must not take the
+// post down with it — the article is the page, related posts are decoration.
+const { entries: recent } = await getEmDashCollection("posts", {
+  orderBy: { published_at: "desc" },
+  limit: 8,
+}).catch(() => ({ entries: [] }))
+
+const tagSet = new Set(tags.map((t) => t.label))
+const related = (recent ?? [])
+  .filter((entry) => entry.id !== post.id)
+  .map((entry) => {
+    const entryTags = entry.data.terms?.tag?.map((t) => t.label) ?? []
+    const shared = entryTags.filter((t) => tagSet.has(t)).length
+    return { entry, shared }
+  })
+  .sort((a, b) => b.shared - a.shared)
+  .slice(0, 3)
+  .map(({ entry }) => ({
+    href: `/blog/${entry.id}/`,
+    title: entry.data.title,
+    topic: entry.data.terms?.tag?.[0]?.label ?? null,
+    minutes: readingMinutes(entry.data.content),
+    // The related rail is narrower than the archive table, so it takes the
+    // short date — a long one pushes the title into an ellipsis.
+    date: entry.data.publishedAt ? formatDate(entry.data.publishedAt) : null,
+    iso: entry.data.publishedAt?.toISOString().slice(0, 10) ?? undefined,
+  }))
+
+const pageUrl = new URL(Astro.url.pathname, Astro.url.origin).href
+const shareText = encodeURIComponent(post.data.title)
+---
+
+<Layout title={seo.title} description={seo.description}>
+  {/* BlogPosting structured data. JSON-LD in body is valid; values come from
+      the same post fields as the visible header so the two can't disagree. */}
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: post.data.title,
+      description: post.data.excerpt ?? seo.description,
+      ...(coverImage ? { image: [new URL(coverImage, Astro.url.origin).href] } : {}),
+      ...(publishedIso ? { datePublished: publishedIso } : {}),
+      ...(author ? { author: { "@type": "Person", name: author } } : {}),
+    })}
+  />
+  <div data-page="box" id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader client:load />
+    <div data-component="container">
+      <main id="main" tabindex="-1">
+        <div data-slot="post-progress" aria-hidden="true"><span></span></div>
+        {/* Two rails and a reading column: the label on the left stays with the
+            reader while the article scrolls, so the page never loses its
+            context the way a top-only breadcrumb does. */}
+        <article data-section="post" data-component="post-layout" aria-labelledby="post-title">
+          <div data-slot="post-rail">
+            <div data-slot="post-rail-inner">
+              <p data-slot="post-back">
+                <a href="/blog/"><ArrowLeft />Blog{topic ? ` / ${topic}` : ""}</a>
+              </p>
+              {/* Populated from the article's h2s by the script below; stays
+                  hidden when the post has fewer than two sections. */}
+              <nav data-slot="post-toc" aria-label="On this page" hidden>
+                <p>On this page</p>
+                <ol data-slot="post-toc-list"></ol>
+              </nav>
+            </div>
+          </div>
+
+          <div data-slot="post-column">
+            {
+              isPreview ? (
+                <p data-slot="post-preview">Preview — this post isn't published yet.</p>
+              ) : null
+            }
+            <Reveal client:load as="header" data-slot="post-header">
+              <p data-slot="post-meta">
+                {publishedAt ? <time datetime={publishedIso}>{publishedAt}</time> : null}
+                {!publishedAt && isPreview ? <span>Not published yet</span> : null}
+                {(publishedAt || isPreview) && topic ? <span aria-hidden="true">·</span> : null}
+                {topic ? <span>{topic}</span> : null}
+              </p>
+              <h1 id="post-title" {...post.edit.title}>{post.data.title}</h1>
+              {post.data.excerpt ? <p {...post.edit.excerpt}>{post.data.excerpt}</p> : null}
+              {
+                author || minutes ? (
+                  <p data-slot="post-byline">
+                    {author ? (
+                      <>
+                        <span data-slot="byline-mark" aria-hidden="true">
+                          {author.slice(0, 2).toUpperCase()}
+                        </span>
+                        <span>{author}</span>
+                      </>
+                    ) : null}
+                    {author && minutes ? <span aria-hidden="true">·</span> : null}
+                    {minutes ? <span>{minutes} min read</span> : null}
+                  </p>
+                ) : null
+              }
+              {
+                tags.length > 1 ? (
+                  <ul data-slot="post-tags" aria-label="Topics">
+                    {tags.map((tag) => (
+                      <li data-slot="beta-pill">{tag.label}</li>
+                    ))}
+                  </ul>
+                ) : null
+              }
+            </Reveal>
+            <div data-slot="post-hero">
+              {
+                coverImage ? (
+                  <img src={coverImage} alt={`Cover art for ${post.data.title}`} />
+                ) : (
+                  <PostCover client:load slug={post.id} topic={topic} slot="hero" />
+                )
+              }
+            </div>
+            <BlogVisual slug={post.id} />
+            <div data-component="prose">
+              {
+                hasContent ? (
+                  <PortableText value={post.data.content} />
+                ) : (
+                  <p data-slot="post-empty">
+                    This post doesn't have any content yet. Try{" "}
+                    <a href="/blog/">the other posts</a> in the meantime.
+                  </p>
+                )
+              }
+            </div>
+            <div data-component="post-share">
+              <span aria-hidden="true">Share</span>
+              <a
+                href={`https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(pageUrl)}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                X
+              </a>
+              <a
+                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                LinkedIn
+              </a>
+              <button type="button" data-slot="post-copy-link" data-url={pageUrl}>
+                Copy link
+              </button>
+            </div>
+          </div>
+        </article>
+
+        {
+          related.length > 0 ? (
+            <section data-component="post-layout" data-slot="post-related" aria-labelledby="related-title">
+              <div data-slot="post-rail">
+                <h2 id="related-title" data-slot="rail-label">Related posts</h2>
+              </div>
+              <div data-slot="post-column">
+                <ul>
+                  {related.map((row) => (
+                    <li>
+                      <a data-slot="archive-row" href={row.href}>
+                        <span data-slot="row-when">
+                          {row.date ? <time datetime={row.iso}>{row.date}</time> : null}
+                          {row.date && row.topic ? <span aria-hidden="true">·</span> : null}
+                          {row.topic ? <span>{row.topic}</span> : null}
+                        </span>
+                        <span data-slot="row-title">{row.title}</span>
+                        <span data-slot="row-time">{row.minutes ? `${row.minutes}m` : null}</span>
+                        <ArrowUpRight />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+                <p data-slot="related-more">
+                  <a href="/blog/">View more posts<ArrowUpRight /></a>
+                </p>
+              </div>
+            </section>
+          ) : null
+        }
+      </main>
+      <SiteFooter client:visible />
+    </div>
+  </div>
+  <script>
+    import { initPostEnhance } from "../../lib/prose-enhance.js"
+    import { COPY_RESET_MS, copyText } from "../../lib/clipboard.js"
+    initPostEnhance()
+    const copyButton = document.querySelector('[data-slot="post-copy-link"]')
+    if (copyButton) {
+      // Label read once, so a second click inside the reset window can't
+      // leave the button stuck on "Copied".
+      const label = copyButton.textContent
+      copyButton.addEventListener("click", async () => {
+        await copyText(copyButton.getAttribute("data-url") ?? window.location.href)
+        copyButton.textContent = "Copied"
+        window.setTimeout(() => {
+          copyButton.textContent = label
+        }, COPY_RESET_MS)
+      })
+    }
+  </script>
+</Layout>

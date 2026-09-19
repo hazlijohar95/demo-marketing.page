@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="BoxCompute">
+  <title>BoxCompute app mark</title>
+  <!-- Carbon tile with the cut-cell notch, bone route channel, ember tip.
+       Geometry is drawn bolder than the brand symbol so the route and tip
+       survive 16px: channel ~36px, tip tip-to-notch ~58px. -->
+  <path fill="#232826" d="M64 8h120q64 0 64 64v32l-22 24 22 24v32q0 64-64 64H64Q8 248 8 184V72Q8 8 64 8Z"/>
+  <path fill="#F4EFE6" d="M60 110h56l60-46h30v34h-20l-40 30 40 30h20v34h-30l-60-46H60v-36Z"/>
+  <path fill="#CE704C" d="M172 154h34v36h-34l-24-18 24-18Z"/>
+</svg>

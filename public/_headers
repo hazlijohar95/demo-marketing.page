@@ -1,0 +1,28 @@
+/.well-known/api-catalog
+  Content-Type: application/linkset+json; charset=utf-8
+  Access-Control-Allow-Origin: *
+
+/.well-known/ai-catalog.json
+  Access-Control-Allow-Origin: *
+
+/auth.md
+  Content-Type: text/markdown; charset=utf-8
+
+/skills/*
+  Content-Type: text/markdown; charset=utf-8
+
+# Prerendered HTML routes are served as static assets, which bypass edge
+# middleware — so they carry the same RFC 8288 discovery headers here.
+# (The SSR landing page gets them from src/middleware.js instead.)
+/docs
+  Link: </.well-known/api-catalog>; rel="api-catalog", </docs/http-api/>; rel="service-doc", <https://api.boxcompute.ai/api/v2/openapi.json>; rel="service-desc", </.well-known/ai-catalog.json>; rel="describedby"
+/docs/*
+  Link: </.well-known/api-catalog>; rel="api-catalog", </docs/http-api/>; rel="service-doc", <https://api.boxcompute.ai/api/v2/openapi.json>; rel="service-desc", </.well-known/ai-catalog.json>; rel="describedby"
+/blog
+  Link: </.well-known/api-catalog>; rel="api-catalog", </docs/http-api/>; rel="service-doc", <https://api.boxcompute.ai/api/v2/openapi.json>; rel="service-desc", </.well-known/ai-catalog.json>; rel="describedby"
+/blog/*
+  Link: </.well-known/api-catalog>; rel="api-catalog", </docs/http-api/>; rel="service-doc", <https://api.boxcompute.ai/api/v2/openapi.json>; rel="service-desc", </.well-known/ai-catalog.json>; rel="describedby"
+/quickstart
+  Link: </.well-known/api-catalog>; rel="api-catalog", </docs/http-api/>; rel="service-doc", <https://api.boxcompute.ai/api/v2/openapi.json>; rel="service-desc", </.well-known/ai-catalog.json>; rel="describedby"
+/quickstart/
+  Link: </.well-known/api-catalog>; rel="api-catalog", </docs/http-api/>; rel="service-doc", <https://api.boxcompute.ai/api/v2/openapi.json>; rel="service-desc", </.well-known/ai-catalog.json>; rel="describedby"

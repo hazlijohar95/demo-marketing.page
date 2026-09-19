@@ -1,0 +1,88 @@
+---
+import "../styles.css"
+import "@fontsource/inter/400.css"
+import "@fontsource/inter/500.css"
+import "@fontsource/inter/600.css"
+import "@fontsource/ibm-plex-mono/400.css"
+import "@fontsource/ibm-plex-mono/500.css"
+import "@fontsource/ibm-plex-mono/600.css"
+
+import WebMcpTools from "../components/WebMcpTools.jsx"
+
+interface Props {
+  title?: string
+  description?: string
+}
+
+const {
+  title = "A workspace for every agent — BoxCompute",
+  description = "Isolated Linux VM Sandboxes grouped by persistent workspaces for AI agents to build, test, and explore.",
+} = Astro.props
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180.png" />
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#161616" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#161616" />
+    <meta name="description" content={description} />
+    {/* Self-referential: boxcompute.ai serves different content, so the
+        canonical must be this deployment, not the brand domain. */}
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.url.origin).href} />
+    <link rel="alternate" type="application/rss+xml" title="BoxCompute blog" href="/blog/rss.xml" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="ai-catalog" href="/.well-known/ai-catalog.json" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="BoxCompute" />
+    <meta property="og:url" content="https://boxcompute.ai/" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content="https://boxcompute.ai/boxcompute-social-card.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="BoxCompute" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content="https://boxcompute.ai/boxcompute-social-card.png" />
+    <meta name="twitter:image:alt" content="BoxCompute" />
+    <title>{title}</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "BoxCompute",
+        "url": "https://boxcompute.ai/",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Linux",
+        "description": "Isolated Linux VM Sandboxes grouped by persistent workspaces for AI agents."
+      }
+    </script>
+    {/* Manual theme override applied before paint: light/dark set
+        html[data-theme], system removes it and falls back to the OS query. */}
+    <script is:inline>
+      try {
+        var t = localStorage.getItem("bx-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+        else document.documentElement.removeAttribute("data-theme");
+      } catch (e) {}
+    </script>
+    {/* Fonts are self-hosted via @fontsource (bundled, no render-blocking
+        third-party CSS). System fallbacks in --bx-sans/--bx-mono cover FOUT. */}
+  </head>
+  <body>
+    <slot />
+    <WebMcpTools client:idle />
+    <noscript>JavaScript enables the mobile navigation menu. You can also use the links in the footer.</noscript>
+  </body>
+</html>

@@ -1,0 +1,214 @@
+/* BoxCompute design tokens — extracted from styles.css. Single source for --bx-* / --live-* vars + dark theme + theme transition. */
+/* ------------------------------------------------------------------
+   BoxCompute — design system adapted from opencode.ai/data
+   Sans display (Inter, Vercel-style) + mono data (IBM Plex Mono).
+   Square corners · hairline boxes · dot pattern.
+   System theme only: light by default, dark via prefers-color-scheme.
+------------------------------------------------------------------- */
+
+/* Anchor nav + skip link travel instead of teleporting. scroll-margin-top
+   (below) already parks the landing under the sticky header. */
+@media (prefers-reduced-motion: no-preference) {
+  html:has([data-page="box"]) {
+    scroll-behavior: smooth;
+  }
+}
+
+[data-page="box"] {
+  color-scheme: light dark;
+  /* details-content can only transition from 0 to a keyword height. */
+  interpolate-size: allow-keywords;
+  --bx-sans:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  --bx-mono:
+    "IBM Plex Mono",
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    "Courier New",
+    monospace;
+  --bx-bg: #ffffff;
+  --bx-layer: #fafafa;
+  --bx-layer-2: #eeeeee;
+  --bx-line: #0000001a;
+  --bx-line-strong: #00000033;
+  --bx-text: #161616;
+  --bx-muted: #5c5c5c;
+  --bx-faint: #707070;
+  /* Ember. Contrast is matched to the blue this replaced, within 0.02 on every
+     accent surface (5.18/4.96/4.46 light vs blue's 5.19/4.97/4.47), so the swap
+     changes hue without changing legibility or visual weight.
+     --bx-accent is UI (focus rings, bars, borders), --bx-accent-text is type. */
+  --bx-accent: #c2410c;
+  --bx-accent-text: #c2410c;
+  --bx-pattern: #dcdcdc;
+  --bx-grid-dot: #0000001f;
+  --bx-success: #198b43;
+  /* Illustration inks that are not theme tokens yet: console ember is fixed
+     across themes (ask bubble + active chat + inspector underline share it),
+     warn amber marks running states. Named here so the six raw hexes below
+     read as a system instead of one-offs. */
+  --live-ember: #ce704c;
+  --live-ember-wash: #ce704c1f;
+  --live-ember-line: #ce704c66;
+  --bx-warn: #d69a00;
+  /* One inline pad for every band — sections, hero, footer — so the page keeps
+     a single leading edge instead of three. */
+  --bx-pad-inline: 40px;
+  --bx-section-pad: 80px var(--bx-pad-inline);
+  /* Sticky bar height. The mobile overlay offset and every anchor landing read
+     from this, so growing the bar for touch targets can't desync them. */
+  --bx-bar-h: 72px;
+  /* Console chrome rows. Named here, not inlined, because the
+     particle-reveal wrapper has to add them to the grid height. */
+  --live-head-h: 44px;
+  --live-foot-h: 42px;
+  /* Motion. Curves follow the decision order: entering/exiting uses
+     --bx-ease-out, on-screen movement uses --bx-ease-in-out, and plain
+     colour changes stay on the built-in `ease`. */
+  --bx-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --bx-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --bx-dur-press: 120ms;
+  --bx-dur-fast: 200ms;
+  --bx-dur-ui: 240ms;
+  --bx-dur-bar: 300ms;
+  --bx-dur-enter: 400ms;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bx-bg);
+  color: var(--bx-text);
+  font-family: var(--bx-sans);
+  font-synthesis: none;
+  overflow-x: clip;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-page="box"] {
+    color-scheme: dark;
+    --bx-bg: #161616;
+    --bx-layer: #242424;
+    --bx-layer-2: #303030;
+    --bx-line: #ffffff1a;
+    --bx-line-strong: #ffffff33;
+    --bx-text: #ffffff;
+    --bx-muted: #d4d4d4;
+    --bx-faint: #a3a3a3;
+    /* Both accent tokens lift in dark mode. --bx-accent used to inherit the
+       light value, which left the focus ring at 3.49 on #161616 — barely over
+       the 3.0 non-text minimum. The dark ember takes it to 6.46. */
+    --bx-accent: #f97316;
+    --bx-accent-text: #f97316;
+    --bx-pattern: #303030;
+    --bx-grid-dot: #ffffff1f;
+  }
+}
+
+/* Manual override: html[data-theme] wins over the OS media query above.
+   `system` (default) removes the attribute and falls back to the query.
+   Specificity (html attr + scope) beats the bare scope + media rule. */
+html[data-theme="light"] [data-page="box"] {
+  color-scheme: light;
+  --bx-bg: #ffffff;
+  --bx-layer: #fafafa;
+  --bx-layer-2: #eeeeee;
+  --bx-line: #0000001a;
+  --bx-line-strong: #00000033;
+  --bx-text: #161616;
+  --bx-muted: #5c5c5c;
+  --bx-faint: #707070;
+  --bx-accent: #c2410c;
+  --bx-accent-text: #c2410c;
+  --bx-pattern: #dcdcdc;
+  --bx-grid-dot: #0000001f;
+}
+
+html[data-theme="dark"] [data-page="box"] {
+  color-scheme: dark;
+  --bx-bg: #161616;
+  --bx-layer: #242424;
+  --bx-layer-2: #303030;
+  --bx-line: #ffffff1a;
+  --bx-line-strong: #ffffff33;
+  --bx-text: #ffffff;
+  --bx-muted: #d4d4d4;
+  --bx-faint: #a3a3a3;
+  --bx-accent: #f97316;
+  --bx-accent-text: #f97316;
+  --bx-pattern: #303030;
+  --bx-grid-dot: #ffffff1f;
+}
+
+html[data-theme="light"] [data-page="box"] [data-slot="brand"] img,
+html[data-theme="light"] [data-page="box"] [data-slot="footer-mark"] img {
+  filter: none;
+}
+
+html[data-theme="dark"] [data-page="box"] [data-slot="brand"] img,
+html[data-theme="dark"] [data-page="box"] [data-slot="footer-mark"] img {
+  filter: grayscale(1) invert(1);
+}
+
+html[data-theme="light"] [data-page="box"] [data-slot="header-button"][data-variant="contrast"] {
+  background: #242424;
+}
+
+html[data-theme="dark"] [data-page="box"] [data-slot="header-button"][data-variant="contrast"] {
+  background: #5c5c5c;
+}
+
+html[data-theme="light"] [data-page="box"] [data-slot="menu-button"] {
+  color: #3a3a3a;
+  background: #ffffff;
+}
+
+html[data-theme="dark"] [data-page="box"] [data-slot="menu-button"] {
+  color: #fafafa;
+  background: #ffffff0f;
+}
+
+/* Elegant system-theme transition: themed surfaces cross-fade instead of
+   flashing when the OS switches. Motion-safe only; cheap properties. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-page="box"],
+  [data-page="box"] [data-component="top"],
+  [data-page="box"] [data-section],
+  [data-page="box"] [data-component="footer"],
+  [data-page="box"] [data-component="leader-card"],
+  [data-page="box"] [data-component="spec-board"],
+  [data-page="box"] [data-component="lifecycle"],
+  [data-page="box"] [data-component="console-live"],
+  [data-page="box"] [data-component="compare-scroll"],
+  [data-page="box"] [data-component="mini-visual"] {
+    transition:
+      background-color 480ms ease,
+      border-color 480ms ease,
+      color 480ms ease;
+  }
+  [data-page="box"] [data-slot="brand"] img,
+  [data-page="box"] [data-slot="footer-mark"] img {
+    transition:
+      filter 480ms ease,
+      opacity 480ms ease;
+  }
+  [data-page="box"] [data-slot="dot-drift"][data-fade] {
+    animation: bx-theme-fade 520ms ease-out both;
+  }
+}
+
+@keyframes bx-theme-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+

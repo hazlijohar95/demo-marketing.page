@@ -1,0 +1,48 @@
+---
+import Layout from "../layouts/Layout.astro"
+
+// The landing page server-renders (not prerendered) so edge middleware can
+// negotiate `Accept: text/markdown` and attach RFC 8288 Link headers —
+// static assets bypass the worker entirely. Every other route stays
+// prerendered edge-cacheable HTML and gets its Link headers from
+// public/_headers instead.
+export const prerender = false
+
+// React islands — ported 1:1 from src/App.jsx.
+// Above-the-fold islands hydrate immediately; everything else hydrates
+// on visibility to keep initial JS small while preserving exact behavior.
+import SiteHeader from "../components/SiteHeader.jsx"
+import Hero from "../components/Hero.jsx"
+import ConsoleSection from "../components/ConsoleSection.jsx"
+import PlatformSection from "../components/PlatformSection.jsx"
+import CompareSection from "../components/CompareSection.jsx"
+import SpecSection from "../components/SpecSection.jsx"
+import HowItWorks from "../components/HowItWorks.jsx"
+import FaqSection from "../components/FaqSection.jsx"
+import ClosingSection from "../components/ClosingSection.jsx"
+import SiteFooter from "../components/SiteFooter.jsx"
+---
+
+<Layout>
+  <!-- `data-page` is the CSS scope, not a landmark: header / main / footer are
+       siblings under it so the page exposes a banner, a main and a contentinfo. -->
+  <div data-page="box" id="top">
+    <a class="skip-link" href="#main">
+      Skip to content
+    </a>
+    <SiteHeader client:load />
+    <div data-component="container">
+      <main id="main" tabindex="-1">
+        <Hero client:load />
+        <ConsoleSection client:visible />
+        <PlatformSection client:visible />
+        <CompareSection client:visible />
+        <SpecSection client:visible />
+        <HowItWorks client:visible />
+        <FaqSection client:visible />
+        <ClosingSection client:visible />
+      </main>
+      <SiteFooter client:visible />
+    </div>
+  </div>
+</Layout>

@@ -1,0 +1,173 @@
+---
+import { getEmDashCollection } from "emdash"
+
+import ArrowUpRight from "../../components/ArrowUpRight.astro"
+import Layout from "../../layouts/Layout.astro"
+import PostCover from "../../components/PostCover.jsx"
+import Reveal from "../../components/Reveal.jsx"
+import SiteHeader from "../../components/SiteHeader.jsx"
+import SiteFooter from "../../components/SiteFooter.jsx"
+import { readingMinutes } from "../../lib/reading-time.js"
+
+// Ordering happens in D1 so the query uses its published_at index.
+// Public collection queries default to status: "published".
+const { entries: posts, error, cacheHint } = await getEmDashCollection("posts", {
+  orderBy: { published_at: "desc" },
+})
+
+if (error) {
+  console.error("Failed to load posts:", error)
+  return new Response("We couldn't load the blog just now. Refresh to try again.", { status: 500 })
+}
+
+if (Astro.cache?.enabled) Astro.cache.set(cacheHint)
+
+// A bad `published_at` in D1 arrives as an Invalid Date, which would render
+// the literal string "Invalid Date" in the byline.
+const formatDate = (date: Date, long = false) =>
+  Number.isNaN(date.getTime())
+    ? null
+    : date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: long ? "long" : "short",
+        day: "numeric",
+      })
+
+// One shape for both the featured cards and the archive rows, so the two
+// views can never disagree about a post's topic or read time.
+const rows = posts.map((post) => ({
+  href: `/blog/${post.id}/`,
+  slug: post.id,
+  title: post.data.title,
+  excerpt: post.data.excerpt ?? null,
+  author: post.data.byline?.displayName ?? null,
+  // The CMS field is optional and may arrive as a bare URL or as an asset
+  // object; a tile with no image falls back to the dot plate.
+  image:
+    typeof post.data.featured_image === "string"
+      ? post.data.featured_image
+      : (post.data.featured_image?.url ?? null),
+  // The first tag is the post's section, the way Cursor prints "· Research".
+  topic: post.data.terms?.tag?.[0]?.label ?? null,
+  minutes: readingMinutes(post.data.content),
+  date: post.data.publishedAt ? formatDate(post.data.publishedAt) : null,
+  dateLong: post.data.publishedAt ? formatDate(post.data.publishedAt, true) : null,
+  iso: post.data.publishedAt?.toISOString().slice(0, 10) ?? undefined,
+}))
+
+// Lead + two stacked, then everything (including the lead) in the archive —
+// a reader scanning the table shouldn't find the newest post missing from it.
+const [lead, ...others] = rows
+// `lead` is undefined on an empty collection; spreading it is a no-op and the
+// empty branch never renders these tiles anyway.
+const tiles = [
+  { ...lead, size: "lead", cover: "lead" },
+  ...others.slice(0, 2).map((row) => ({ ...row, size: undefined, cover: "tile" })),
+]
+---
+
+<Layout
+  title="Blog — BoxCompute"
+  description="Notes on the technology behind agent workspaces: virtualization, infrastructure, and the boundaries that make them work."
+>
+  <div data-page="box" id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteHeader client:load />
+    <div data-component="container">
+      <main id="main" tabindex="-1">
+        <section data-section="blog" aria-labelledby="blog-title">
+          <Reveal client:load as="header" data-slot="blog-intro">
+            <p data-slot="eyebrow">Engineering notes</p>
+            <h1 id="blog-title">The BoxCompute blog</h1>
+            <p>
+              How we build agent workspaces: virtualization, infrastructure, and the boundaries that
+              make them work.
+            </p>
+            <div data-component="docs-filter">
+              <label for="blog-filter-input">Filter posts</label>
+              <input
+                id="blog-filter-input"
+                type="search"
+                placeholder="Filter posts…"
+                autocomplete="off"
+              />
+            </div>
+          </Reveal>
+
+          {
+            rows.length === 0 ? (
+              <p data-slot="blog-empty">
+                No posts published yet. In the meantime, the <a href="/docs">docs</a> cover how
+                sandboxes and workspaces work.
+              </p>
+            ) : (
+              <>
+                <Reveal client:load data-component="post-featured">
+                  {tiles.map((row) => (
+                    <a data-slot="post-tile" data-size={row.size} href={row.href}>
+                      {row.image ? (
+                        <img data-slot="tile-image" src={row.image} alt={row.title} loading="lazy" />
+                      ) : (
+                        <PostCover client:load slug={row.slug} topic={row.topic} slot={row.cover} />
+                      )}
+                      <span data-slot="tile-body">
+                        <span data-slot="post-meta">
+                          {row.dateLong ? <time datetime={row.iso}>{row.dateLong}</time> : null}
+                          {row.dateLong && row.topic ? <span aria-hidden="true">·</span> : null}
+                          {row.topic ? <span>{row.topic}</span> : null}
+                        </span>
+                        <span data-slot="tile-title">{row.title}</span>
+                        {row.excerpt ? <span data-slot="tile-excerpt">{row.excerpt}</span> : null}
+                        <span data-slot="post-meta">
+                          {row.author ? <span>{row.author}</span> : null}
+                          {row.author && row.minutes ? <span aria-hidden="true">·</span> : null}
+                          {row.minutes ? <span>{row.minutes} min read</span> : null}
+                        </span>
+                      </span>
+                    </a>
+                  ))}
+                </Reveal>
+
+                <Reveal client:visible as="section" data-component="post-archive" aria-label="All posts">
+                  <h2 data-slot="archive-label">All posts</h2>
+                  <ul>
+                    {rows.map((row) => (
+                      <li>
+                        <a data-slot="archive-row" href={row.href}>
+                          <span data-slot="row-when">
+                            {row.date ? <time datetime={row.iso}>{row.date}</time> : null}
+                            {row.date && row.topic ? <span aria-hidden="true">·</span> : null}
+                            {row.topic ? <span>{row.topic}</span> : null}
+                          </span>
+                          <span data-slot="row-title">{row.title}</span>
+                          <span data-slot="row-author">{row.author}</span>
+                          <span data-slot="row-time">{row.minutes ? `${row.minutes}m` : null}</span>
+                          <ArrowUpRight />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </Reveal>
+              </>
+            )
+          }
+        </section>
+      </main>
+      <SiteFooter client:visible />
+    </div>
+  </div>
+  <script>
+    // Filters archive rows and cover tiles together: both carry the post
+    // title, so one text match covers the whole index.
+    const input = document.getElementById("blog-filter-input");
+    if (input) {
+      const items = '[data-component="post-archive"] li, [data-slot="post-tile"]';
+      input.addEventListener("input", () => {
+        const q = input.value.trim().toLowerCase();
+        document.querySelectorAll(items).forEach((item) => {
+          item.hidden = q ? !(item.textContent || "").toLowerCase().includes(q) : false;
+        });
+      });
+    }
+  </script>
+</Layout>

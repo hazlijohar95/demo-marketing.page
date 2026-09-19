@@ -1,0 +1,37 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "boxcompute",
+  // No account_id on purpose: a hardcoded one fails with error 7003 for anyone
+  // deploying to a different account, which breaks the Deploy to Cloudflare
+  // button. Set CLOUDFLARE_ACCOUNT_ID instead when a login has more than one
+  // account and the deploy has to stay non-interactive.
+  "main": "./src/worker.ts",
+  "compatibility_date": "2026-02-24",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "boxcompute-cms",
+      "database_id": "fe1f7075-285b-4905-a4e5-34950990c5f4",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "boxcompute-media",
+    },
+  ],
+  // Astro sessions. Wrangler provisioned this on first deploy; pinning the id
+  // stops later deploys from creating a second namespace.
+  "kv_namespaces": [
+    {
+      "binding": "SESSION",
+      "id": "1ec3d931856145cb91f59886ae6cf7cf",
+    },
+  ],
+  // Drives scheduled publishing and EmDash maintenance. Without it, a post
+  // scheduled for later never goes live.
+  "triggers": {
+    "crons": ["* * * * *"],
+  },
+}
