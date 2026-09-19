@@ -12,9 +12,6 @@ system and an interactive recreation of the product console.
 
 [![CI](https://github.com/hazlijohar95/boxcompute-marketing.page/actions/workflows/ci.yml/badge.svg)](https://github.com/hazlijohar95/boxcompute-marketing.page/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-black?style=flat-square)](LICENSE)
-[![Astro](https://img.shields.io/badge/astro-7.3-black?style=flat-square&logo=astro)](https://astro.build)
-[![Bun](https://img.shields.io/badge/bun-1.4-black?style=flat-square&logo=bun)](https://bun.sh)
-[![Cloudflare Workers](https://img.shields.io/badge/cloudflare-workers-black?style=flat-square&logo=cloudflare)](https://workers.cloudflare.com)
 
 [Live site](https://boxcompute.ai) · [Docs](https://boxcompute.ai/docs) · [Quick start](#quick-start) · [Architecture](#architecture)
 
@@ -29,9 +26,8 @@ namespace, and deploys the Worker. Requires the repository to be public.
 
 ## Quick start
 
-Requires [Bun](https://bun.sh) (`curl -fsSL https://bun.sh/install | bash`) and
-Node 20+ on `PATH` — Bun runs the scripts, Node runs the tests. The exact Bun
-version is pinned in `package.json`.
+Requires [Bun](https://bun.sh) and Node 20+ on `PATH` — Bun runs the scripts,
+Node runs the tests. The Bun version is pinned in `package.json`.
 
 ```bash
 git clone https://github.com/hazlijohar95/boxcompute-marketing.page.git
@@ -73,15 +69,14 @@ secrets become unreadable.
 | Command | What it does |
 | :--- | :--- |
 | `bun dev` | Dev server on port 5180 |
-| `bun run build` | Production build to `dist/` |
-| `bun run preview` | Serve the build locally |
-| `bun check` | Build, then unit + accessibility suites (32 tests) |
+| `bun check` | Build, then unit + accessibility suites |
 | `bun check:unit` | Unit tests only, no build — fast inner loop |
 | `bun run deploy` | Build and `wrangler deploy` |
 
-> Two Bun names to know: `bun run build`, not `bun build` (the bare form is
-> Bun's own bundler). And the test script is `check`, not `test` — see
-> [Testing](#testing) for why.
+Plus the usual `build` and `preview`. Two Bun names to watch: `bun run build`,
+not `bun build` (the bare form is Bun's own bundler), and `check`, not `test` —
+`bun test` forces Bun's own runner, which collects no `node:test` cases and
+reports `0 pass, 0 fail` while exiting `0`.
 
 ## Architecture
 
@@ -106,10 +101,8 @@ src/
 └── worker.ts           Astro handler + EmDash cron handler
 ```
 
-**Islands.** The homepage mounts 10. `SiteHeader` and `Hero` use
-`client:load` because they are above the fold; the other eight use
-`client:visible`, so Astro code-splits their JS per section and nothing below
-the fold costs anything until it scrolls in.
+**Islands.** Only `SiteHeader` and `Hero` are `client:load`; every other
+island on the homepage is `client:visible`.
 
 **Cloudflare bindings** (`wrangler.jsonc`):
 
@@ -168,14 +161,6 @@ bun check         # the above plus the served-page suite
 dependency. `scripts/a11y-check.mjs` boots `wrangler dev` against the real
 build and asserts the accessibility, layout, and agent-discovery invariants
 of the actual HTTP responses, including headers.
-
-> **Why `check` and not `test`?** Bun's `bun test` always runs Bun's own
-> runner and ignores a `test` script. That runner does not collect
-> `node:test` registrations, so it reports `0 pass, 0 fail` and still exits
-> `0` — a green check having tested nothing. Naming the script `check`
-> means there is no builtin to shadow it and no way to get that false
-> green by accident. Node runs the suites, which is why it stays a
-> prerequisite alongside Bun.
 
 ## License
 
