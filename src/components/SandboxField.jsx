@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react"
 
 import { prefersReducedMotion, useSystemTheme } from "../lib/environment.js"
 import { hexToRgb, rgba as css } from "../lib/color.js"
-import { CONTOUR_STEP, contour } from "../lib/field-contour.js"
+import { CONTOUR_STEP, HOVER_RADIUS, PULSE_REACH, fieldStrength, scanBounds } from "../lib/field-contour.js"
 
 // CanvasUI Grid / Ripple / Magnify, translated into the BoxCompute system.
 // The canonical dot grid stays in CSS (square 2px cells on a 6px grid);
@@ -17,7 +17,6 @@ import { CONTOUR_STEP, contour } from "../lib/field-contour.js"
 // rather than firing a travelling wave.
 const GAP = 6
 const SIZE = 2
-const HOVER_RADIUS = 132
 // One ink. The rings carry the structure, so a second hue would only add noise
 // the contours already encode as spacing.
 const PALETTE = {
@@ -29,7 +28,6 @@ const PALETTE = {
 // reads as a grid artifact instead of a measured field.
 const STEP = CONTOUR_STEP
 const PULSE_LIFE = 1400
-const PULSE_REACH = 190
 
 export default function SandboxField() {
   const theme = useSystemTheme()
@@ -80,22 +78,9 @@ export default function SandboxField() {
       // Only cells within reach of the pointer or a live pulse can clear the
       // `total < 0.03` guard below. Scanning the whole grid computed ~12k sqrt
       // per frame to discard 94% of them.
-      let minX = Infinity
-      let minY = Infinity
-      let maxX = -Infinity
-      let maxY = -Infinity
-
-      // Grow the scan box to cover one circle of influence.
-      const cover = (cx, cy, reach) => {
-        minX = Math.min(minX, cx - reach)
-        maxX = Math.max(maxX, cx + reach)
-        minY = Math.min(minY, cy - reach)
-        maxY = Math.max(maxY, cy + reach)
-      }
-
-      if (pointer.inside) cover(pointer.x, pointer.y, HOVER_RADIUS)
-      for (const p of pulseStates) cover(p.x, p.y, PULSE_REACH)
-      if (minX > maxX) return
+      const bounds = scanBounds(pointer, pulseStates, HOVER_RADIUS, PULSE_REACH)
+      if (!bounds) return
+      const { minX, minY, maxX, maxY } = bounds
 
       // Snap to the same lattice the full scan used, so cells land on
       // identical coordinates and the visual result is unchanged.
@@ -106,28 +91,7 @@ export default function SandboxField() {
         for (let x = xFrom; x < w && x <= maxX; x += GAP) {
           // Strength is how strongly this cell belongs to *any* contour origin,
           // so overlapping fields read as one surface, not stacked rings.
-          let total = 0
-          if (pointer.inside) {
-            const dx = x - pointer.x
-            const dy = y - pointer.y
-            const dist = Math.sqrt(dx * dx + dy * dy)
-            if (dist < HOVER_RADIUS) {
-              // Linear falloff, not squared: squaring it dropped the outer rings
-              // below the alpha floor and only the innermost two were visible.
-              total = contour(dist) * (1 - dist / HOVER_RADIUS)
-            }
-          }
-          for (const p of pulseStates) {
-            const dx = x - p.x
-            const dy = y - p.y
-            const dist = Math.sqrt(dx * dx + dy * dy)
-            if (dist >= PULSE_REACH) continue
-            const falloff = 1 - dist / PULSE_REACH
-            // Rings tighten as the pulse decays, so the field reads as settling
-            // to a finer measurement rather than travelling outward.
-            const band = contour(dist, STEP * (0.6 + p.fade * 0.4))
-            total = Math.max(total, band * falloff * p.fade)
-          }
+          const total = fieldStrength(x, y, pointer, pulseStates, STEP)
           if (total < 0.03) continue
           const size = SIZE + total * 1.6
           // Floor of 0.35 so a ring stays a ring at the edge of its falloff.

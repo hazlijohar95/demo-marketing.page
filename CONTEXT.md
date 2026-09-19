@@ -25,3 +25,6 @@ locality) for the structure.
 - **Environment** — SSR-safe reads of the browser shared by all islands:
   media queries, OS theme, motion preference, in-view observation.
 - **Reveal** — scroll-triggered `.is-visible`; instant under reduced-motion.
+- **SDK language** — the persisted TypeScript/Python choice shared by the
+  Quickstart page and the docs switcher (canonical key `bx-sdk-lang`,
+  legacy `bx-qs-lang` / `bx-docs-lang` as read fallbacks).

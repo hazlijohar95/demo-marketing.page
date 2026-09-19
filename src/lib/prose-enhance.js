@@ -1,10 +1,10 @@
 // Prose enhancement for CMS-rendered article and docs pages. One module owns
 // every DOM contract the prose scripts rely on; the post page and the docs
 // layout are the two adapters at its seam, each calling only its entry point.
-// Both entries share the code chrome (code-chrome.js) and the
-// private-mode-tolerant storage helpers (use-local-storage.js).
+// Both entries share the code chrome (code-chrome.js); the docs language
+// choice persists through the SDK language module (sdk-language.js).
 import { enhanceCodeBlocks } from "./code-chrome.js"
-import { readStored, writeStored } from "./use-local-storage.js"
+import { readSdkLang, writeSdkLang } from "./sdk-language.js"
 
 // --- Shared ---
 
@@ -131,14 +131,12 @@ function docsBadge(pre, code) {
   return LANGS[raw] || raw || "code"
 }
 
-const LANG_KEY = "bx-docs-lang"
-
 function readLang() {
-  return readStored(LANG_KEY) === "py" ? "py" : "ts"
+  return readSdkLang()
 }
 
 function remember(lang, apply) {
-  writeStored(LANG_KEY, lang)
+  writeSdkLang(lang)
   apply(lang)
 }
 

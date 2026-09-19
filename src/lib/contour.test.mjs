@@ -5,7 +5,7 @@
 // arithmetic that could drift from the shipped field.
 import assert from "node:assert/strict"
 
-import { CONTOUR_STEP, contour } from "./field-contour.js"
+import { CONTOUR_STEP, contour, fieldStrength, HOVER_RADIUS, hoverStrength, PULSE_REACH, pulseStrength, scanBounds } from "./field-contour.js"
 
 const STEP = CONTOUR_STEP
 
@@ -49,5 +49,48 @@ for (let d = mid; d < STEP; d += 0.5) {
 // STEP must not be a multiple of the 6px lattice, or every ring lands on the
 // same columns and the field reads as a grid artifact.
 assert.notEqual(STEP % 6, 0, "STEP must not align to the dot lattice")
+
+// --- Field accumulation: the painter's contract, tested at the seam ---
+// Hover is 1 at the pointer and exactly 0 at and past its reach.
+near(hoverStrength(0), 1, "hover peaks at the pointer")
+assert.equal(hoverStrength(HOVER_RADIUS), 0, "hover is unlit at its reach")
+assert.equal(hoverStrength(HOVER_RADIUS + 1), 0, "hover is unlit past its reach")
+assert.equal(hoverStrength(-1), 0, "hover rejects negative distance")
+
+// A pulse is 1 fresh at its origin, gone when decayed or out of reach.
+near(pulseStrength(0, 1), 1, "fresh pulse peaks at its origin")
+assert.equal(pulseStrength(0, 0), 0, "decayed pulse is unlit")
+assert.equal(pulseStrength(PULSE_REACH, 1), 0, "pulse is unlit at its reach")
+assert.equal(pulseStrength(PULSE_REACH + 1, 1), 0, "pulse is unlit past its reach")
+// Decay is monotonic at the origin, where the band term is pinned at 1.
+assert.ok(
+  pulseStrength(0, 1) >= pulseStrength(0, 0.5) && pulseStrength(0, 0.5) >= pulseStrength(0, 0.1),
+  "pulse decays monotonically at its origin",
+)
+
+// Combined strength: idle is dark, hover-only matches the hover term, and
+// overlapping origins read as one surface (max), not stacked rings (sum).
+const idle = { inside: false, x: 0, y: 0 }
+assert.equal(fieldStrength(10, 10, idle, []), 0, "idle field is unlit")
+const hover = { inside: true, x: 100, y: 100 }
+near(
+  fieldStrength(100, 100, hover, []),
+  hoverStrength(0),
+  "hover-only matches the hover term",
+)
+const onePulse = [{ x: 50, y: 50, fade: 0.8 }]
+const single = fieldStrength(50, 50, idle, onePulse)
+const doubled = fieldStrength(50, 50, idle, [...onePulse, ...onePulse])
+near(doubled, single, "overlapping pulses take the max, not the sum")
+for (let d = 0; d < 200; d += 7.3) {
+  const v = fieldStrength(100 + d, 100, hover, [{ x: 300, y: 300, fade: 0.6 }])
+  assert.ok(v >= 0 && v <= 1 + 1e-9, `fieldStrength at d=${d} = ${v} out of range`)
+}
+
+// Scan bounds: null when idle, otherwise covering every circle of influence.
+assert.equal(scanBounds(idle, []), null, "idle scans nothing")
+const box = scanBounds(hover, [{ x: 300, y: 300, fade: 0.6 }])
+assert.ok(box.minX <= 100 - HOVER_RADIUS && box.maxX >= 300 + PULSE_REACH, "box spans hover and pulse")
+assert.ok(box.minY <= 100 - HOVER_RADIUS && box.maxY >= 300 + PULSE_REACH, "box spans hover and pulse")
 
 console.log("contour ok")

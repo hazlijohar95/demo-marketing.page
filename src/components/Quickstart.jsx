@@ -3,7 +3,7 @@ import { ArrowUpRight } from "lucide-react"
 import SectionHeading from "./SectionHeading.jsx"
 import Reveal from "./Reveal.jsx"
 import CodeBlock from "./CodeBlock.jsx"
-import { useLocalStorage } from "../lib/use-local-storage.js"
+import { useSdkLanguage } from "../lib/sdk-language.js"
 import { APP_URL, DEMO_URL } from "../content.js"
 import { DOCS, NEXT_STEPS, SCOPES, SNIPPETS } from "../content/quickstart-snippets.js"
 
@@ -27,7 +27,7 @@ function LanguageToggle({ lang, onChange, label }) {
 }
 
 export default function Quickstart() {
-  const [lang, setLang] = useLocalStorage("bx-qs-lang", "ts")
+  const [lang, setLang] = useSdkLanguage()
   const isTs = lang === "ts"
 
   return (
