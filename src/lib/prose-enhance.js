@@ -14,6 +14,24 @@ const slugify = (s) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
 
+// A wide table has to scroll sideways on a phone, but scrolling the table
+// element itself (display: block) takes its rows and cells out of the table
+// role, so a screen reader stops announcing row and column context. Scroll a
+// wrapper instead, and give it a tab stop — a scroll container with no tab
+// stop is unreachable without a pointer (WCAG 2.1.1).
+export function wrapTables(root) {
+  root.querySelectorAll("table").forEach((table) => {
+    if (table.parentElement?.dataset.slot === "prose-table") return
+    const box = document.createElement("div")
+    box.setAttribute("data-slot", "prose-table")
+    box.setAttribute("tabindex", "0")
+    box.setAttribute("role", "region")
+    box.setAttribute("aria-label", "Table")
+    table.replaceWith(box)
+    box.append(table)
+  })
+}
+
 // --- Post entry: reading progress, rail contents, terminal chrome ---
 // The CMS ships headings without ids and code without highlighting, so this
 // entry anchors the h2s and labels badges with a light heuristic
@@ -109,7 +127,10 @@ export function initPostEnhance() {
   initProgress(document.querySelector('[data-section="post"]'))
   const prose = col.querySelector('[data-component="prose"]')
   initToc(prose)
-  if (prose) enhanceCodeBlocks(prose, postBadge)
+  if (prose) {
+    enhanceCodeBlocks(prose, postBadge)
+    wrapTables(prose)
+  }
 }
 
 // --- Docs entry: terminal chrome plus a TypeScript/Python switcher ---
@@ -154,6 +175,7 @@ export function initDocsEnhance() {
   const prose = document.querySelector('[data-component="prose"][data-docs]')
   if (!prose) return
   enhanceCodeBlocks(prose, docsBadge)
+  wrapTables(prose)
   initDocsInpage(prose)
 
   const groups = []

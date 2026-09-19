@@ -7,6 +7,8 @@ description: "Query current or retained workload and command output without star
 
 Read logs for an owned Sandbox with the `sandbox:read` scope:
 
+## Read a Sandbox's logs
+
 ### TypeScript
 
 ```ts

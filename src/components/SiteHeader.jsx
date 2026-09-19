@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { ArrowUpRight, Menu, X } from "lucide-react"
 
+import { useMediaQuery } from "../lib/environment.js"
 import { APP_URL } from "../content.js"
 
 // Root-relative so the nav also works from /blog/*; on the landing page these
@@ -30,6 +31,16 @@ export default function SiteHeader() {
   const [scrolled, setScrolled] = useState(false)
   const menuButtonRef = useRef(null)
   const firstLinkRef = useRef(null)
+  // Same breakpoint as the CSS that hides the overlay and its toggle. In rem,
+  // so it tracks zoom the way the media query does. Without this, rotating a
+  // phone with the menu open hid the overlay *and* its close button while the
+  // effect below kept the page content inert — unreachable, with no control
+  // left to undo it.
+  const wide = useMediaQuery("(min-width: 48rem)")
+
+  useEffect(() => {
+    if (wide) setOpen(false)
+  }, [wide])
 
   // Which section the reader is in. Drives the nav's current-item mark, so the
   // sticky bar answers "where am I" instead of only "where can I go".
@@ -70,12 +81,18 @@ export default function SiteHeader() {
     // interactive: it holds the close button.
     const behind = document.querySelector('[data-page] > [data-component="container"]')
     if (behind) behind.inert = true
+    // The skip link sits outside that container, so it survives the inert pass:
+    // tabbing from the close button would otherwise reach a link that jumps to
+    // content nobody can focus.
+    const skip = document.querySelector(".skip-link")
+    if (skip) skip.inert = true
     const onKey = (event) => {
       if (event.key === "Escape") setOpen(false)
     }
     document.addEventListener("keydown", onKey)
     return () => {
       if (behind) behind.inert = false
+      if (skip) skip.inert = false
       document.removeEventListener("keydown", onKey)
       menuButtonRef.current?.focus()
     }

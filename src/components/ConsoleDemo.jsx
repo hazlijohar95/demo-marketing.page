@@ -25,8 +25,15 @@ export default function ConsoleDemo() {
       />
 
       {/* Touching the app hands control over — the Pause control sits outside
-          this element so it stays usable. */}
-      <div data-component="live-grid" onPointerDownCapture={demo.takeOver} onKeyDownCapture={demo.takeOver}>
+          this element so it stays usable. Focus counts as touching: a keyboard
+          reader tabbing in would otherwise have panels swapped out from under
+          their focused control by the next tour beat. */}
+      <div
+        data-component="live-grid"
+        onPointerDownCapture={demo.takeOver}
+        onKeyDownCapture={demo.takeOver}
+        onFocusCapture={demo.takeOver}
+      >
         <ConsoleSidebar
           chatId={demo.chatId}
           setChatId={demo.setChatId}

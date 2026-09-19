@@ -18,9 +18,10 @@ export default function ConsoleHeader({
           app.boxcompute.ai<b>/c/{chat.id}</b>
         </span>
       </span>
-      {/* Always rendered so the live region is stable across tour steps; the
-          keyed inner span re-fires the entrance animation. */}
-      <span data-slot="live-tour" role="status">
+      {/* Not a live region: the tour narrates itself every ~2s and loops for as
+          long as the page is open, so announcing it interrupted anything a
+          screen reader reader was doing elsewhere on the page, forever. */}
+      <span data-slot="live-tour">
         {tourStep === null ? null : (
           <span key={tourStep}>
             <b>
@@ -33,7 +34,12 @@ export default function ConsoleHeader({
       </span>
       <span data-slot="live-head-right">
         {progress ? <span data-slot="live-progress" aria-hidden="true">{progress}</span> : null}
-        <span data-slot="live-badge" role="status">{done ? "Done" : "Working"}</span>
+        {/* Live only once the demo is not autorunning: then a state change is
+            the reader's own (they sent a message, or paused). While the tour
+            runs it flips Working/Done on every loop with no one asking. */}
+        <span data-slot="live-badge" role={running ? undefined : "status"}>
+          {done ? "Done" : "Working"}
+        </span>
         {/* The demo's only control. Icon-only: the head row is status, and a
             self-running demo needs one affordance, not a console of them. */}
         <button

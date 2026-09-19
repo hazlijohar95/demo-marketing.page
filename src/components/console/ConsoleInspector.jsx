@@ -31,7 +31,9 @@ export default function ConsoleInspector({
       {rightTab === "files" ? (
         preview ? (
           <div data-slot="live-preview">
-            <button type="button" onClick={() => setPreview(null)}>
+            {/* The filename is the visible label, but the button closes the
+                preview — the name has to say so. */}
+            <button type="button" onClick={() => setPreview(null)} aria-label={`Close ${preview}`}>
               <X aria-hidden="true" /> {preview}
             </button>
             <pre>{FILE_BODY[preview] ?? "…"}</pre>

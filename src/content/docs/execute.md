@@ -7,6 +7,8 @@ description: "Run a bounded command synchronously or as an independently observa
 
 Execute a command in an owned Sandbox by sending a structured `argv` array through an official SDK:
 
+## Run a command
+
 ### TypeScript
 
 ```ts

@@ -89,6 +89,14 @@ test("heading levels never skip", () => {
   }
 })
 
+test("the self-running demo never announces itself", () => {
+  // The tour loops for as long as the page is open. A live region on its
+  // narration or its Working/Done badge interrupts a screen reader anywhere
+  // else on the page, forever, with nobody having asked for an update.
+  assert.equal(html.includes('data-slot="live-tour" role="status"'), false)
+  assert.equal(html.includes('data-slot="live-badge" role="status"'), false)
+})
+
 test("scrollable regions are keyboard reachable", () => {
   // Conversation log and comparison table. The demo transcript is not here:
   // it has no overflow, so a tab stop would land on nothing.
@@ -298,4 +306,7 @@ test("docs index filters and guides carry inpage nav + feedback", async () => {
   const qs = await (await fetch(`${BASE}/quickstart/`)).text()
   assert.ok(qs.includes('aria-label="Package manager"'), "quickstart pm toggle missing")
   assert.ok(qs.includes("scopes checked"), "quickstart scope checklist missing")
+  // Snippets scroll sideways instead of wrapping, so each block is a scroll
+  // container and needs its own tab stop.
+  assert.ok(qs.includes('<pre tabindex="0">'), "quickstart code blocks are not keyboard scrollable")
 })

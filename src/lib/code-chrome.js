@@ -33,6 +33,10 @@ export function enhanceCodeBlocks(root, resolveBadge) {
     if (pre.closest('[data-component="docs-code"]')) return
     const code = pre.querySelector("code")
     const badge = resolveBadge(pre, code)
+    // Code lines are the one thing that cannot reflow, so the block scrolls
+    // sideways. A scroll container with no tab stop is unreachable without a
+    // pointer (WCAG 2.1.1).
+    pre.setAttribute("tabindex", "0")
     const figure = document.createElement("figure")
     figure.setAttribute("data-component", "docs-code")
     figure.setAttribute("data-language", badge)

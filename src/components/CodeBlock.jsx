@@ -21,7 +21,9 @@ export default function CodeBlock({ filename, caption, code, langLabel }) {
           {copied ? "Copied" : "Copy"}
         </button>
       </figcaption>
-      <pre>
+      {/* Snippets scroll sideways rather than wrap, so the scroller needs a
+          tab stop to be reachable without a pointer. */}
+      <pre tabIndex={0}>
         <code>{code}</code>
       </pre>
     </figure>
